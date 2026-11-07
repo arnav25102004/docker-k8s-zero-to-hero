@@ -80,11 +80,17 @@ The program is called `start-notebook.py`. The command says `start-notebok.py` (
 ```bash
 cd ../fix && ./fix.sh
 ```
-What changed: one letter, nothing else.
+What changed: one letter, nothing else. See the two `docker run` lines side by side:
 ```bash
-diff ../break/break.sh ./fix.sh
-# start-notebok.py   ->   start-notebook.py
+grep -h 'IMAGE" start' ../break/break.sh
+grep -h 'IMAGE" start' fix.sh
 ```
+```
+  "$IMAGE" start-notebok.py --IdentityProvider.token=change-me-123 >/dev/null \
+  "$IMAGE" start-notebook.py --IdentityProvider.token=change-me-123 >/dev/null \
+```
+(`break.sh` first, `fix.sh` second: `notebok` became `notebook`.)
+
 By hand: `docker rm -f d01-jupyter`, then run it again with the correct name:
 ```bash
 docker run -d --name d01-jupyter -p 8101:8888 \
