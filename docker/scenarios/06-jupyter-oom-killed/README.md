@@ -1,6 +1,6 @@
 # D06 · No error, no goodbye
 
-*Your AI model was 80% trained. Then it vanished. No error. No goodbye.*
+*Your AI model was more than halfway trained. Then it vanished. No error. No goodbye.*
 
 ⏱ 12 min · beginner · Jupyter image (`quay.io/jupyter/base-notebook:2026-11-02`) · memory limits, cgroups, exit code 137, OOMKilled
 
@@ -27,7 +27,7 @@ Think of a hostel mess with one plate per student. Take more than one plate and 
 ```bash
 cd break && ./break.sh
 ```
-The "training" starts, prints a few epochs, and then the container stops. Nothing shows on screen. No port to open: this one is all in the terminal.
+The "training" starts, prints a few epochs, and then the container stops, more than halfway through. Nothing shows on screen. No port to open: this one is all in the terminal.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
@@ -102,15 +102,7 @@ docker start d06-trainer
 ```
 
 ## ✅ Verify it yourself
-Right after starting it, watch the memory while it trains:
-```bash
-sleep 3; docker stats --no-stream d06-trainer
-```
-```
-CONTAINER ID   NAME          CPU %     MEM USAGE / LIMIT   MEM %     NET I/O       BLOCK I/O   PIDS
-97177ec99136   d06-trainer   3.47%     484.8MiB / 1GiB     47.34%    872B / 126B   0B / 0B     1
-```
-(Your numbers will differ a little. It's already past 300 MiB and happily running.) Wait a few seconds, then:
+`fix.sh` waited for the training to finish. Read the proof:
 ```bash
 docker logs d06-trainer
 ```
@@ -122,14 +114,23 @@ epoch 4/5 ... loading 120 MB
 epoch 5/5 ... loading 120 MB
 ✅ model trained
 ```
-(shortened: if you used the manual `docker update` way, the log also still has the first, killed run's three lines at the top.)
 ```bash
 docker inspect -f '{{.State.OOMKilled}} {{.State.ExitCode}}' d06-trainer
 ```
 ```
 false 0
 ```
-Not killed, and a clean exit code **0**.
+Not killed, and a clean exit code **0**. Now watch the memory live: start the same container again (it keeps its 1 GB limit) and look 3 seconds in:
+```bash
+docker start d06-trainer
+sleep 3; docker stats --no-stream d06-trainer
+```
+```
+d06-trainer
+CONTAINER ID   NAME          CPU %     MEM USAGE / LIMIT   MEM %     NET I/O       BLOCK I/O   PIDS
+d483fe0b6775   d06-trainer   3.15%     486.4MiB / 1GiB     47.50%    872B / 126B   0B / 0B     1
+```
+(Your numbers will differ a little.) Already past the old 300 MiB limit and happily running. (Start it again later and `docker logs` will show the six lines twice, once per run.)
 
 ## 🎯 Key takeaways
 - `--memory` is a hard fence (a cgroup). Go over it and the kernel kills the process, with no warning to the program.
