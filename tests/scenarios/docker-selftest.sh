@@ -93,7 +93,28 @@ test_cleanup_idempotent() {
   return $f
 }
 
-for t in test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
+test_run_cycle_catches_early_assert() {
+  local tmp out rc f=0
+  tmp=$(mktemp -d) || return 1
+  mkdir -p "$tmp/break" "$tmp/fix"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmp/cleanup.sh"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmp/fix/fix.sh"
+  printf '#!/usr/bin/env bash\necho boom-output\nexit 3\n' > "$tmp/break/break.sh"
+  # 1) first of two asserts fails (break.sh fine this time)
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmp/break/break.sh"
+  out=$(bash -c "source '$REPO/tests/scenarios/lib.sh'; broken(){ assert_eq a b first; assert_eq a a second; }; fixed(){ true; }; run_cycle '$tmp' d98" 2>&1); rc=$?
+  check "run_cycle fails" rc_is "$rc" 1 || f=1
+  check "reports broken step" has "$out" 'FAILED at step: broken' || f=1
+  # 2) failing break.sh shows its output
+  printf '#!/usr/bin/env bash\necho boom-output\nexit 3\n' > "$tmp/break/break.sh"
+  out=$(bash -c "source '$REPO/tests/scenarios/lib.sh'; broken(){ true; }; fixed(){ true; }; run_cycle '$tmp' d98" 2>&1); rc=$?
+  check "failing script exits 1" rc_is "$rc" 1 || f=1
+  check "shows script output" has "$out" 'boom-output' || f=1
+  rm -rf "$tmp"
+  return $f
+}
+
+for t in test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
          test_any_cwd test_cleanup_idempotent; do
   run_test "$t"
 done
