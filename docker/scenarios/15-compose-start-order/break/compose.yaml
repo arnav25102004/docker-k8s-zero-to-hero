@@ -1,0 +1,30 @@
+# D15 break: depends_on only controls START ORDER. It does not wait for "ready".
+name: d15
+
+services:
+  db:
+    image: postgres:16.15-alpine
+    container_name: d15-db-1
+    environment:
+      POSTGRES_PASSWORD: change-me-123
+    labels:
+      z2h.scenario: d15
+
+  app:
+    image: python:3.12-alpine
+    container_name: d15-app-1
+    command: ["python", "/app/app.py"]
+    volumes:
+      - ./app.py:/app/app.py:ro
+    ports:
+      - "8115:8000"
+    depends_on:
+      - db
+    restart: "no"
+    labels:
+      z2h.scenario: d15
+
+networks:
+  default:
+    labels:
+      z2h.scenario: d15
