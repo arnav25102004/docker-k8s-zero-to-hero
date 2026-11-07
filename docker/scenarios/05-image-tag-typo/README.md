@@ -42,7 +42,7 @@ docker: Error response from daemon: failed to resolve reference "docker.io/coren
 Docker looked locally, then asked the registry. The registry said **not found**.
 
 <details><summary>💡 Hint</summary>
-Docker names the thing it could not find, in full. Is that exactly the version your teammate meant to type? Compare it character by character with the tag in the story.
+Docker names the thing it could not find, in full. Is that tag really published in the registry? How could you check, without running anything?
 </details>
 
 **2. Did a container get created anyway?**
@@ -63,7 +63,7 @@ no such manifest: docker.io/corentinth/it-tools:2024.10.22-7ca5393
 ```
 A "manifest" is the registry's description of an image. No manifest, no image.
 
-**4. Compare with the tag from the course notes.**
+**4. Compare with the tag the course pins (the one in the meta line at the top of this page).**
 ```bash
 docker manifest inspect corentinth/it-tools:2024.10.22-7ca5933 | head -8
 ```
