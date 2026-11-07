@@ -26,8 +26,8 @@ docker run -d --name d12-game --label z2h.scenario=d12 -p 8112:8000 -v d12-data:
 wait_for "the game server to start" 30 app_answers \
   || die "The server didn't start. Check: docker logs d12-game"
 
-say "Three players beat the high score tonight: Asha 42, Ravi 35, Meera 28"
-for entry in Asha:42 Ravi:35 Meera:28; do
+say "Three players beat the high score tonight: Lakshmi 42, Ravi 35, Meera 28"
+for entry in Lakshmi:42 Ravi:35 Meera:28; do
   curl -s -o /dev/null -X POST -H 'Content-Type: application/json' \
     -d "{\"name\":\"${entry%%:*}\",\"score\":${entry##*:}}" "$API" \
     || die "Could not post a score. Check: docker logs d12-game"
@@ -40,5 +40,5 @@ wait_for "the game server to come back" 30 app_answers \
   || die "The server didn't come back. Check: docker logs d12-game"
 
 show_next \
-  "The game is back. Open http://localhost:8112 (playground: the port 8112 URL): Asha, Ravi and Meera were on the board a moment ago. Look at the Top 5." \
+  "The game is back. Open http://localhost:8112 (playground: the port 8112 URL): Lakshmi, Ravi and Meera were on the board a moment ago. Look at the Top 5." \
   "curl localhost:8112/api/scores"

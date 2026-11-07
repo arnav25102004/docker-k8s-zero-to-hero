@@ -7,7 +7,7 @@
 ⬇️ First run downloads about 19 MB (the `python:3.12-alpine` base image), plus about 2 MB (`busybox:1.36`) the first time you peek inside the volume. Do it on good Wi-Fi, before the session. The game is one file and needs no internet.
 
 ## 📖 The story
-Friday night at the college fest. The canteen team built **Dosa Dash**: catch the falling dosas on a tawa, and the top five go on a big screen. Asha beats everyone with 42 points, then Ravi, then Meera. Then the organisers push a "tiny update" and restart the server. The big screen shows an empty table. *"Where did Asha go?"* The server is healthy. The code that saves the scores is right there. It just never ran.
+Friday night at the college fest. The canteen team built **Dosa Dash**: catch the falling dosas on a tawa, and the top five go on a big screen. Lakshmi beats everyone with 42 points, then Ravi, then Meera. Then the organisers push a "tiny update" and restart the server. The big screen shows an empty table. *"Where did Lakshmi go?"* The server is healthy. The code that saves the scores is right there. It just never ran.
 
 ## 🧠 The concept: why, what, how
 When you type `docker stop`, Docker does **not** pull the plug. It politely knocks first: it sends a signal called **SIGTERM** ("please finish up and leave") to **PID 1**, the first process inside the container. It waits (10 s in our commands, `-t 10`). If the process is still there, Docker sends **SIGKILL**, which cannot be caught: instant end, no goodbye.
@@ -32,7 +32,7 @@ docker stop ──SIGTERM──▶ PID 1 = python ─▶ saves scores ─▶ exi
 ```bash
 cd break && ./break.sh
 ```
-The script plays three fest scores (Asha 42, Ravi 35, Meera 28), then "deploys": it stops the server (about 10 seconds of waiting) and starts it again. The room should see the script finish happily. Now open http://localhost:8112 (playground: the port 8112 URL): the **Top 5** table says *No scores yet. Be the first!* Nothing in the script printed an error.
+The script plays three fest scores (Lakshmi 42, Ravi 35, Meera 28), then "deploys": it stops the server (about 10 seconds of waiting) and starts it again. The room should see the script finish happily. Now open http://localhost:8112 (playground: the port 8112 URL): the **Top 5** table says *No scores yet. Be the first!* Nothing in the script printed an error.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
@@ -76,7 +76,7 @@ docker logs d12-game
 ```
 📂 no saved scores yet, starting with an empty board
 🥞 Dosa Dash is serving on port 8000
-🏆 new score: Asha scored 42
+🏆 new score: Lakshmi scored 42
 🏆 new score: Ravi scored 35
 🏆 new score: Meera scored 28
 📂 no saved scores yet, starting with an empty board

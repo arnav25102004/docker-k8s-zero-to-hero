@@ -4,7 +4,7 @@
 # post_demo: put three demo scores on the board, the same way break.sh does.
 post_demo() {
   local n
-  for n in Asha:42 Ravi:35 Meera:28; do
+  for n in Lakshmi:42 Ravi:35 Meera:28; do
     curl -s -o /dev/null -X POST -H 'Content-Type: application/json' \
       -d "{\"name\":\"${n%%:*}\",\"score\":${n##*:}}" http://localhost:8112/api/scores
   done
@@ -31,7 +31,7 @@ broken() {
   local saved
   saved="$(saved_file)"
   case "$saved" in
-    *Asha*) assert_eq "found" "missing" "scores.json must NOT contain the demo scores" ;;
+    *Lakshmi*) assert_eq "found" "missing" "scores.json must NOT contain the demo scores" ;;
     *) assert_eq "missing" "missing" "scores.json lacks the demo scores" ;;
   esac
   docker start d12-game >/dev/null 2>&1
@@ -47,12 +47,12 @@ fixed() {
   assert_eq "$(docker inspect -f '{{.State.ExitCode}}' d12-game)" "0" "ExitCode is 0 (clean exit)"
   local saved
   saved="$(saved_file)"
-  assert_contains "$saved" "Asha" "scores.json contains Asha"
+  assert_contains "$saved" "Lakshmi" "scores.json contains Lakshmi"
   assert_contains "$saved" "Ravi" "scores.json contains Ravi"
   assert_contains "$saved" "Meera" "scores.json contains Meera"
   docker start d12-game >/dev/null 2>&1
   wait_for_api
-  assert_contains "$(curl -s --max-time 5 http://localhost:8112/api/scores)" "Asha" "after docker start, Asha is back on the board"
+  assert_contains "$(curl -s --max-time 5 http://localhost:8112/api/scores)" "Lakshmi" "after docker start, Lakshmi is back on the board"
 }
 
 wait_for_api() {
