@@ -45,7 +45,7 @@ curl localhost:8111
 ```
 curl: (56) Recv failure: Connection reset by peer
 ```
-(On some computers it says `Empty reply from server`. Same meaning: something took the call, then hung up.) Docker accepted the connection and then had nowhere to deliver it.
+The exact message varies by computer: `Connection reset by peer`, `Empty reply from server` or `Connection refused`. All mean the same thing: nobody answered. Docker took the call at port 8111, but the app inside never picked up.
 
 <details><summary>💡 Hint</summary>
 Is the container even alive? And if you could stand <em>inside</em> it, would the page load? Who is the server willing to talk to?
@@ -98,7 +98,7 @@ Local Address `127.0.0.1:8000`. A server that welcomes everyone would show `0.0.
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The `Dockerfile` starts the server with `--bind 127.0.0.1`. Inside a container, that means *"only answer connections coming from this same container"*. Traffic from your laptop, forwarded by `-p`, arrives on the container's network address, which the server isn't listening on, so the connection is refused. The app is healthy; it is just listening on the wrong door.
+The `Dockerfile` starts the server with `--bind 127.0.0.1`. Inside a container, that means *"only answer connections coming from this same container"*. Traffic from your laptop, forwarded by `-p`, arrives on the container's network address, which the server isn't listening on, so nobody answers: the connection is reset, empty or refused, depending on your computer. The app is healthy; it is just listening on the wrong door.
 </details>
 
 ## 🔧 Fix it
@@ -107,13 +107,13 @@ cd ../fix && ./fix.sh
 ```
 What changed: `break/` and `fix/` hold the same page. Only the `Dockerfile` differs:
 ```bash
-grep -n -e '--bind' ../break/Dockerfile Dockerfile
+grep -n '^CMD' ../break/Dockerfile Dockerfile
 ```
 ```
 ../break/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "127.0.0.1"]
 Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "0.0.0.0"]
 ```
-(The comment line above each `CMD` also changed.) `0.0.0.0` means "listen on every network interface". By hand, this replaces `./fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
+`0.0.0.0` means "listen on every network interface". By hand, this replaces `./fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
 ```bash
 docker rm -f d11-portfolio
 docker build -t d11-portfolio:1.0 .
