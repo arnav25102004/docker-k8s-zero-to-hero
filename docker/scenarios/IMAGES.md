@@ -10,3 +10,4 @@ Every image has linux/amd64 and linux/arm64 builds and is pinned to an exact tag
 | `redis` | `7.4.12-alpine` | D03 | ~17 MB |
 | `python` | `3.12-alpine` | D03 (base of `apps/api/Dockerfile`, which pins this tag) | ~19 MB |
 | `codercom/code-server` | `4.145.2` | D04 | ~380 MB |
+| `busybox` | `1.36` | D07 (helper that creates and `chown`s files in the volume) | ~2 MB |
