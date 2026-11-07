@@ -9,3 +9,4 @@ Every image has linux/amd64 and linux/arm64 builds and is pinned to an exact tag
 | `corentinth/it-tools` | `2024.10.22-7ca5933` | D02 | ~24 MB |
 | `redis` | `7.4.12-alpine` | D03 | ~17 MB |
 | `python` | `3.12-alpine` | D03 (base of `apps/api/Dockerfile`, which pins this tag) | ~19 MB |
+| `codercom/code-server` | `4.145.2` | D04 | ~380 MB |
