@@ -91,6 +91,17 @@ scenario_cleanup() {
   for x in $(docker volume ls -q --filter "label=$label" 2>/dev/null); do
     docker volume rm -f "$x" >/dev/null 2>&1
   done
+  # Also catch things made by hand (no label): anything named "ID-...". The name
+  # filter is a substring match, so keep only names that really start with "ID-".
+  for x in $(docker ps -a --filter "name=${id}-" --format '{{.Names}}' 2>/dev/null | grep "^${id}-"); do
+    docker rm -f "$x" >/dev/null 2>&1
+  done
+  for x in $(docker network ls --filter "name=${id}-" --format '{{.Name}}' 2>/dev/null | grep "^${id}-"); do
+    docker network rm "$x" >/dev/null 2>&1
+  done
+  for x in $(docker volume ls --filter "name=${id}-" --format '{{.Name}}' 2>/dev/null | grep "^${id}-"); do
+    docker volume rm -f "$x" >/dev/null 2>&1
+  done
   for x in $(docker images -q --filter "label=$label" 2>/dev/null); do
     docker rmi -f "$x" >/dev/null 2>&1
   done

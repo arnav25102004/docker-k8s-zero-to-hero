@@ -114,8 +114,26 @@ test_run_cycle_catches_early_assert() {
   return $f
 }
 
+test_cleanup_by_name_prefix() {
+  local f=0
+  docker rm -f d98-manual zz-d98-keep >/dev/null 2>&1
+  docker network create d98-net >/dev/null 2>&1
+  docker volume create d98-vol >/dev/null 2>&1
+  docker run -d --name d98-manual --network d98-net busybox:1.36 sleep 300 >/dev/null 2>&1 || { echo "could not start test container"; return 1; }
+  docker run -d --name zz-d98-keep busybox:1.36 sleep 300 >/dev/null 2>&1 || { echo "could not start keep container"; return 1; }
+  bash -c "source '$LIB'; scenario_cleanup d98" >/dev/null 2>&1
+  check "unlabeled d98-manual removed" assert_gone container d98-manual || f=1
+  check "unlabeled d98-net removed" assert_gone network d98-net || f=1
+  check "unlabeled d98-vol removed" assert_gone volume d98-vol || f=1
+  check "unrelated zz-d98-keep kept" assert_there container zz-d98-keep || f=1
+  docker rm -f zz-d98-keep >/dev/null 2>&1
+  return $f
+}
+assert_gone() { ! docker "$1" inspect "$2" >/dev/null 2>&1; }
+assert_there() { docker "$1" inspect "$2" >/dev/null 2>&1; }
+
 for t in test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
-         test_any_cwd test_cleanup_idempotent; do
+         test_any_cwd test_cleanup_idempotent test_cleanup_by_name_prefix; do
   run_test "$t"
 done
 
