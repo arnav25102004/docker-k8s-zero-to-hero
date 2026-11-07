@@ -48,6 +48,16 @@ nothing_left() {
   [ -z "$left" ]
 }
 
+# dangling_count: number of dangling (unreferenced) volumes right now.
+dangling_count() {
+  docker volume ls -qf dangling=true 2>/dev/null | wc -l | tr -d ' '
+}
+
+# no_images ID: fail if any image whose repository starts with "ID-" remains.
+no_images() {
+  [ -z "$(docker images --format '{{.Repository}}' 2>/dev/null | grep "^$1-")" ]
+}
+
 # _step LABEL N SCRIPT: run a script, capture output, show its tail on failure.
 _step() {
   local label="$1" n="$2" script="$3" out
@@ -70,8 +80,9 @@ _check() {
 # run_cycle DIR ID: cleanup -> break -> broken -> fix -> fixed -> cleanup -> nothing left.
 # Twice. broken() and fixed() must be defined by the caller. Fails fast.
 run_cycle() {
-  local dir="$1" id="$2" n
+  local dir="$1" id="$2" n vol_before
   for n in 1 2; do
+    vol_before=$(dangling_count)
     printf '  -- cycle %s/2\n' "$n"
     _step cleanup "$n" "$dir/cleanup.sh" || return 1
     _step break.sh "$n" "$dir/break/break.sh" || return 1
@@ -80,5 +91,7 @@ run_cycle() {
     _check fixed "$n" fixed || return 1
     _step "final cleanup" "$n" "$dir/cleanup.sh" || return 1
     nothing_left "$id" || { printf '  FAILED at step: nothing-left check (cycle %s)\n' "$n"; return 1; }
+    no_images "$id" || { printf '  FAILED at step: image "%s-*" left behind (cycle %s)\n' "$id" "$n"; return 1; }
+    [ "$(dangling_count)" -le "$vol_before" ] || { printf '  FAILED at step: dangling volumes grew (%s -> %s, cycle %s)\n' "$vol_before" "$(dangling_count)" "$n"; return 1; }
   done
 }

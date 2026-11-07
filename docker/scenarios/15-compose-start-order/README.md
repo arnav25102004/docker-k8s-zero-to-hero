@@ -111,7 +111,7 @@ diff ../break/compose.yaml compose.yaml
 > # D15 fix: the db reports when it is READY, and app waits for that.
 9a10,13
 >     healthcheck:
->       test: ["CMD-SHELL", "pg_isready -U postgres"]
+>       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
 >       interval: 2s
 >       retries: 15
 22c26,27
@@ -120,7 +120,7 @@ diff ../break/compose.yaml compose.yaml
 >       db:
 >         condition: service_healthy
 ```
-The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool), and the app waits for `service_healthy`. By hand, this replaces `./fix.sh`:
+The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool; `-h 127.0.0.1` makes it knock on the network door the app will use), and the app waits for `service_healthy`. By hand, this replaces `./fix.sh`:
 ```bash
 docker compose -p d15 -f compose.yaml up -d
 ```

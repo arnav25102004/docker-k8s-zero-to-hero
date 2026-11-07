@@ -39,7 +39,7 @@ It is already on your screen from `break.sh`. This is the part that matters:
 Unable to find image 'corentinth/it-tools:2024.10.22-7ca5393' locally
 docker: Error response from daemon: failed to resolve reference "docker.io/corentinth/it-tools:2024.10.22-7ca5393": docker.io/corentinth/it-tools:2024.10.22-7ca5393: not found
 ```
-Docker looked locally, then asked the registry. The registry said **not found**.
+Docker looked locally, then asked the registry. The registry said **not found**. (The exact wording varies by Docker version and engine, for example `manifest unknown`. The idea is the same.)
 
 <details><summary>💡 Hint</summary>
 Docker names the thing it could not find, in full. Is that tag really published in the registry? How could you check, without running anything?
@@ -145,4 +145,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D06: Jupyter is training your AI model, then dies without a word. Docker killed it for using too much memory.
+[D06](../06-jupyter-oom-killed/README.md): Jupyter is training your AI model, then dies without a word. Docker killed it for using too much memory.

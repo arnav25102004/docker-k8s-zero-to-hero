@@ -147,4 +147,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D07: Jupyter can't save your notebook: "permission denied". The container is running, but it isn't allowed to write.
+[D07](../07-jupyter-cant-save/README.md): Jupyter can't save your notebook: "permission denied". The container is running, but it isn't allowed to write.

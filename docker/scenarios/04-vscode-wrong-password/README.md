@@ -149,4 +149,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D05: An image tag with a one-character typo, and a container that never starts.
+[D05](../05-image-tag-typo/README.md): An image tag with a one-character typo, and a container that never starts.

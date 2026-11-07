@@ -1,6 +1,6 @@
 # Pinned images for the Docker scenarios
 
-Every image has linux/amd64 and linux/arm64 builds and is pinned to an exact tag.
+Every image has linux/amd64 and linux/arm64 builds. All are pinned to an exact tag except `python:3.12-alpine`, which floats on purpose (it is the shared course base image).
 Heavy images are limited to Jupyter (D01, D06, D07) and VS Code (D04); everything else is about 160 MB or less.
 
 `preload.sh` reads the table below (first column = image, second column = tag, both in backticks) and pulls each one.

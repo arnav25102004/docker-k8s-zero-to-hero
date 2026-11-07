@@ -171,4 +171,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D10: Build your own QR code app. The file is right there. Docker says it doesn't exist.
+[D10](../10-qr-app-build-fails/README.md): Build your own QR code app. The file is right there. Docker says it doesn't exist.

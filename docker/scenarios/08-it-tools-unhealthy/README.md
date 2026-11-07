@@ -63,7 +63,7 @@ docker inspect -f '{{json .State.Health}}' d08-tools
 ```
 {"Status":"unhealthy","FailingStreak":2,"Log":[{"Start":"2026-11-07T18:08:18.847663129Z","End":"2026-11-07T18:08:18.874078254Z","ExitCode":1,"Output":"wget: can't connect to remote host (127.0.0.1): Connection refused\n"},{"Start":"2026-11-07T18:08:21.875778172Z","End":"2026-11-07T18:08:21.905836547Z","ExitCode":1,"Output":"wget: can't connect to remote host (127.0.0.1): Connection refused\n"}]}
 ```
-(Your times will differ.) Read the `Output`: *"Connection refused."* Nobody answered the knock. Two strikes in a row (`FailingStreak: 2`), and Docker gave the verdict.
+(Your times will differ.) Read the `Output`: *"Connection refused."* Nobody answered the knock. Two strikes in a row (`FailingStreak: 2`), and Docker gave the verdict. Run the command again and again: the number keeps climbing every 3 seconds. Docker flipped the label after 2 in a row.
 
 **4. What exactly is the check?**
 ```bash
@@ -150,4 +150,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D09: The status board says everything is down. Everything is up.
+[D09](../09-status-board-no-dns/README.md): The status board says everything is down. Everything is up.

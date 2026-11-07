@@ -133,4 +133,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D03: Cats vs Dogs voting app that can't reach Redis.
+[D03](../03-votes-cant-reach-redis/README.md): Cats vs Dogs voting app that can't reach Redis.

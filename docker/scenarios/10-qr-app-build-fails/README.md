@@ -187,4 +187,4 @@ cd .. && ./cleanup.sh
 The QR code is drawn by [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 by Kazuhiko Arase, MIT licensed (the `LICENSE` file sits next to it in each folder). `qrcode.min.js` comes from https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js, and the license text from the project's GitHub repository. The unminified `qrcode.js` of the same version on https://unpkg.com/qrcode-generator@1.4.4/qrcode.js is byte-identical to the one on cdnjs.
 
 ## Next →
-D11: Portfolio on localhost only. It works inside. It's running. And nobody can see it.
+[D11](../11-portfolio-localhost-only/README.md): Portfolio on localhost only. It works inside. It's running. And nobody can see it.

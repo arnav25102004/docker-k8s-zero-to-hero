@@ -132,8 +132,33 @@ test_cleanup_by_name_prefix() {
 assert_gone() { ! docker "$1" inspect "$2" >/dev/null 2>&1; }
 assert_there() { docker "$1" inspect "$2" >/dev/null 2>&1; }
 
+test_cleanup_removes_anonymous_volume() {
+  local f=0 vol
+  docker rm -fv d97-x >/dev/null 2>&1
+  docker run -d --label z2h.scenario=d97 --name d97-x redis:7.4.12-alpine >/dev/null 2>&1 || { echo "could not start redis"; return 1; }
+  vol=$(docker inspect -f '{{range .Mounts}}{{.Name}}{{end}}' d97-x)
+  check "redis got an anonymous volume" [ -n "$vol" ] || f=1
+  bash -c "source '$LIB'; scenario_cleanup d97" >/dev/null 2>&1
+  check "container removed" assert_gone container d97-x || f=1
+  check "anonymous volume removed" assert_gone volume "$vol" || f=1
+  return $f
+}
+
+test_cleanup_removes_unlabelled_image() {
+  local f=0
+  docker image inspect busybox:1.36 >/dev/null 2>&1 || docker pull busybox:1.36 >/dev/null 2>&1
+  docker tag busybox:1.36 d96-x:1
+  docker tag busybox:1.36 d96-x:2
+  bash -c "source '$LIB'; scenario_cleanup d96" >/dev/null 2>&1
+  check "d96-x:1 removed" assert_gone image d96-x:1 || f=1
+  check "d96-x:2 removed" assert_gone image d96-x:2 || f=1
+  check "busybox:1.36 remains" assert_there image busybox:1.36 || f=1
+  return $f
+}
+
 for t in test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
-         test_any_cwd test_cleanup_idempotent test_cleanup_by_name_prefix; do
+         test_any_cwd test_cleanup_idempotent test_cleanup_by_name_prefix \
+         test_cleanup_removes_anonymous_volume test_cleanup_removes_unlabelled_image; do
   run_test "$t"
 done
 

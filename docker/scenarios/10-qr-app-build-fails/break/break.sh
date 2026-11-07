@@ -15,8 +15,8 @@ ensure_image "$BASE_IMAGE" "about 23 MB"
 say "Building the QR app: docker build -t d10-qr:1.0 ."
 cd "$HERE" || die "Could not enter $HERE"
 docker build --label z2h.scenario=d10 -t d10-qr:1.0 .
-say "Starting it: docker run -d --name d10-qr -p 8110:80 d10-qr:1.0"
-docker run -d --name d10-qr --label z2h.scenario=d10 -p 8110:80 d10-qr:1.0
+say "Starting it: docker run --pull never -d --name d10-qr -p 8110:80 d10-qr:1.0"
+docker run --pull never -d --name d10-qr --label z2h.scenario=d10 -p 8110:80 d10-qr:1.0
 
 show_next \
   "Both commands above failed: the build stopped with an error, and there is no image to run." \

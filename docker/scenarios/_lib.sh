@@ -6,6 +6,9 @@
 #   break/ and fix/ scripts:  source "$(cd "$(dirname "$0")/../.." && pwd)/_lib.sh"
 #   cleanup.sh:               source "$(cd "$(dirname "$0")/.." && pwd)/_lib.sh"
 
+# Git Bash would rewrite paths like /data into C:/Program Files/Git/data.
+export MSYS_NO_PATHCONV=1
+
 say()  { printf '\033[1;36m▶ %s\033[0m\n' "$*"; }
 ok()   { printf '\033[1;32m✔ %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33m⚠ %s\033[0m\n' "$*"; }
@@ -78,12 +81,14 @@ wait_for() {
 scenario_cleanup() {
   local id="$1" x
   local label="z2h.scenario=$id"
-  for x in $(docker ps -aq --filter "label=$label" 2>/dev/null); do
-    docker rm -f "$x" >/dev/null 2>&1
-  done
+  # compose first: "down -v" also removes the anonymous volumes of its containers.
   docker compose -p "$id" down -v --remove-orphans >/dev/null 2>&1
+  # rm -fv: also remove the anonymous volumes (postgres, redis ... declare VOLUME).
+  for x in $(docker ps -aq --filter "label=$label" 2>/dev/null); do
+    docker rm -fv "$x" >/dev/null 2>&1
+  done
   for x in $(docker ps -aq --filter "label=com.docker.compose.project=$id" 2>/dev/null); do
-    docker rm -f "$x" >/dev/null 2>&1
+    docker rm -fv "$x" >/dev/null 2>&1
   done
   for x in $(docker network ls -q --filter "label=$label" 2>/dev/null); do
     docker network rm "$x" >/dev/null 2>&1
@@ -94,7 +99,7 @@ scenario_cleanup() {
   # Also catch things made by hand (no label): anything named "ID-...". The name
   # filter is a substring match, so keep only names that really start with "ID-".
   for x in $(docker ps -a --filter "name=${id}-" --format '{{.Names}}' 2>/dev/null | grep "^${id}-"); do
-    docker rm -f "$x" >/dev/null 2>&1
+    docker rm -fv "$x" >/dev/null 2>&1
   done
   for x in $(docker network ls --filter "name=${id}-" --format '{{.Name}}' 2>/dev/null | grep "^${id}-"); do
     docker network rm "$x" >/dev/null 2>&1
@@ -103,6 +108,10 @@ scenario_cleanup() {
     docker volume rm -f "$x" >/dev/null 2>&1
   done
   for x in $(docker images -q --filter "label=$label" 2>/dev/null); do
+    docker rmi -f "$x" >/dev/null 2>&1
+  done
+  # Images built by hand from a README (no label): every tag of "ID-...".
+  for x in $(docker images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null | grep "^${id}-"); do
     docker rmi -f "$x" >/dev/null 2>&1
   done
   printf '✅ Scenario %s cleaned up\n' "$id"

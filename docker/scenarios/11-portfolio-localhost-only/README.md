@@ -45,7 +45,7 @@ curl localhost:8111
 ```
 curl: (56) Recv failure: Connection reset by peer
 ```
-The exact message varies by computer: `Connection reset by peer`, `Empty reply from server` or `Connection refused`. All mean the same thing: nobody answered. Docker took the call at port 8111, but the app inside never picked up.
+The exact message varies by computer: `Connection reset by peer`, `Empty reply from server` or `Connection refused`. All mean the same thing: nobody answered. The call reached port 8111 on your computer, but nothing inside the container ever answered it.
 
 <details><summary>💡 Hint</summary>
 Is the container even alive? And if you could stand <em>inside</em> it, would the page load? Who is the server willing to talk to?
@@ -163,4 +163,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D12: High score lost on stop. You beat the high score. The server restarts. Your name is gone.
+[D12](../12-high-score-lost-on-stop/README.md): High score lost on stop. You beat the high score. The server restarts. Your name is gone.

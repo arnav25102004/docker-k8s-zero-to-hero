@@ -158,4 +158,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D04: VS Code says your right password is wrong.
+[D04](../04-vscode-wrong-password/README.md): VS Code says your right password is wrong.

@@ -160,4 +160,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D08: it-tools is running and answers every request, but Docker says it's **unhealthy**. The app works; who is lying?
+[D08](../08-it-tools-unhealthy/README.md): it-tools is running and answers every request, but Docker says it's **unhealthy**. The app works; who is lying?

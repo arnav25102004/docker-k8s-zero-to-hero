@@ -42,7 +42,7 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 | Where | What to know |
 |-------|--------------|
 | macOS / Linux | Docker Desktop or Docker Engine. Nothing else to install. |
-| Windows | Use **WSL2** (preferred) or **Git Bash**. On WSL, keep this repo **inside the Linux filesystem** (`~/…`), not under `/mnt/c/…`. Line endings stay LF (`.gitattributes` does this). |
+| Windows | **WSL2 is recommended.** Git Bash works if you first run `export MSYS_NO_PATHCONV=1` in that terminal (Git Bash otherwise rewrites paths like `/data` into Windows paths). On WSL, keep this repo **inside the Linux filesystem** (`~/…`), not under `/mnt/c/…`. Line endings stay LF (`.gitattributes` does this). |
 | Play with Docker | Supported. Open the apps with the port badge that appears at the top. |
 | Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `81NN`. |
 
@@ -69,26 +69,27 @@ Docker not running? Start Docker Desktop, wait for the whale to settle, then ste
 
 Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested macOS (Docker Desktop, arm64) only.
 
-| Scenario | Killercoda | iximiuz | Play with Docker | Linux | WSL2 |
-|----------|:---:|:---:|:---:|:---:|:---:|
-| D01 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D02 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D03 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D04 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D05 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D06 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D07 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D08 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D09 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D10 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D11 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D12 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D13 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D14 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| D15 | ☐ | ☐ | ☐ | ☐ | ☐ |
+| Scenario | Killercoda | iximiuz | Play with Docker | Linux | WSL2 | Git Bash |
+|----------|:---:|:---:|:---:|:---:|:---:|:---:|
+| D01 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D02 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D03 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D04 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D05 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D06 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D07 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D08 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D09 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D10 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D11 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D12 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D13 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D14 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| D15 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
+- **D05 and D10 need Docker Hub reachable:** D05's lesson needs the registry to answer (offline it shows a DNS error instead of "not found"); D10 pulls nginx on first run.
 - **D06 OOM:** the memory limit and exit code 137 behave the same on cgroup v1 and v2, but `docker inspect` / `docker stats` numbers differ a little. On Play with Docker and older hosts (cgroup v1) check that `OOMKilled` shows `true`.
 - **D09 DNS error wording:** the exact message from the failed name lookup differs between Docker versions and base images. The idea (name not found on the default bridge) is the same.
 - **D11 curl error wording:** "Connection refused" vs "Empty reply from server" depends on the curl and Docker version. Check what your screen shows before the class.
