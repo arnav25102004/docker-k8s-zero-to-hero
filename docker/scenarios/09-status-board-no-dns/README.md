@@ -59,7 +59,7 @@ docker logs --tail 4 d09-board
 ❌ d09-draw: [Errno -2] Name does not resolve
 ❌ d09-tools: [Errno -2] Name does not resolve
 ```
-The board isn't saying "connection refused" or "timed out". It says **Name does not resolve**: it never even found out *where* the apps are.
+On most setups it says **Name does not resolve** (on some networks you may see a timeout instead). Either way it is not "connection refused": the board never even found out *where* the apps are.
 
 <details><summary>💡 Hint</summary>
 The board calls the apps by <b>name</b>. Who turns a name into an address? And do all Docker networks offer that service? Check which network these containers are on.
@@ -74,7 +74,7 @@ Traceback (most recent call last):
   File "<string>", line 1, in <module>
 socket.gaierror: [Errno -2] Name does not resolve
 ```
-Same failure, outside the board's own code. So it's the container's environment, not the board's script.
+Same kind of failure (the exact wording can differ on your setup), outside the board's own code. So it's the container's environment, not the board's script.
 
 **4. Which network is the board on?**
 ```bash
@@ -171,4 +171,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-D10: Build your own QR code app. The build succeeds, but your code is ignored.
+D10: Build your own QR code app. The file is right there. Docker says it doesn't exist.
