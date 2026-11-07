@@ -1,0 +1,5 @@
+TODO (Ravi's notes, please don't delete)
+- fix the typo in Priya's headline
+- add a dark mode (maybe)
+- buy filter coffee for the hostel floor
+- remember why we mounted this folder in the first place
