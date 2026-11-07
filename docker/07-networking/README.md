@@ -79,7 +79,7 @@ docker exec api-bad wget -qO- localhost:8080/readyz          # 503: cannot reach
 docker logs api-bad | tail -2
 docker rm -f api-bad
 ```
-This is the class-slide scenario: *"containers are running, but the API cannot connect"*.
+This is the class-slide scenario: *"containers are running, but the API cannot connect"*. The same trap, as a stage demo, is [scenario D03](../scenarios/03-votes-cant-reach-redis/README.md).
 
 ### Step 7: Debug from inside the network
 `nicolaka/netshoot` is a Swiss-army-knife container (dig, curl, nc, tcpdump...):

@@ -22,6 +22,11 @@ IMAGES=(
   # D01 student survival kit (Stirling-PDF is left out on purpose: ~1 GB, optional bonus)
   codercom/code-server:latest quay.io/jupyter/base-notebook:latest
   excalidraw/excalidraw:latest corentinth/it-tools:latest
+  # Docker break/fix scenarios (exact pins; the full list is docker/scenarios/IMAGES.md)
+  quay.io/jupyter/base-notebook:2026-11-02 codercom/code-server:4.145.2
+  excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
+  corentinth/it-tools:2024.10.22-7ca5933
+  redis:7.4.12-alpine nginx:1.27.5-alpine postgres:16.15-alpine
 )
 
 head1 "🧰 Tools"

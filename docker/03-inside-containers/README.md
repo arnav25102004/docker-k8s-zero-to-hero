@@ -121,7 +121,7 @@ The UI already warned you: *"⚠️ votes in this container's memory"*. A contai
 
 ## 🏆 Challenge
 1. Run a second copy on port 8081 with a different title: `-e TITLE="Tea vs Coffee" -e VOTE_OPTIONS="tea:🍵:Tea,coffee:☕:Coffee"`. Two apps, one image.
-2. Start a third copy on port 8080 again. Read the error. (This is [scenario D-02](../troubleshooting/README.md).)
+2. Start a third copy on port 8080 again. Read the error. (This is [scenario D02](../scenarios/02-port-clash/README.md).)
 3. Using only `docker inspect`, find which command the container runs.
 
 ## ✅ Checkpoint

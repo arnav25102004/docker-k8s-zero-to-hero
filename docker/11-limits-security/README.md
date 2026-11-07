@@ -115,4 +115,4 @@ CPU is compressible: the process is throttled and gets slower. Memory is not: th
 docker rm -f hog burner hardened 2>/dev/null
 ```
 
-🎉 **Docker track complete!** Test yourself with the [Docker troubleshooting scenarios](../troubleshooting/README.md), then move on to [Kubernetes](../../kubernetes/README.md).
+🎉 **Docker track complete!** Test yourself with the [Docker break-and-fix scenarios](../scenarios/README.md) (D06 is the OOM kill you just learned about), then move on to [Kubernetes](../../kubernetes/README.md).

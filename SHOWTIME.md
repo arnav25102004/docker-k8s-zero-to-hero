@@ -151,7 +151,7 @@ Close with the checklist on screen: *"Every line on this list is something you *
 ## 🧯 When things go wrong on stage (they will, and that's a gift)
 | Problem | Turn it into a lesson |
 |---|---|
-| Image pull is slow | *"This is why we pre-pull and why image size matters"* → preview of Lab D05 |
+| Image pull is slow | *"This is why we pre-pull and why image size matters"* → preview of Lab D05. Instructor: run `docker/scenarios/preload.sh` the day before ([checklist](docker/scenarios/README.md)) |
 | Pod stuck `Pending` | Run `kubectl describe pod` live: *"Let's debug it together"* → K-01 |
 | A typo breaks something | Leave it! Ask the room to find it. Best teaching moment of the day. |
 | Phones can't connect | Hotspot plan B, or `kubectl port-forward --address 0.0.0.0`, or demo solo and use the curl voting loop |
@@ -161,7 +161,7 @@ Close with the checklist on screen: *"Every line on this list is something you *
 | Format | Cover |
 |---|---|
 | **3-hour keynote workshop** | Act 0 (short), Scenes 1–3, 5–7, 9–12, then the Gauntlet (demo-led, audience votes) |
-| **1 day hands-on** | D01–D08, K01–K08, 4 troubleshooting scenarios each |
-| **2 days, zero to hero** | Day 1: Git G00–G06 (morning) + Docker D00–D08. Day 2: K00–K12 + scenarios |
-| **3 days, complete** | Day 1: Track 0 Git + G-scenarios. Day 2: Track 1 Docker + D-scenarios. Day 3: Track 2 Kubernetes + K-scenarios |
+| **1 day hands-on** | D01–D08, K01–K08, 4 break-and-fix scenarios each ([Docker ones](docker/scenarios/README.md)) |
+| **2 days, zero to hero** | Day 1: Git G00–G06 (morning) + Docker D00–D08 + scenarios D01–D05. Day 2: K00–K12 + scenarios |
+| **3 days, complete** | Day 1: Track 0 Git + G-scenarios. Day 2: Track 1 Docker + [Docker scenarios](docker/scenarios/README.md). Day 3: Track 2 Kubernetes + K-scenarios |
 | **Semester course** | One lab per session + one troubleshooting scenario as homework |

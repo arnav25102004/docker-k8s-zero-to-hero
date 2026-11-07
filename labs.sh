@@ -4,18 +4,17 @@
 #   ./labs.sh                     interactive menu
 #   ./labs.sh git 02              break Git scenario G-02 (sandbox in /tmp/z2h-git-ts)
 #   ./labs.sh git 02 fix
-#   ./labs.sh docker 03           break Docker scenario D-03
-#   ./labs.sh docker 03 fix       apply the reference fix
 #   ./labs.sh k8s 04              break Kubernetes scenario K-04
 #   ./labs.sh k8s 04 fix
-#   ./labs.sh docker clean        remove everything Docker scenarios created
+#   ./labs.sh docker clean        run every docker/scenarios/*/cleanup.sh
+#   (Docker scenarios are run by hand: see docker/scenarios/README.md)
 #   ./labs.sh k8s clean           delete the troubleshoot namespaces
 #   ./labs.sh list
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 GITTS_DIR="$ROOT/git/troubleshooting"
-DOCKER_DIR="$ROOT/docker/troubleshooting"
+DOCKER_DIR="$ROOT/docker/scenarios"
 K8S_DIR="$ROOT/kubernetes/troubleshooting"
 NS=troubleshoot
 
@@ -25,11 +24,15 @@ ok()    { printf '\033[1;32m✔ %s\033[0m\n' "$*"; }
 warn()  { printf '\033[1;33m⚠ %s\033[0m\n' "$*"; }
 die()   { printf '\033[1;31m✖ %s\033[0m\n' "$*"; exit 1; }
 
-title_of() { head -1 "$1/description.md" | sed 's/^# //'; }
+title_of() {   # git/k8s: description.md, docker: README.md (first line, without "# ")
+  local f="$1/description.md"
+  [ -f "$f" ] || f="$1/README.md"
+  head -1 "$f" | sed 's/^# //'
+}
 
 scenario_dir() {   # $1 = git|docker|k8s, $2 = number
   local base
-  case "$1" in git) base="$GITTS_DIR" ;; docker) base="$DOCKER_DIR" ;; *) base="$K8S_DIR" ;; esac
+  case "$1" in git) base="$GITTS_DIR" ;; *) base="$K8S_DIR" ;; esac
   local n; n=$(printf '%02d' "$((10#$2))")
   local d; d=$(ls -d "$base/$n"-*/ 2>/dev/null | head -1)
   [ -n "$d" ] || die "No $1 scenario number $2. Try: ./labs.sh list"
@@ -40,16 +43,13 @@ list() {
   bold "🌿 Git scenarios"
   for d in "$GITTS_DIR"/[0-9]*/; do printf '  %s\n' "$(title_of "$d")"; done
   echo
-  bold "🐳 Docker scenarios"
+  bold "🐳 Docker scenarios (run them by hand: docker/scenarios/README.md)"
   for d in "$DOCKER_DIR"/[0-9]*/; do printf '  %s\n' "$(title_of "$d")"; done
   echo
   bold "☸️  Kubernetes scenarios"
   for d in "$K8S_DIR"/[0-9]*/; do printf '  %s\n' "$(title_of "$d")"; done
 }
 
-# ---------------------------------------------------------------- docker --
-docker_break() { bash "$1/break.sh"; }
-docker_fix()   { bash "$1/fix.sh"; }
 # ------------------------------------------------------------------- git --
 git_break() {
   info "Breaking: $(title_of "$1")"
@@ -61,7 +61,14 @@ git_break() {
 git_fix()   { info "Applying the reference fix for: $(title_of "$1")"; bash "$1/fix.sh"; }
 git_clean() { rm -rf "${Z2H_GIT_TS:-/tmp/z2h-git-ts}"; ok "Git scenario sandboxes removed"; }
 
-docker_clean() { bash -c "source '$DOCKER_DIR/_lib.sh'; ts_cleanup"; ok "Docker scenario resources removed"; }
+# ---------------------------------------------------------------- docker --
+docker_clean() {
+  local c
+  for c in "$DOCKER_DIR"/[0-9]*/cleanup.sh; do
+    [ -f "$c" ] && bash "$c" >/dev/null 2>&1
+  done
+  ok "Docker scenario resources removed"
+}
 
 # ------------------------------------------------------------------- k8s --
 k8s_preflight() {
@@ -121,8 +128,9 @@ menu() {
   echo
   local i=1 entries=()
   for d in "$GITTS_DIR"/[0-9]*/;  do entries+=("git:${d%/}");    printf '  %2d) 🌿 %s\n' $i "$(title_of "$d")"; i=$((i+1)); done
-  for d in "$DOCKER_DIR"/[0-9]*/; do entries+=("docker:${d%/}"); printf '  %2d) 🐳 %s\n' $i "$(title_of "$d")"; i=$((i+1)); done
   for d in "$K8S_DIR"/[0-9]*/;   do entries+=("k8s:${d%/}");    printf '  %2d) ☸️  %s\n' $i "$(title_of "$d")"; i=$((i+1)); done
+  echo
+  echo "  🐳 Docker scenarios: open docker/scenarios/README.md (run by hand)"
   echo "   c) clean up everything      q) quit"
   echo
   read -r -p "Pick a scenario: " choice
@@ -136,9 +144,7 @@ menu() {
   echo
   read -r -p "🔍 Investigate in another terminal. Press Enter when you want to see the fix... "
   echo; bold "──────── The fix ────────"
-  if [ "$kind" = docker ]; then cat "$dir/fix.sh"; else
-    if [ -f "$dir/fix.sh" ]; then cat "$dir/fix.sh"; else cat "$dir/fix.yaml"; fi
-  fi
+  if [ -f "$dir/fix.sh" ]; then cat "$dir/fix.sh"; else cat "$dir/fix.yaml"; fi
   echo; read -r -p "Apply it? [Y/n] " yn
   [[ "$yn" =~ ^[Nn] ]] || "${kind}_fix" "$dir"
   echo; read -r -p "Clean up this scenario now? [Y/n] " yn
@@ -149,7 +155,13 @@ menu() {
 case "${1:-}" in
   "") menu ;;
   list) list ;;
-  git|docker|k8s)
+  docker)
+    case "${2:-}" in
+      clean) docker_clean ;;
+      *) echo "Docker scenarios are run by hand. Open docker/scenarios/README.md"
+         echo "Reset everything with: ./labs.sh docker clean" ;;
+    esac ;;
+  git|k8s)
     kind=$1
     case "${2:-}" in
       clean) "${kind}_clean" ;;

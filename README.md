@@ -65,7 +65,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [D09](docker/09-health-restart/README.md) | health checks, restart policies | 💥 press the red button |
 | [D10](docker/10-registry-tags/README.md) | registries, tags, digests | why `latest` bites |
 | [D11](docker/11-limits-security/README.md) | limits, OOM, non-root, hardening | the fully hardened `docker run` |
-| [🔥 D-scenarios](docker/troubleshooting/README.md) | **10 break-and-fix incidents** | |
+| [🔥 D-scenarios](docker/scenarios/README.md) | **15 break-and-fix incidents** | |
 
 ### ☸️ Track 2: Kubernetes ([overview](kubernetes/README.md))
 | Lab | You will… | Wow moment |
@@ -104,9 +104,12 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 
 ## 🔥 The Troubleshooting Arena
 ```bash
-./labs.sh            # interactive menu: pick a scenario, it breaks, you fix it
+./labs.sh            # interactive menu: Git and Kubernetes scenarios
+./labs.sh list       # every scenario, by track
 ```
-33 real-world incidents: committed secrets, rejected pushes and lost commits in Git; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+Docker scenarios are run by hand from their folders: see [docker/scenarios/README.md](docker/scenarios/README.md). `./labs.sh docker clean` resets them all.
+
+38 real-world incidents: committed secrets, rejected pushes and lost commits in Git; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
 
 ## 📁 Repository layout
 ```
@@ -117,11 +120,11 @@ docker-k8s-zero-to-hero/
 │   ├── api/                 🐱🐶 the Showdown app (Python stdlib + one HTML page)
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
-├── docker/                  D00–D11 + troubleshooting/ (10 scenarios)
+├── docker/                  D00–D11 + scenarios/ (15 scenarios)
 ├── kubernetes/              K01–K18 + stack/ (shared manifests) + troubleshooting/ (15 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · load-image.sh
-└── labs.sh                  🔥 troubleshooting scenario runner
+└── labs.sh                  🔥 Git/K8s scenario runner + `docker clean`
 ```
 
 ## 🧭 How every lab is built

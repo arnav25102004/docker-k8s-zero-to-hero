@@ -16,7 +16,7 @@ By the end of this track you can package any app into an image, run multi-contai
 | D09 | [Health Checks & Restart Policies](09-health-restart/README.md) | 35m | 🟡 |
 | D10 | [Registries, Tags & Digests](10-registry-tags/README.md) | 35m | 🟡 |
 | D11 | [Resource Limits & Security](11-limits-security/README.md) | 45m | 🟡→🔴 |
-| 🔥 | [Troubleshooting scenarios D-01 … D-10](troubleshooting/README.md) | 2–3h | 🟢→🟡 |
+| 🔥 | [Break-and-fix scenarios D01 … D15](scenarios/README.md) | 3–4h | 🟢→🟡 |
 
 **The story arc:** D03 ends with a cliffhanger (votes vanish when the container is replaced). D06 fixes it with Redis + volumes, D07 adds load balancing, and D08 packages it all with Compose and releases v2 🦄.
 
