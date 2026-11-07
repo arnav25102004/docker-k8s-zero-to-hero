@@ -7,7 +7,7 @@
 ⬇️ First run downloads about 116 MB (`postgres:16.15-alpine`) and about 19 MB (`python:3.12-alpine`). Do it on good Wi-Fi, before the session. Output formats of `docker compose ps` (columns, wording) vary a little between Docker versions; the ideas are the same.
 
 ## 📖 The story
-Sunday night, the college hostel. Meera finishes a "Dosa ratings board" for the food-club: a web page and a database, two containers, one `compose.yaml`. She types `docker compose up -d`. Compose prints *"Started"* twice, in green. She opens the page: nothing. She runs the same command again and it works. Monday morning, her friend's laptop does the same thing in the other direction. *"It's flaky,"* says everyone. It isn't flaky. It is **timing**.
+Sunday night, the college hostel. Meera finishes a "Dosa ratings board" for the food-club: a web page and a database, two containers, one `compose.yaml`. She types `docker compose up -d`. Compose lists both containers as *Started*, no errors. She opens the page: nothing. She runs the same command again and it works. Monday morning, her friend's laptop does the same thing in the other direction. *"It's flaky,"* says everyone. It isn't flaky. It is **timing**.
 
 ## 🧠 The concept: why, what, how
 A database is not instantly ready when its container starts. PostgreSQL first sets itself up (creates files, runs an internal start-up, restarts for real), and only then **opens its door** for connections. That takes a couple of seconds.
@@ -32,7 +32,12 @@ service_healthy         db starts ─▶ health check… healthy ─▶ app star
 ```bash
 cd break && ./break.sh
 ```
-The script runs `docker compose up -d` and waits a moment. The room should see Compose report that everything started, with no error. Now open http://localhost:8115 (playground: the port 8115 URL): **the browser says it can't be reached.**
+The script runs `docker compose up -d` and waits a moment. The room should see Compose's own output, ending with both containers started and no error (shortened; the exact look depends on your Compose version):
+```
+ Container d15-db-1 Started
+ Container d15-app-1 Started
+```
+Everything looks fine. Now open http://localhost:8115 (playground: the port 8115 URL): **the browser says it can't be reached.**
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. They work from any folder, because we named the project `d15`.
@@ -75,6 +80,7 @@ db-1   | 2026-11-07T18:55:10.776539500Z 2026-11-07 18:55:10 UTC [1] LOG:  databa
 **4. Prove it's only timing.** Start just the app again, now that the database has had time:
 ```bash
 docker compose -p d15 start app
+sleep 2
 curl -s -o /dev/null -w '%{http_code}\n' localhost:8115
 ```
 ```
