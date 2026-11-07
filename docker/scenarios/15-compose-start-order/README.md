@@ -109,12 +109,12 @@ diff ../break/compose.yaml compose.yaml
 < # D15 break: depends_on only controls START ORDER. It does not wait for "ready".
 ---
 > # D15 fix: the db reports when it is READY, and app waits for that.
-9a10,13
+12a13,16
 >     healthcheck:
 >       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
 >       interval: 2s
 >       retries: 15
-22c26,27
+25c29,30
 <       - db
 ---
 >       db:

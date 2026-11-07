@@ -7,6 +7,9 @@ services:
     container_name: d15-db-1
     environment:
       POSTGRES_PASSWORD: change-me-123
+    # Keep the scratch data in memory, so nothing is left behind on your disk.
+    tmpfs:
+      - /var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
       interval: 2s
