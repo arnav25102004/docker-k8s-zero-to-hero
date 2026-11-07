@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dosa Dash</title>
+<style>
+  :root { --bg:#1b1410; --card:#2a1f18; --gold:#f5b942; --text:#fff4e0; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--text); font:22px/1.4 system-ui,sans-serif;
+         display:flex; flex-wrap:wrap; gap:20px; justify-content:center; align-items:flex-start; }
+  canvas { width:min(640px,100%); background:#fbe6b8; border:4px solid var(--gold); border-radius:12px; touch-action:none; }
+  aside { width:min(340px,100%); background:var(--card); border-radius:12px; padding:16px 20px; }
+  h1 { margin:0 0 4px; color:var(--gold); font-size:34px; }
+  h2 { margin:14px 0 6px; font-size:22px; }
+  p { margin:4px 0; color:#d8c3a5; font-size:18px; }
+  ol { margin:0; padding-left:28px; font-size:24px; }
+  li span { float:right; color:var(--gold); font-weight:bold; }
+  #form { display:none; margin-top:12px; }
+  input, button { font:inherit; padding:8px 12px; border-radius:8px; border:2px solid var(--gold); }
+  input { width:100%; margin-bottom:8px; background:#fff; color:#000; }
+  button { background:var(--gold); color:#000; font-weight:bold; cursor:pointer; }
+  #msg { color:#9be28f; min-height:1.4em; }
+</style>
+</head>
+<body>
+<canvas id="c" width="640" height="400"></canvas>
+<aside>
+  <h1>Dosa Dash</h1>
+  <p>Catch dosas on the tawa. Idli +3, vada +5. Miss 3 dosas and it's over.</p>
+  <p>Move: mouse, finger, or ← →. Start: click or Space.</p>
+  <h2>🏆 Top 5</h2>
+  <ol id="board"></ol>
+  <div id="form">
+    <h2>Your score: <span id="final">0</span></h2>
+    <input id="name" maxlength="12" placeholder="Your name" autocomplete="off">
+    <button id="save">Save my score</button>
+  </div>
+  <div id="msg"></div>
+</aside>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height, TAWA_Y = H - 40;
+let state = 'ready', score = 0, lives = 3, items = [], px = W / 2, last = 0, spawnIn = 0;
+
+function load() {
+  fetch('/api/scores').then(r => r.json()).then(rows => {
+    const ol = document.getElementById('board');
+    ol.innerHTML = '';
+    rows.forEach(s => {
+      const li = document.createElement('li');
+      li.textContent = s.name;
+      const sp = document.createElement('span');
+      sp.textContent = s.score;
+      li.appendChild(sp);
+      ol.appendChild(li);
+    });
+    if (!rows.length) ol.innerHTML = '<p>No scores yet. Be the first!</p>';
+  }).catch(() => { document.getElementById('msg').textContent = 'Server not reachable.'; });
+}
+
+function start() {
+  state = 'play'; score = 0; lives = 3; items = []; spawnIn = 0;
+  document.getElementById('form').style.display = 'none';
+  document.getElementById('msg').textContent = '';
+}
+
+function over() {
+  state = 'over';
+  document.getElementById('final').textContent = score;
+  document.getElementById('form').style.display = 'block';
+  document.getElementById('name').focus();
+}
+
+document.getElementById('save').onclick = () => {
+  const name = document.getElementById('name').value;
+  fetch('/api/scores', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ name: name, score: score }) })
+    .then(r => { if (!r.ok) throw 0; document.getElementById('form').style.display = 'none';
+                 document.getElementById('msg').textContent = 'Saved! Click or press Space to play again.'; load(); })
+    .catch(() => { document.getElementById('msg').textContent = 'Could not save. Is the server up?'; });
+};
+
+function moveTo(clientX) {
+  const r = cv.getBoundingClientRect();
+  px = Math.max(60, Math.min(W - 60, (clientX - r.left) * W / r.width));
+}
+cv.addEventListener('pointermove', e => moveTo(e.clientX));
+const canStart = () => state === 'ready' || (state === 'over' && document.getElementById('form').style.display === 'none');
+cv.addEventListener('pointerdown', e => { moveTo(e.clientX); if (canStart()) start(); });
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') document.getElementById('save').click(); return; }
+  if (e.key === 'ArrowLeft') px = Math.max(60, px - 40);
+  if (e.key === 'ArrowRight') px = Math.min(W - 60, px + 40);
+  if (e.key === ' ') { e.preventDefault(); if (canStart()) start(); }
+});
+
+function spawn() {
+  const r = Math.random();
+  items.push({ x: 30 + Math.random() * (W - 60), y: -20, t: r < 0.12 ? 'vada' : r < 0.3 ? 'idli' : 'dosa' });
+}
+
+function update(dt) {
+  const speed = 120 + score * 3;
+  spawnIn -= dt;
+  if (spawnIn <= 0) { spawn(); spawnIn = Math.max(0.45, 1.1 - score * 0.012); }
+  items.forEach(it => it.y += speed * dt);
+  items = items.filter(it => {
+    if (it.y > TAWA_Y - 14 && it.y < TAWA_Y + 14 && Math.abs(it.x - px) < 62) {
+      score += it.t === 'vada' ? 5 : it.t === 'idli' ? 3 : 1;
+      return false;
+    }
+    if (it.y > H + 20) { if (it.t === 'dosa' && --lives <= 0) over(); return false; }
+    return true;
+  });
+}
+
+function drawItem(it) {
+  ctx.lineWidth = 3; ctx.strokeStyle = '#7a4a12';
+  if (it.t === 'dosa') {
+    ctx.fillStyle = '#e8a33d'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 8, 32, 20, 0, Math.PI, 0); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(it.x - 14, it.y + 6); ctx.lineTo(it.x + 14, it.y + 6); ctx.stroke();
+  } else if (it.t === 'idli') {
+    ctx.fillStyle = '#fffdf5'; ctx.strokeStyle = '#a89c86'; ctx.beginPath(); ctx.ellipse(it.x, it.y, 24, 15, 0, 0, 7); ctx.fill(); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#9a5b1f'; ctx.beginPath(); ctx.arc(it.x, it.y, 19, 0, 7); ctx.arc(it.x, it.y, 6, 0, 7, true);
+    ctx.fill('evenodd'); ctx.stroke();
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  items.forEach(drawItem);
+  ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.ellipse(px, TAWA_Y, 62, 14, 0, 0, 7); ctx.fill();
+  ctx.fillRect(px + 58, TAWA_Y - 4, 44, 8);
+  ctx.fillStyle = '#3a2a1c'; ctx.font = 'bold 28px system-ui,sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('Score ' + score, 14, 34);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#c0392b'; ctx.fillText('♥'.repeat(Math.max(lives, 0)), W - 14, 34);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#3a2a1c'; ctx.font = 'bold 40px system-ui,sans-serif';
+  if (state === 'ready') ctx.fillText('Click or press Space to start', W / 2, H / 2);
+  if (state === 'over') ctx.fillText('Game over! Score ' + score, W / 2, H / 2);
+}
+
+function frame(t) {
+  const dt = Math.min((t - last) / 1000, 0.05); last = t;
+  if (state === 'play') update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+load();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
