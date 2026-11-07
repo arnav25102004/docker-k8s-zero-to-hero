@@ -1,13 +1,13 @@
 # D06 · No error, no goodbye
 
-*Your AI model was more than halfway trained. Then it vanished. No error. No goodbye.*
+*Your AI model was three epochs into training. Then it vanished. No error. No goodbye.*
 
 ⏱ 12 min · beginner · Jupyter image (`quay.io/jupyter/base-notebook:2026-11-02`) · memory limits, cgroups, exit code 137, OOMKilled
 
 ⬇️ First run downloads about 343 MB (the same image as D01, so it may already be on your laptop). Do it before the session anyway.
 
 ## 📖 The story
-It's exam week at Christ University and your final-year project is a "model" that learns from a big dataset. You start the training in a container on the lab server and go for a filter coffee. When you come back, the output stops halfway: no red error, no traceback, nothing. The container is just... gone. Your teammate says, *"Maybe Python crashed?"* Python did not crash. Someone else ended it.
+It's exam week at Christ University and your final-year project is a "model" that learns from a big dataset. You start the training in a container on the lab server and go for a filter coffee. When you come back, the output stops at epoch 3 of 5: no red error, no traceback, nothing. The container is just... gone. Your teammate says, *"Maybe Python crashed?"* Python did not crash. Someone else ended it.
 
 ## 🧠 The concept: why, what, how
 A container shares the host's memory with everyone else. To stop one greedy container from eating the whole machine, Docker can set a **memory limit** (`--memory 300m`). It is built on a Linux feature called a **cgroup** (D00 §7.2): a fence the kernel builds around a group of processes.
@@ -27,7 +27,7 @@ Think of a hostel mess with one plate per student. Take more than one plate and 
 ```bash
 cd break && ./break.sh
 ```
-The "training" starts, prints a few epochs, and then the container stops, more than halfway through. Nothing shows on screen. No port to open: this one is all in the terminal.
+The "training" starts, prints a few epochs, and then, in the middle of epoch 3, the container stops. Nothing shows on screen. No port to open: this one is all in the terminal.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
