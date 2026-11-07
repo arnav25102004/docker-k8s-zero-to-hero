@@ -20,7 +20,7 @@ An image is not one blob. It is a **stack of layers**, one per Dockerfile step, 
 - A **file written during the build** (like `/app/config`) is part of a layer, so it is in the image too.
 - A **build secret** (`RUN --mount=type=secret`) is different: it is shown to one `RUN` step in a temporary spot and then gone. It is never written into a layer or the history.
 
-Think of an **exam hall sign-in sheet that is photocopied and stapled into every answer booklet**: you can hide the sheet in the room, but once it is in the booklet, everyone who gets a booklet gets the sheet.
+Think of a **password written into every printed answer booklet**: whoever gets a booklet gets the password.
 
 ```
  docker build --build-arg KEY=...          docker build --secret ...
@@ -134,6 +134,8 @@ docker run --rm -e WEATHER_API_KEY d14-weather:fixed
 ```
 (`env=WEATHER_API_KEY` means "take the secret from my shell variable of that name". `-e WEATHER_API_KEY` with no `=` passes that variable's value on to the container.)
 
+Two honest notes. First, the build secret here is cosmetic: the `RUN` only checks that a key exists. The real fix is simply **not putting the key in the image at all**. `RUN --mount=type=secret` is for builds that genuinely need a secret (for example `pip install` from a private package index), and the check step stands in for that. Second, `-e` keeps the key out of the **image**, not out of sight: `docker inspect` on the container shows it (see Verify), and typing the key inline lands in your shell history. In production, use a secrets manager or file-based secrets (Docker, Compose or Kubernetes secrets).
+
 ## ✅ Verify it yourself
 The same search that found the key before:
 ```bash
@@ -161,6 +163,18 @@ Bengaluru weather widget
   Today: 27 C, light rain after 4 pm. Carry an umbrella.
   (Demo forecast: this app makes no network calls.)
 ```
+The flip side of `-e`: the key is visible on the **container**. Start one and inspect it:
+```bash
+docker run --name d14-demo -e WEATHER_API_KEY=z2h-demo-key-NOT-REAL-123 d14-weather:fixed >/dev/null
+docker inspect d14-demo --format '{{.Config.Env}}'
+docker rm d14-demo
+```
+```
+[WEATHER_API_KEY=z2h-demo-key-NOT-REAL-123 PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=C.UTF-8 GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305 PYTHON_VERSION=3.12.16 PYTHON_SHA256=b5796915dc45ff745cfb4e990a7e7c93d6f546328a102ce31448d69ebc37575c]
+d14-demo
+```
+(The order and extra settings can differ.) It is in the container's settings, not in the shared image. That is better, but it is not a vault.
+
 One last look. The old image is **still leaky**; fixing the Dockerfile does not repair images that were already shared:
 ```bash
 docker history --no-trunc d14-weather:shared | grep -c z2h-demo-key
@@ -173,7 +187,7 @@ That is why a real leak means **rotating the key**, not just rebuilding.
 ## 🎯 Key takeaways
 - Every build step is saved as a layer, with its command and arguments, and anyone who can pull the image can read them (`docker history --no-trunc`).
 - A build `ARG` used in a `RUN` is recorded with its value. Files written during the build are in the image too.
-- Use **build secrets** (`--secret` and `RUN --mount=type=secret`) for things the build needs, and **runtime** variables (`-e`, or a secrets manager) for things the app needs.
+- Use **build secrets** (`--secret` and `RUN --mount=type=secret`) for things the build needs, and **runtime** configuration for things the app needs. `-e` keeps the key out of the image but not out of `docker inspect` or shell history, so in production use a secrets manager or file-based secrets.
 - If a key might have leaked, **rotate it**. Deleting the image does not un-leak a key.
 
 ## 💎 Lifelong lesson
