@@ -162,6 +162,6 @@ Close with the checklist on screen: *"Every line on this list is something you *
 |---|---|
 | **3-hour keynote workshop** | Act 0 (short), Scenes 1–3, 5–7, 9–12, then the Gauntlet (demo-led, audience votes) |
 | **1 day hands-on** | D01–D08, K01–K08, 4 break-and-fix scenarios each ([Docker ones](docker/scenarios/README.md)) |
-| **2 days, zero to hero** | Day 1: Git G00–G06 (morning) + Docker D00–D08 + scenarios D01–D05. Day 2: K00–K12 + scenarios |
+| **2 days, zero to hero** | Day 1: Git G00–G06 (morning) + Docker labs D00–D08 + [break-and-fix scenarios](docker/scenarios/README.md) 01–05. Day 2: K00–K12 + scenarios |
 | **3 days, complete** | Day 1: Track 0 Git + G-scenarios. Day 2: Track 1 Docker + [Docker scenarios](docker/scenarios/README.md). Day 3: Track 2 Kubernetes + K-scenarios |
 | **Semester course** | One lab per session + one troubleshooting scenario as homework |

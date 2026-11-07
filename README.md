@@ -10,7 +10,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
   🐱🐶 Build & ship a live voting app the whole room uses from their phones
   💀 Delete every server and watch Kubernetes bring them back
   🦄 "One more thing…": release a new version mid-vote with 0 failed requests
-  🔥 Break things on purpose, 33 times, and fix them like a pro
+  🔥 Break things on purpose, 38 times, and fix them like a pro
 ```
 
 ---
@@ -65,7 +65,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [D09](docker/09-health-restart/README.md) | health checks, restart policies | 💥 press the red button |
 | [D10](docker/10-registry-tags/README.md) | registries, tags, digests | why `latest` bites |
 | [D11](docker/11-limits-security/README.md) | limits, OOM, non-root, hardening | the fully hardened `docker run` |
-| [🔥 D-scenarios](docker/scenarios/README.md) | **15 break-and-fix incidents** | |
+| [🔥 Docker scenarios](docker/scenarios/README.md) | **15 break-and-fix incidents** | |
 
 ### ☸️ Track 2: Kubernetes ([overview](kubernetes/README.md))
 | Lab | You will… | Wow moment |
