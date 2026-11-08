@@ -16,7 +16,7 @@ broken() {
   [ "${n:-0}" -ge 2 ] 2>/dev/null && n=2
   assert_eq "$n" "2" "restartCount reached 2 within 90 s"
   assert_contains "$(kubectl get events -n k-07-slow-start 2>&1)" "Liveness probe failed" "events show Liveness probe failed"
-  assert_contains "$(kubectl logs -n k-07-slow-start -l app=showdown 2>&1)" "simulating slow startup" "logs show the slow startup"
+  assert_contains "$(kubectl logs -n k-07-slow-start -l app=showdown --previous 2>&1)" "simulating slow startup" "logs show the slow startup"
 }
 
 fixed() {

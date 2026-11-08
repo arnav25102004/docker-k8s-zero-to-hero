@@ -54,14 +54,18 @@ Guess first, then run these **in order**.
 kubectl get pods -n k-07-slow-start -w
 ```
 ```
-NAME                       READY   STATUS    RESTARTS     AGE
-showdown-976689b99-b2jrf   0/1     Running   2 (6s ago)   26s
-showdown-976689b99-b2jrf   0/1     Running   3 (6s ago)   36s
-showdown-976689b99-b2jrf   0/1     CrashLoopBackOff   3 (6s ago)   46s
-showdown-976689b99-b2jrf   0/1     CrashLoopBackOff   4 (1s ago)   76s
-showdown-976689b99-b2jrf   0/1     Running            5 (52s ago)   2m7s
+NAME                       READY   STATUS              RESTARTS     AGE
+showdown-976689b99-z7b86   0/1     ContainerCreating   0            0s
+showdown-976689b99-z7b86   0/1     Running             0            1s
+showdown-976689b99-z7b86   0/1     Running             1 (1s ago)   6s
+showdown-976689b99-z7b86   0/1     Running             2 (1s ago)   11s
+showdown-976689b99-z7b86   0/1     CrashLoopBackOff    2 (1s ago)   16s
+showdown-976689b99-z7b86   0/1     Running             3 (16s ago)  31s
+showdown-976689b99-z7b86   0/1     Running             4 (1s ago)   41s
+showdown-976689b99-z7b86   0/1     CrashLoopBackOff    4 (1s ago)   46s
+showdown-976689b99-z7b86   0/1     Running             5 (50s ago)  95s
 ```
-(Shortened; ages and Pod names will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod is restarted about every 10 seconds at first. After three or four restarts the kubelet starts **backing off**: the waits grow to 10 s, 20 s, 40 s… up to 5 minutes (that is `CrashLoopBackOff`, as in [K03](../03-showdown-crashloop/README.md)), so the cycle gets slower. The pattern is the same, though: `0/1` and a rising `RESTARTS`. Nobody typed `kubectl delete`: something is killing it.
+(Shortened: it keeps going. Ages, Pod names and exact timings will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod is `Running` but never `1/1`, and `RESTARTS` climbs: the first restart comes after only about 6 seconds, the next about 5 seconds later. The kubelet **backs off** between restarts, so the waits grow (about 10 s at first, then longer, doubling up to 5 minutes) and `CrashLoopBackOff` appears in between, as in [K03](../03-showdown-crashloop/README.md). Nobody typed `kubectl delete`: something is killing it.
 
 <details><summary>💡 Hint</summary>
 Is the app crashing, or is somebody killing it? Which part of Kubernetes is allowed to kill a container, and what rule does it use? Compare the app's start-up time with how long Kubernetes waits before it first checks.
@@ -77,7 +81,7 @@ kubectl describe pod -n k-07-slow-start -l app=showdown | grep -E 'Liveness|Kill
   Warning  Unhealthy  89s (x5 over 2m34s)   kubelet            spec.containers{showdown}: Liveness probe failed: Get "http://10.244.2.82:8080/healthz": dial tcp 10.244.2.82:8080: connect: connection refused
   Normal   Killing    34s (x6 over 2m34s)   kubelet            spec.containers{showdown}: Container showdown failed liveness probe, will be restarted
 ```
-(The IP addresses and counts will differ.) There is the culprit, in the kubelet's own words: `Liveness probe failed` followed by `Container showdown failed liveness probe, will be restarted`. The probe checks `/healthz` after `delay=5s`, then every `period=5s`, and `#failure=1` means one failed check is enough. "Connection refused" means nothing was listening yet.
+(The IP addresses and counts will differ.) There is the culprit, in the kubelet's own words: `Liveness probe failed` followed by `Container showdown failed liveness probe, will be restarted`. The probe checks `/healthz` after `delay=5s`, then every `period=5s`, and `#failure=1` means one failed check is enough. "Connection refused" means nothing was listening yet. The `Readiness probe failed` line is the same story: during its 20-second sleep the app isn't listening, so the readiness check is refused too. It is only a symptom here; the `Killing` line is the one that matters.
 
 **3. What was the app doing in those 5 seconds?** Read the last words of the container that was killed.
 ```bash
@@ -109,7 +113,7 @@ The kubelet starts knocking after 5 seconds, gives up after 1 failure, and the a
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The app needs about 20 seconds (`STARTUP_DELAY: "20"`) before it listens on port 8080. The liveness probe starts checking after `initialDelaySeconds: 5`, and `failureThreshold: 1` means the very first refused connection is fatal. So the kubelet kills the container at about 5 to 6 seconds, every time, long before the app is ready. After a few rounds the kubelet adds back-off waits (`CrashLoopBackOff`). The app is healthy; the probe is simply too impatient for a slow starter.
+The app needs about 20 seconds (`STARTUP_DELAY: "20"`) before it listens on port 8080. The liveness probe starts checking after `initialDelaySeconds: 5`, and `failureThreshold: 1` means the very first refused connection is fatal. So the kubelet kills the container at about 5 to 6 seconds, every time, long before the app is ready. The kubelet also waits longer between restarts each time (`CrashLoopBackOff`). The app is healthy; the probe is simply too impatient for a slow starter.
 </details>
 
 ## 🔧 Fix it
@@ -145,7 +149,7 @@ By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fix
 ```bash
 kubectl apply -f app.yaml
 ```
-Kubernetes starts a new Pod with the startup probe and removes the old one.
+Kubernetes starts a new Pod with the startup probe and removes the old one. Wait about 25 seconds for the new Pod to become `1/1` before you start verifying.
 
 ## ✅ Verify it yourself
 ```bash
