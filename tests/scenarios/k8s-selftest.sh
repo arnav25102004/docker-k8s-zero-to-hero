@@ -11,6 +11,10 @@ cd "$REPO" || exit 1
 # Safety: this file only ever talks to the throwaway cluster (never the owner's others).
 export KUBECONFIG="$HOME/.kube/z2h-test.config"
 
+# shellcheck source=k8s-lib.sh
+source "$REPO/tests/scenarios/k8s-lib.sh"
+require_test_cluster || exit 1
+
 PASS=0; FAIL=0
 FAILED_NAMES=""
 PF_PID=""
@@ -75,9 +79,12 @@ users:
 - name: nobody
   user: {}
 YAML
-  out=$(KUBECONFIG="$kc" bash tests/scenarios/k8s.sh 01 2>&1); rc=$?
+  out=$(KUBECONFIG="$kc" bash -c "source '$REPO/tests/scenarios/k8s-lib.sh'; require_test_cluster" 2>&1); rc=$?
   check "exits non-zero" [ "$rc" -ne 0 ] || f=1
   check "names kind-z2h-test" has "$out" "kind-z2h-test" || f=1
+  out=$(KUBECONFIG="$kc" bash tests/scenarios/k8s.sh 01 2>&1); rc=$?
+  check "k8s.sh refuses a foreign kubeconfig" [ "$rc" -ne 0 ] || f=1
+  check "k8s.sh names kind-z2h-test" has "$out" "kind-z2h-test" || f=1
   return $f
 }
 

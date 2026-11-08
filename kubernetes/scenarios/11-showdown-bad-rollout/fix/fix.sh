@@ -24,4 +24,4 @@ wait_for "only the 3 good Pods to remain" 60 three_pods \
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl rollout history deployment/showdown -n $NS" \
   "kubectl get pods -n $NS" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/showdown 9211:80   (in a second terminal; then open http://localhost:9211)"
+  "kubectl port-forward -n $NS svc/showdown 9211:80   (in a second terminal; then open http://localhost:9211; on a playground add --address 0.0.0.0 and open the URL for port 9211)"

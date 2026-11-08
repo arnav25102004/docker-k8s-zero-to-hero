@@ -23,9 +23,7 @@ app_cannot_resolve() {
 # if the client can STILL reach the target, nothing is enforcing policies.
 probe_enforces() {
   local ip i enforced=1
-  kubectl delete namespace "$PROBE" --ignore-not-found >/dev/null 2>&1
-  kubectl create namespace "$PROBE" >/dev/null || return 2
-  kubectl label namespace "$PROBE" z2h.scenario=k13 --overwrite >/dev/null
+  fresh_ns "$PROBE" || return 2
   kubectl apply -n "$PROBE" -f - >/dev/null <<'YAML' || return 2
 apiVersion: v1
 kind: Pod

@@ -37,8 +37,12 @@ spec:
             if [ "$CODE" = "200" ]; then
               echo "✅ found $(grep -c '"phase"' /tmp/out) players (pods)"
             else
-              MSG=$(grep '"message"' /tmp/out | sed 's/^ *"message": *"//; s/",*$//; s/\\"/"/g')
-              echo "❌ $CODE Forbidden: $MSG"
+              if [ "$CODE" = "403" ]; then
+                MSG=$(grep '"message"' /tmp/out | sed 's/^ *"message": *"//; s/",*$//; s/\\"/"/g')
+                echo "❌ $CODE Forbidden: $MSG"
+              else
+                echo "❌ HTTP $CODE"
+              fi
             fi
             sleep 5
           done

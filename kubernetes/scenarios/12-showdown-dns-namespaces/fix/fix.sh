@@ -17,4 +17,4 @@ kubectl rollout status deployment/showdown -n "$APP" --timeout=180s >/dev/null \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get pods -n $APP" \
-  "kubectl port-forward -n $APP --address 0.0.0.0 svc/showdown 9212:80   (in a second terminal; then open http://localhost:9212)"
+  "kubectl port-forward -n $APP svc/showdown 9212:80   (in a second terminal; then open http://localhost:9212; on a playground add --address 0.0.0.0 and open the URL for port 9212)"

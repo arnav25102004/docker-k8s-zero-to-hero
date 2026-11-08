@@ -73,6 +73,27 @@ load_via_archive() {
   return "$rc"
 }
 
+# load_digest_into_kind REF CLUSTER: for a pinned "name:tag@sha256:..." reference. A plain
+# "kind load" stores such an image nameless, so the kubelet never finds it and pulls it again
+# (the digest in the Pod spec is the multi-platform index digest, which a single-platform
+# save no longer has). Import this machine's platform into every node under the digest name
+# the Pod spec resolves to.
+load_digest_into_kind() {
+  local ref="$1" cluster="$2" name digest tar node rc=0
+  name="${ref%%@*}"; name="${name%%:*}"; digest="${ref#*@}"
+  case "$name" in */*) ;; *) name="library/$name" ;; esac
+  tar=$(mktemp -t z2h-preload.XXXXXX) || return 1
+  if docker save --platform "$PLATFORM" -o "$tar" "$ref" >/dev/null 2>&1; then
+    for node in $(kind get nodes --name "$cluster" 2>/dev/null); do
+      docker exec -i "$node" ctr -n k8s.io images import --index-name "docker.io/$name@$digest" - <"$tar" >/dev/null 2>&1 || rc=1
+    done
+  else
+    rc=1
+  fi
+  rm -f "$tar"
+  return "$rc"
+}
+
 total=0
 failed=0
 for ref in $IMAGES; do
@@ -88,8 +109,11 @@ for ref in $IMAGES; do
       if ! command -v kind >/dev/null 2>&1; then
         printf '❌ %s (pulled, but the kind command is missing, so it was not loaded)\n' "$ref"
         failed=$((failed + 1))
-      elif kind load docker-image "$ref" --name "$CLUSTER" >/dev/null 2>&1 \
-        || load_via_archive "$ref" kind load image-archive --name "$CLUSTER"; then
+      elif case "$ref" in
+             *@sha256:*) load_digest_into_kind "$ref" "$CLUSTER" ;;
+             *)          kind load docker-image "$ref" --name "$CLUSTER" >/dev/null 2>&1 \
+                           || load_via_archive "$ref" kind load image-archive --name "$CLUSTER" ;;
+           esac; then
         printf '✅ %s (pulled, loaded into kind "%s")\n' "$ref" "$CLUSTER"
       else
         printf '❌ %s (pulled, but loading into kind "%s" failed)\n' "$ref" "$CLUSTER"

@@ -190,11 +190,13 @@ kubectl exec -n k-12-dns-app deploy/showdown -- python -c "import socket;print(s
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-12-dns-app --address 0.0.0.0 svc/showdown 9212:80
+kubectl port-forward -n k-12-dns-app svc/showdown 9212:80
 ```
 ```
-Forwarding from 0.0.0.0:9212 -> 8080
+Forwarding from 127.0.0.1:9212 -> 8080
+Forwarding from [::1]:9212 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9212.
 Back in the first terminal: ask if it is ready, cast a vote, and read the results:
 ```bash
 curl -s localhost:9212/readyz; echo
@@ -214,7 +216,7 @@ kubectl exec -n k-12-dns-data deploy/redis -- redis-cli hgetall votes
 cats
 1
 ```
-Or open http://localhost:9212 in your browser and vote (playground: open the URL for port 9212). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9212 in your browser and vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **A Service name is only short inside its own namespace.** `redis` means `redis.<my-namespace>.svc.cluster.local`.
@@ -232,4 +234,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K13](../13-lockdown-blocks-dns/README.md): Security hardened the network. Now nothing can find anything.
+[K13](../13-lockdown-blocks-dns/README.md): Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.

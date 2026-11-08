@@ -201,4 +201,3 @@ cd .. && ./cleanup.sh
 ## Next →
 [K15](../15-mystery-redis-port/README.md): Nobody set REDIS_PORT. Kubernetes did.
 
-← Previous: [K13](../13-lockdown-blocks-dns/README.md)

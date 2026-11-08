@@ -17,7 +17,7 @@ Long before DNS names were common in clusters, Docker's old "links" feature told
 - When a Pod starts, Kubernetes looks at every **Service** in the same namespace and adds environment variables for each: `<NAME>_SERVICE_HOST`, `<NAME>_SERVICE_PORT`, and the Docker-style `<NAME>_PORT=tcp://<ip>:<port>`.
 - A Service named `redis` therefore creates a variable called **`REDIS_PORT`**, and its value is a URL like `tcp://10.96.234.78:6379`, not a number.
 - Only Pods that start **after** the Service exists get the variables (a Pod that was already running never changes).
-- Our worker does `int(os.environ["REDIS_PORT"])`, expecting `6379`. `int("tcp://…")` fails, the container exits, and Kubernetes restarts it again and again.
+- Our worker does `int(os.environ.get("REDIS_PORT", "6379"))`, expecting `6379`. `int("tcp://…")` fails, the container exits, and Kubernetes restarts it again and again.
 - Think of a hotel that slips a card under *every* guest's door listing the room numbers of everything in the building. Most guests ignore it. One guest has a habit of reading a card called "port" as a number.
 
 ```
@@ -70,7 +70,7 @@ ValueError: invalid literal for int() with base 10: 'tcp://10.96.234.78:6379'
 kubectl get deploy score-worker -n k-15-mystery-env -o jsonpath='{.spec.template.spec.containers[0].env}'
 ```
 ```
-
+(no output)
 ```
 Empty: there is no `env:` section at all. So the value came from somewhere other than our YAML.
 
@@ -135,7 +135,7 @@ deployment.apps/score-worker configured
 Waiting for deployment "score-worker" rollout to finish: 1 old replicas are pending termination...
 deployment "score-worker" successfully rolled out
 ```
-(shortened: the "Waiting…" line repeats a few times.) The alternative fix is a rename: have the code read a variable nobody else will invent, such as `APP_REDIS_PORT`.)
+(shortened: the "Waiting…" line repeats a few times.) The alternative fix is a rename: have the code read a variable nobody else will invent, such as `APP_REDIS_PORT`.
 
 ## ✅ Verify it yourself
 ```bash
@@ -165,7 +165,7 @@ kubectl exec -n k-15-mystery-env deploy/score-worker -- env | grep -c REDIS
 ## 🎯 Key takeaways
 - **Kubernetes injects `<SERVICE>_PORT`, `<SERVICE>_SERVICE_HOST` and friends** into every new Pod, for every Service in its namespace.
 - **The value of `REDIS_PORT` is a URL, not a number.** Names like `REDIS_PORT` and `MYSQL_PORT` collide with app settings all the time.
-- **Only Pods that start after the Service get them.** That is why a restart "fixes" some old Pods and breaks others.
+- **Only Pods that start after the Service get them.** A Pod created before the Service never gets the variables; a restart after the Service exists can suddenly break it.
 - **`enableServiceLinks: false` switches it off.** Use DNS names (`redis`) to find other Services; you don't need the variables.
 - Debug path: `get pods` → `logs --previous` → look at the env → `get svc`.
 - How our own app is immune: `apps/api/app.py` (Cats vs Dogs) carries this line, which accepts both `6379` and the URL form:
@@ -183,4 +183,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-Previous: [K14](../14-leaderboard-bot-forbidden/README.md). That was the last scenario in this set: back to the [Kubernetes scenarios index](../README.md).
+That was the last scenario in this set: back to the [Kubernetes scenarios index](../README.md).

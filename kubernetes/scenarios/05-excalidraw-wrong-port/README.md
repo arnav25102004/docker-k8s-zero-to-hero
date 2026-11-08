@@ -172,11 +172,13 @@ kubectl logs visitor -n k-05-wrong-port --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-05-wrong-port --address 0.0.0.0 svc/draw 9205:80
+kubectl port-forward -n k-05-wrong-port svc/draw 9205:80
 ```
 ```
-Forwarding from 0.0.0.0:9205 -> 80
+Forwarding from 127.0.0.1:9205 -> 80
+Forwarding from [::1]:9205 -> 80
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9205.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' localhost:9205
@@ -184,7 +186,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9205
 ```
 200
 ```
-(The port-forward terminal also prints `Handling connection for 9205`.) Or open http://localhost:9205 in your browser and draw something (playground: open the URL for port 9205). Press Ctrl+C in the second terminal to stop the port-forward.
+(The port-forward terminal also prints `Handling connection for 9205`.) Or open http://localhost:9205 in your browser and draw something. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **`port` is the Service's door; `targetPort` is the container's door.** They only match if you make them match.

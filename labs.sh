@@ -73,10 +73,10 @@ k8s_clean() {
     warn "No Kubernetes cluster reachable, so there is nothing to clean. Check: kubectl config current-context"
     return 0
   fi
+  echo "Cleaning Kubernetes scenarios (current kubectl context: $(kubectl config current-context 2>/dev/null || echo none))"
   for c in "$K8S_DIR"/[0-9]*/cleanup.sh; do
-    [ -f "$c" ] && bash "$c" >/dev/null 2>&1
+    [ -f "$c" ] && bash "$c" 2>&1
   done
-  ok "Kubernetes scenario resources removed (current kubectl context: $(kubectl config current-context 2>/dev/null || echo none))"
 }
 
 # ----------------------------------------------------------- interactive --

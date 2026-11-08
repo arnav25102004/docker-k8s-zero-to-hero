@@ -195,11 +195,13 @@ kubectl logs visitor -n k-11-bad-rollout --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-11-bad-rollout --address 0.0.0.0 svc/showdown 9211:80
+kubectl port-forward -n k-11-bad-rollout svc/showdown 9211:80
 ```
 ```
-Forwarding from 0.0.0.0:9211 -> 8080
+Forwarding from 127.0.0.1:9211 -> 8080
+Forwarding from [::1]:9211 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9211.
 Back in the first terminal:
 ```bash
 curl -s localhost:9211/api/info | grep -o '"version": "[^"]*"'
@@ -207,7 +209,7 @@ curl -s localhost:9211/api/info | grep -o '"version": "[^"]*"'
 ```
 "version": "1.0.0"
 ```
-Or open http://localhost:9211 in your browser and cast a vote (playground: open the URL for port 9211). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9211 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **A rolling update with a readiness probe protects users from a bad release:** a new Pod that never becomes Ready never gets traffic, and `maxUnavailable: 0` keeps the old Pods until it does.
@@ -225,4 +227,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K12](../12-showdown-dns-namespaces/README.md): Same cluster. Same name. "Never heard of it."
+[K12](../12-showdown-dns-namespaces/README.md): The Redis is running. The app is running. And the app swears Redis does not exist.

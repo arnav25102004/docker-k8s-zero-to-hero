@@ -19,4 +19,4 @@ wait_for "the Adminer Pod to start by itself (the kubelet retries)" 180 pod_read
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get pods -n $NS" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/adminer 9209:80   (in a second terminal; then open http://localhost:9209)"
+  "kubectl port-forward -n $NS svc/adminer 9209:80   (in a second terminal; then open http://localhost:9209; on a playground add --address 0.0.0.0 and open the URL for port 9209)"

@@ -169,7 +169,7 @@ NAME                     READY   STATUS    RESTARTS   AGE
 board-5df664b878-2hzs9   1/1     Running   0          21s
 visitor                  1/1     Running   0          32s
 ```
-(Names and ages will differ.) `READY` is now **1/1**, and the old Pod is gone. The Service has a ready address again, and the visitor's log is green (if you still see a ❌, wait a few seconds and run it again):
+(Names and ages will differ.) `READY` is now **1/1**, and the old Pod is gone (it may show `Terminating` for a moment). The Service has a ready address again, and the visitor's log is green (if you still see a ❌, wait a few seconds and run it again):
 ```bash
 kubectl logs visitor -n k-06-never-ready --tail=3
 ```
@@ -180,11 +180,13 @@ kubectl logs visitor -n k-06-never-ready --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-06-never-ready --address 0.0.0.0 svc/board 9206:80
+kubectl port-forward -n k-06-never-ready svc/board 9206:80
 ```
 ```
-Forwarding from 0.0.0.0:9206 -> 80
+Forwarding from 127.0.0.1:9206 -> 80
+Forwarding from [::1]:9206 -> 80
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9206.
 Back in the first terminal:
 ```bash
 curl -s localhost:9206/healthcheck.php; echo
@@ -192,7 +194,7 @@ curl -s localhost:9206/healthcheck.php; echo
 ```
 {"status":200,"message":"Database connection is OK"}
 ```
-(The port-forward terminal also prints `Handling connection for 9206`.) Or open http://localhost:9206 in your browser (playground: open the URL for port 9206). Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
+(The port-forward terminal also prints `Handling connection for 9206`.) Or open http://localhost:9206 in your browser. Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **Readiness gates traffic; liveness restarts.** A failing readiness probe keeps the Pod out of the Service and never restarts it.

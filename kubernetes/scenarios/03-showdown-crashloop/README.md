@@ -103,7 +103,7 @@ The Deployment sets `PORT` to the word `eighty`. The app needs digits.
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The Deployment sets the environment variable `PORT: "eighty"`. At startup the app runs `int(os.environ["PORT"])`, which raises `ValueError` for a word, so the process exits with code 1 before it listens on anything. Because the Deployment's restartPolicy is `Always`, the kubelet starts it again, it dies again, and the waits between tries grow: `CrashLoopBackOff`. Nothing is wrong with the image, the node or the network.
+The Deployment sets the environment variable `PORT: "eighty"`. At startup the app runs `int(os.environ.get("PORT", "8080"))`, which raises `ValueError` for a word, so the process exits with code 1 before it listens on anything. Because the Deployment's restartPolicy is `Always`, the kubelet starts it again, it dies again, and the waits between tries grow: `CrashLoopBackOff`. Nothing is wrong with the image, the node or the network.
 </details>
 
 ## 🔧 Fix it
@@ -163,11 +163,13 @@ kubectl logs -n k-03-crashloop -l app=showdown
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-03-crashloop --address 0.0.0.0 svc/showdown 9203:80
+kubectl port-forward -n k-03-crashloop svc/showdown 9203:80
 ```
 ```
-Forwarding from 0.0.0.0:9203 -> 8080
+Forwarding from 127.0.0.1:9203 -> 8080
+Forwarding from [::1]:9203 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9203.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' localhost:9203
@@ -175,7 +177,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9203
 ```
 200
 ```
-Or open http://localhost:9203 in your browser and cast a vote (playground: open the URL for port 9203). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9203 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **restartPolicy `Always` restarts a dead container, but waits longer each time** (about 10 s up to 5 min). That waiting is `CrashLoopBackOff`.

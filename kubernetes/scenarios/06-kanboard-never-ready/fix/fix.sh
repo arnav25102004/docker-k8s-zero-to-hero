@@ -19,4 +19,4 @@ wait_for "the Kanboard Deployment to be Ready" 180 rolled_out \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get pods -n $NS" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/board 9206:80   (in a second terminal; then open http://localhost:9206)"
+  "kubectl port-forward -n $NS svc/board 9206:80   (in a second terminal; then open http://localhost:9206; on a playground add --address 0.0.0.0 and open the URL for port 9206)"

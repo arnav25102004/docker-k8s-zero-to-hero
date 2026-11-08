@@ -206,11 +206,13 @@ kubectl exec -n k-13-lockdown deploy/showdown -- python -c "import socket;print(
 ```
 (The IP address will differ.) Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-13-lockdown --address 0.0.0.0 svc/showdown 9213:80
+kubectl port-forward -n k-13-lockdown svc/showdown 9213:80
 ```
 ```
-Forwarding from 0.0.0.0:9213 -> 8080
+Forwarding from 127.0.0.1:9213 -> 8080
+Forwarding from [::1]:9213 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9213.
 Back in the first terminal: ask if it is ready, cast a vote, and read the results:
 ```bash
 curl -s localhost:9213/readyz; echo
@@ -230,7 +232,7 @@ kubectl exec -n k-13-lockdown deploy/redis -- redis-cli hgetall votes
 cats
 1
 ```
-Or open http://localhost:9213 in your browser and vote (playground: open the URL for port 9213). Notice the policy only restricts what the app sends *out*: the browser could always reach the app. Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9213 in your browser and vote. Notice the policy only restricts what the app sends *out*: the browser could always reach the app. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **Once a NetworkPolicy selects a Pod for Egress, everything not listed is blocked.** Allow-lists only add; there is no deny rule.

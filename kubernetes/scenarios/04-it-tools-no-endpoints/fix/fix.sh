@@ -23,4 +23,4 @@ wait_for "the Service to find its Pods" 60 has_endpoints \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get endpointslices -n $NS -l kubernetes.io/service-name=tools" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/tools 9204:80   (in a second terminal; then open http://localhost:9204)"
+  "kubectl port-forward -n $NS svc/tools 9204:80   (in a second terminal; then open http://localhost:9204; on a playground add --address 0.0.0.0 and open the URL for port 9204)"

@@ -180,11 +180,13 @@ kubectl logs visitor -n k-10-pvc-pending --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-10-pvc-pending --address 0.0.0.0 svc/board 9210:80
+kubectl port-forward -n k-10-pvc-pending svc/board 9210:80
 ```
 ```
-Forwarding from 0.0.0.0:9210 -> 80
+Forwarding from 127.0.0.1:9210 -> 80
+Forwarding from [::1]:9210 -> 80
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9210.
 Back in the first terminal:
 ```bash
 curl -s localhost:9210/healthcheck.php; echo
@@ -192,7 +194,7 @@ curl -s localhost:9210/healthcheck.php; echo
 ```
 {"status":200,"message":"Database connection is OK"}
 ```
-(The port-forward terminal also prints `Handling connection for 9210`.) Or open http://localhost:9210 in your browser (playground: open the URL for port 9210). Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
+(The port-forward terminal also prints `Handling connection for 9210`.) Or open http://localhost:9210 in your browser. Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **A PVC is a request, a StorageClass is the menu, a provisioner makes the disk.** If the class doesn't exist, nothing is ever made.

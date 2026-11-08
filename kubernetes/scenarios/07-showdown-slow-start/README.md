@@ -187,11 +187,13 @@ kubectl describe pod -n k-07-slow-start -l app=showdown | grep -E 'Startup:|Live
 ```
 (`kubectl describe` may also list a few `Startup probe failed` events from the first 20 seconds. They are harmless: the app was still waking up, and the startup probe is allowed 12 failures.) Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-07-slow-start --address 0.0.0.0 svc/showdown 9207:80
+kubectl port-forward -n k-07-slow-start svc/showdown 9207:80
 ```
 ```
-Forwarding from 0.0.0.0:9207 -> 8080
+Forwarding from 127.0.0.1:9207 -> 8080
+Forwarding from [::1]:9207 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9207.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' localhost:9207
@@ -199,7 +201,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9207
 ```
 200
 ```
-Or open http://localhost:9207 in your browser and cast a vote (playground: open the URL for port 9207). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9207 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **Liveness restarts; startup waits.** A liveness probe that fires before the app is up kills a healthy app over and over.
@@ -217,4 +219,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K08](../08-ai-trainer-oomkilled/README.md): Exit 137 means someone killed it…
+[K08](../08-ai-trainer-oomkilled/README.md): Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.

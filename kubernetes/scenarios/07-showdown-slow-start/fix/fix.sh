@@ -24,4 +24,4 @@ wait_for "the old restarting Pod to be removed" 60 one_pod \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get pods -n $NS" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/showdown 9207:80   (in a second terminal; then open http://localhost:9207)"
+  "kubectl port-forward -n $NS svc/showdown 9207:80   (in a second terminal; then open http://localhost:9207; on a playground add --address 0.0.0.0 and open the URL for port 9207)"

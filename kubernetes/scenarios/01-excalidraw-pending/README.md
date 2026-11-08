@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · Excalidraw whiteboard (`excalidraw/excalidraw`, about 44 MB) · Pending, scheduler, requests vs limits
 
-⬇️ First run downloads about 44 MB (Excalidraw) plus a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
+⬇️ The tiny 4 MB visitor image downloads when you break it. The Excalidraw image (about 44 MB) downloads only at fix time, because the whiteboard Pod never starts while it is broken. On a cold cluster the fix moment waits on that download (the first time, up to a minute or two). Presenters: preload it (`kubernetes/scenarios/preload.sh`) or run the scenario once before class, on good Wi-Fi.
 
 Output columns and wording can differ a little between kubectl and cluster versions (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
@@ -120,7 +120,7 @@ Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-Within a few seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it). What changed: the request shrinks to what a whiteboard needs, and we add a limit as a safety cap.
+Within a few seconds once Excalidraw is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it). What changed: the request shrinks to what a whiteboard needs, and we add a limit as a safety cap.
 ```bash
 diff ../break/app.yaml app.yaml
 ```
@@ -165,11 +165,13 @@ kubectl logs visitor -n k-01-pending --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-01-pending --address 0.0.0.0 svc/draw 9201:80
+kubectl port-forward -n k-01-pending svc/draw 9201:80
 ```
 ```
-Forwarding from 0.0.0.0:9201 -> 80
+Forwarding from 127.0.0.1:9201 -> 80
+Forwarding from [::1]:9201 -> 80
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9201.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' localhost:9201
@@ -177,7 +179,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9201
 ```
 200
 ```
-Or open http://localhost:9201 in your browser and draw something (playground: open the URL for port 9201). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9201 in your browser and draw something. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **Requests are reservations** the scheduler must fit on a single node; **limits are caps** enforced while the Pod runs.

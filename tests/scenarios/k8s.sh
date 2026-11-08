@@ -7,6 +7,12 @@ set -u
 
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO" || exit 1
+# Safety: this harness only ever talks to the throwaway cluster, so refuse any other kubeconfig.
+if [ "${KUBECONFIG:-}" != "$HOME/.kube/z2h-test.config" ]; then
+  printf 'Refusing to run: KUBECONFIG is "%s", not the throwaway cluster'"'"'s (context kind-z2h-test).\n' "${KUBECONFIG:-}" >&2
+  printf 'Create and use the test cluster:\n  tests/scenarios/k8s-cluster.sh up\n  export KUBECONFIG=$HOME/.kube/z2h-test.config\n' >&2
+  exit 1
+fi
 # shellcheck source=k8s-lib.sh
 source "$REPO/tests/scenarios/k8s-lib.sh"
 

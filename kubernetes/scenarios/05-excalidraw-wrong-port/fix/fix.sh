@@ -24,4 +24,4 @@ wait_for "the Service to forward to port 80" 60 port_is_80 \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get endpointslices -n $NS -l kubernetes.io/service-name=draw" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/draw 9205:80   (in a second terminal; then open http://localhost:9205)"
+  "kubectl port-forward -n $NS svc/draw 9205:80   (in a second terminal; then open http://localhost:9205; on a playground add --address 0.0.0.0 and open the URL for port 9205)"

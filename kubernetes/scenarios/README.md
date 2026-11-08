@@ -24,7 +24,7 @@
 | K14 | [The bot has an ID card, but the door stays shut](14-leaderboard-bot-forbidden/README.md) | a "leaderboard bot" (terminal only) | *The bot has a valid ID card. The API still says: not allowed.* | - | 16 MB |
 | K15 | [The mystery variable](15-mystery-redis-port/README.md) | a Python score worker + Redis (terminal only) | *Nobody set `REDIS_PORT`. Kubernetes did.* | - | 82 MB |
 
-Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. The login for any app that has one is `change-me-123`. All images and sizes are in [IMAGES.md](IMAGES.md).
+Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. Logins: Kanboard (K06, K10) uses the default `admin` / `admin`; the other apps need no login (Adminer in K09 only shows its login form, and there is no database behind it). All images and sizes are in [IMAGES.md](IMAGES.md).
 
 ## How a session runs
 
@@ -34,9 +34,11 @@ Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each 
 4. **Fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
    ```bash
-   kubectl port-forward -n <namespace> --address 0.0.0.0 svc/<service> 92NN:<port>
+   kubectl port-forward -n <namespace> svc/<service> 92NN:<port>
    ```
-   The scenario README prints the exact line (for example K07: `kubectl port-forward -n k-07-slow-start --address 0.0.0.0 svc/showdown 9207:80`). Then open `http://localhost:92NN` on a laptop, or the URL for port `92NN` on a playground (`--address 0.0.0.0` is what lets the playground's proxy reach it). Press **Ctrl+C** in that terminal to stop it. K08, K14 and K15 have no web page: you verify them in the terminal.
+   The scenario README prints the exact line (for example K07: `kubectl port-forward -n k-07-slow-start svc/showdown 9207:80`). Then open `http://localhost:92NN` on a laptop. On a playground, add `--address 0.0.0.0` and open the URL for port `92NN`. Press **Ctrl+C** in that terminal to stop it. K08, K14 and K15 have no web page: you verify them in the terminal.
+
+   **Why the laptop command has no `--address 0.0.0.0`:** without it, `port-forward` listens on `localhost` only. With it, anyone on the same network (venue Wi-Fi) could open your app, and Kanboard's default login is `admin` / `admin`. A playground needs `--address 0.0.0.0` because its URL proxy reaches the app from outside the terminal. Keep `-n <namespace>` right after `port-forward`: `cleanup.sh` finds leftovers by that text.
 6. **Clean up**: `cd .. && ./cleanup.sh`
 
 Every `break.sh` cleans up first, so you can run it again and again. Every script works from any folder.
@@ -48,14 +50,15 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 | kind | Works. The default network add-on of recent kind versions enforces NetworkPolicy, so K13 runs. The default StorageClass is `standard`. |
 | minikube | Works with a default StorageClass (`standard`). A plain `minikube start` may **not enforce NetworkPolicy**, so K13 stops with a clear message: start it with `minikube start --cni=calico` for K13. |
 | Docker Desktop (Kubernetes enabled) | Works. The StorageClass is called `hostpath`. NetworkPolicy is often **not enforced**, so K13 may stop with its message (that is the check working, not a bug). |
-| Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `92NN`. Both enforce NetworkPolicy. |
+| Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `92NN`. Both should enforce NetworkPolicy (K13's `break.sh` checks before it breaks anything). |
+| Windows | Use **WSL2** (Ubuntu) and run everything inside it. Git Bash is not enough: the scripts use `pkill` and `pgrep`, which it lacks. |
 | Play with Docker | **No Kubernetes there.** Use the Docker scenarios instead, or a Kubernetes playground. |
 
 Things to know before you start:
 
 - **Check your cluster first.** `kubectl config current-context` shows which cluster you are about to break. The scenarios only create things in their own `k-NN-...` namespaces, but break the right cluster on purpose.
 - **K10 needs a default StorageClass.** `kubectl get storageclass` must show one marked `(default)`. K10's fix is to stop asking for the missing `fast-ssd` class and use that default.
-- **K10 downloads Kanboard at fix time**, because the board Pod never starts while it is broken. On a cold cluster the fix waits on that download (up to a minute or two): preload it (see the checklist below).
+- **K01, K02 and K10 download their app at fix time**, because the Pod never starts while it is broken (K01, K02: Excalidraw; K10: Kanboard). On a cold cluster the fix waits on that download (the first time it can take up to a minute or two): preload it or run the scenario once before class (see the checklist below).
 - **K13 needs a cluster that enforces NetworkPolicy**, and checks it first (a throwaway `k-13-probe` namespace, deleted straight after). If your cluster ignores policies, it stops with a clear message instead of showing a fake outage.
 - **Scenarios behave the same on 1 node and 3 nodes** (minikube and Docker Desktop are one node; the course's kind config is three).
 
@@ -84,29 +87,29 @@ Stay calm. Nothing here touches anything outside the `k-NN-...` namespaces. In t
 
 Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested **kind only** (3 nodes and 1 node, on macOS arm64); every other cell is still to be ticked by an instructor.
 
-| Scenario | kind | minikube | Docker Desktop | Killercoda | iximiuz |
-|----------|:---:|:---:|:---:|:---:|:---:|
-| K01 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K02 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K03 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K04 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K05 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K06 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K07 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K08 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K09 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K10 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K11 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K12 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K13 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K14 | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K15 | ☐ | ☐ | ☐ | ☐ | ☐ |
+| Scenario | kind | minikube | Docker Desktop | Killercoda | iximiuz | WSL2 |
+|----------|:---:|:---:|:---:|:---:|:---:|:---:|
+| K01 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K02 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K03 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K04 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K05 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K06 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K07 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K08 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K09 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K10 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K11 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K12 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K13 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K14 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K15 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
 - **K07 and K11 timing:** K07's app takes about 20 seconds to wake up and K11's broken release needs a moment to be refused by its readiness check. On a slow or busy node the restarts and the "timed out" moment come a little later than the README says. Wait for the visible symptom before you start explaining.
 - **K08 `OOMKilled` vs `Error`:** the kill is the same, but on some clusters and container runtimes the `STATUS` column shows `Error` instead of `OOMKilled`. Check `kubectl describe pod` (the `Last State` shows the reason and exit code 137) before the class.
-- **K10 StorageClass names:** `standard` on kind and minikube, `hostpath` on Docker Desktop, `local-path` on Killercoda. A default class must exist. K10 also downloads Kanboard at fix time.
+- **K10 StorageClass names:** `standard` on kind and minikube, `hostpath` on Docker Desktop, `local-path` on Killercoda. A default class must exist. K10 also downloads Kanboard at fix time (and K01, K02 download Excalidraw).
 - **K12 and K13 DNS error wording:** the exact message from the failed name lookup (`Name or service not known`, `Temporary failure in name resolution`, ...) differs between images and cluster DNS versions. The idea (the name does not resolve) is the same.
 - **K13 enforcement:** needs a NetworkPolicy-enforcing cluster. Run it on your platform before class. If it stops with its "not enforced" message, switch cluster (minikube: `--cni=calico`) or skip K13.
 

@@ -159,11 +159,13 @@ kubectl logs visitor -n k-04-no-endpoints --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-04-no-endpoints --address 0.0.0.0 svc/tools 9204:80
+kubectl port-forward -n k-04-no-endpoints svc/tools 9204:80
 ```
 ```
-Forwarding from 0.0.0.0:9204 -> 80
+Forwarding from 127.0.0.1:9204 -> 80
+Forwarding from [::1]:9204 -> 80
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9204.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' localhost:9204
@@ -171,7 +173,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9204
 ```
 200
 ```
-Or open http://localhost:9204 in your browser and try a tool, like the token generator (playground: open the URL for port 9204). Press Ctrl+C in the second terminal to stop the port-forward.
+Or open http://localhost:9204 in your browser and try a tool, like the token generator. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **A Service finds Pods by labels.** It sends traffic only to Ready Pods that match *all* of its selector.

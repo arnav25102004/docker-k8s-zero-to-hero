@@ -182,11 +182,13 @@ kubectl logs visitor -n k-09-missing-secret --tail=3
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-09-missing-secret --address 0.0.0.0 svc/adminer 9209:80
+kubectl port-forward -n k-09-missing-secret svc/adminer 9209:80
 ```
 ```
-Forwarding from 0.0.0.0:9209 -> 8080
+Forwarding from 127.0.0.1:9209 -> 8080
+Forwarding from [::1]:9209 -> 8080
 ```
+On a playground, add `--address 0.0.0.0` and open the URL for port 9209.
 Back in the first terminal:
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" localhost:9209
@@ -194,7 +196,7 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:9209
 ```
 200
 ```
-(The port-forward terminal also prints `Handling connection for 9209`. It shows `8080` because the Service's port 80 leads to Adminer's port 8080 inside the Pod.) Or open http://localhost:9209 in your browser: you should see the Adminer login page, with the server field already set to `db` (playground: open the URL for port 9209). There is no database behind it in this demo, so just admire the page. Press Ctrl+C in the second terminal to stop the port-forward.
+(The port-forward terminal also prints `Handling connection for 9209`. It shows `8080` because the Service's port 80 leads to Adminer's port 8080 inside the Pod.) Or open http://localhost:9209 in your browser: you should see the Adminer login page, with the server field already set to `db`. There is no database behind it in this demo, so just admire the page. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways
 - **No logs means it never started.** A container that was never created can't write a log line.
@@ -213,4 +215,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K10](../10-kanboard-pvc-pending/README.md): The task board is waiting for a disk that will never arrive.
+[K10](../10-kanboard-pvc-pending/README.md): The Pod isn't crashing. It isn't even starting. It's waiting for a disk that doesn't exist.

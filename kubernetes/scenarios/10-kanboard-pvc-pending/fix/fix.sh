@@ -26,4 +26,4 @@ wait_for "the disk (PVC) to be Bound" 60 pvc_bound \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "kubectl get pods,pvc -n $NS" \
-  "kubectl port-forward -n $NS --address 0.0.0.0 svc/board 9210:80   (in a second terminal; then open http://localhost:9210)"
+  "kubectl port-forward -n $NS svc/board 9210:80   (in a second terminal; then open http://localhost:9210; on a playground add --address 0.0.0.0 and open the URL for port 9210)"
