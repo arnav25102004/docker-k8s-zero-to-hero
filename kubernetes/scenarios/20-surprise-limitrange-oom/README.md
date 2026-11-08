@@ -2,7 +2,7 @@
 
 *"Nobody set a memory limit. The app still got killed for exceeding it."*
 
-⏱ 12 min · intermediate · Cats vs Dogs voting app (`python:3.12-alpine`, about 19 MB) · memory requests and limits, OOMKilled, reading the live Pod spec (`kubectl get pod -o yaml`), LimitRange
+⏱ 12 min · intermediate · Cats vs Dogs voting app (`python:3.12-alpine`, about 19 MB) · memory requests and limits, OOMKilled, reading the live Pod spec (`kubectl get pod -o yaml`), where unwritten settings come from
 
 ⬇️ First run downloads about 19 MB (Python) plus a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
 
