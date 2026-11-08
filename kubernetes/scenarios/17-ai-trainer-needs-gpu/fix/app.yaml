@@ -1,0 +1,45 @@
+# K17 fix: the same trainer, but the GPU is only a preference (preferred node affinity), not a requirement.
+# No Service: this app has no web page.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trainer
+  namespace: k-17-needs-gpu
+  labels: { app: trainer }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: trainer }
+  template:
+    metadata:
+      labels: { app: trainer }
+    spec:
+      affinity:
+        nodeAffinity:
+          # "Preferred": use a GPU node if one exists, otherwise any node. (A nodeSelector is "required".)
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: accelerator
+                    operator: In
+                    values: ["nvidia-gpu"]
+      containers:
+        - name: trainer
+          image: python:3.12-alpine
+          command: ["python", "-u", "-c"]
+          args:
+            - |
+              import time
+              data = []
+              for epoch in range(1, 7):
+                  print(f"epoch {epoch}/6 ... loading 25 MB", flush=True)
+                  data.append(bytearray(b"x") * (25 * 1024 * 1024))
+                  time.sleep(1)
+              print("✅ model trained", flush=True)
+              # Finished: stay Running instead of exiting, so Kubernetes doesn't restart a job that is done.
+              while True:
+                  time.sleep(3600)
+          resources:
+            requests: { memory: 200Mi }
+            limits: { memory: 256Mi }
