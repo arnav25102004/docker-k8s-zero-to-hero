@@ -11,3 +11,4 @@ All are pinned to an exact tag (or digest) and published for linux/amd64 and lin
 | `corentinth/it-tools:2024.10.22-7ca5933` | about 24 MB | K04 and later IT-Tools scenarios |
 | `kanboard/kanboard:v1.2.57` | about 33 MB | K06 and later Kanboard scenarios |
 | `adminer:5.4.1` | about 46 MB | K09 |
+| `redis:7.4.12-alpine` | about 59 MB on disk | K15 (the real Redis behind Service `redis`) |
