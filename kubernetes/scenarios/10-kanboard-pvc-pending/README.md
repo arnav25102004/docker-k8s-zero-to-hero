@@ -4,7 +4,7 @@
 
 ⏱ 12 min · beginner · Kanboard (`kanboard/kanboard`, about 33 MB) · PersistentVolumeClaim, StorageClass, provisioner, PersistentVolume
 
-⬇️ First run downloads about 33 MB (Kanboard) plus a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
+⬇️ The tiny 4 MB visitor image downloads when you break it. The Kanboard image (about 33 MB) downloads only at fix time, because the board Pod never starts while it is broken. On a cold cluster the fix moment waits on that download (up to a minute or two). Presenters: preload it (`kubernetes/scenarios/preload.sh`, coming) or run the scenario once before class, on good Wi-Fi.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
@@ -121,7 +121,7 @@ Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-Within about twenty seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
+Within about twenty seconds once Kanboard is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```
 ❌ 05:01:06 no answer from http://board
 ❌ 05:01:09 no answer from http://board
@@ -140,7 +140,7 @@ diff ../break/app.yaml app.yaml
 10d9
 <   storageClassName: fast-ssd    # does not exist here
 ```
-One line is gone: with no `storageClassName`, the cluster's default class is used. But you can't just `kubectl apply` that: a PVC's spec is **immutable** (Kubernetes refuses to change the class of an existing PVC). So `fix.sh` deletes the Deployment (a PVC that a Pod uses is protected and would hang in `Terminating`), then deletes the PVC, then applies the corrected file, which creates a new PVC and a new Pod.
+One line of config is gone (plus the header comment): with no `storageClassName`, the cluster's default class is used. But you can't just `kubectl apply` that: a PVC's spec is **immutable** (Kubernetes refuses to change the class of an existing PVC). So `fix.sh` deletes the Deployment (a PVC that a Pod uses is protected and would hang in `Terminating`), then deletes the PVC, then applies the corrected file, which creates a new PVC and a new Pod. If your default class uses WaitForFirstConsumer (as on kind), the new PVC may show `Pending` for a moment: that is normal, it binds as soon as the Pod is scheduled.
 
 By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder,
 ```bash
@@ -162,7 +162,7 @@ pod/visitor                  1/1     Running   0          26s
 NAME                               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
 persistentvolumeclaim/board-data   Bound    pvc-39311f64-1d64-4986-b656-5ed416cdd990   1Gi        RWO            standard       <unset>                 13s
 ```
-(Names, volume ids and ages will differ.) The Pod is `1/1`, and the PVC is **Bound** to a real volume, using the default class. Kanboard keeps its data in that volume; check that its database lives there:
+(Names, volume ids and ages will differ. If you run this very early, the PVC may still say `Pending` until the Pod is scheduled: that is WaitForFirstConsumer, run it again.) The Pod is `1/1`, and the PVC is **Bound** to a real volume, using the default class. Kanboard keeps its data in that volume; check that its database lives there:
 ```bash
 kubectl exec -n k-10-pvc-pending deploy/board -- ls /var/www/app/data
 ```
