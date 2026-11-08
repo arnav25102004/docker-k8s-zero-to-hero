@@ -19,7 +19,7 @@ Think of a hostel mess with one plate per student. Take more than one plate and 
 - A **request** (`requests.memory`) is what the scheduler reserves for you when it picks a node.
 - A **limit** (`limits.memory`) is the fence. Inside it the program keeps asking for memory and gets it, until the fence is full.
 - Then the kernel's **OOM killer** (OOM = Out Of Memory) ends the process with `SIGKILL` (signal 9). A SIGKILL cannot be caught, so the program never prints an error. The exit code is **137 = 128 + 9**.
-- Kubernetes notes it as `OOMKilled` and, because a Deployment wants its Pod running, **restarts** the container, which gets killed again, and again (`CrashLoopBackOff`).
+- Kubernetes notes it as `OOMKilled` and the **kubelet** (the node's agent; the Pod's `restartPolicy` is `Always`) **restarts** the container, which gets killed again, and again (`CrashLoopBackOff`).
 
 ```
  epoch 1 ──▶ epoch 2 ──▶ epoch 3 ──▶ 💥 memory over the 64Mi fence ──▶ SIGKILL (137)
@@ -59,12 +59,12 @@ trainer-85967484bf-nvtmh   0/1     OOMKilled          3 (28s ago)   50s
 (Shortened: this is what you see if you start watching a few seconds after `break.sh`, and it keeps going. Ages and Pod names will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod lives only about 2 seconds each time, `RESTARTS` climbs, and the waits between restarts grow (`CrashLoopBackOff`, as in [K03](../03-showdown-crashloop/README.md)). Nobody typed `kubectl delete`. On some clusters the `STATUS` word is `Error` instead of `OOMKilled`: it is the same kill.
 
 <details><summary>💡 Hint</summary>
-A container that dies by itself usually leaves an error behind. This one left nothing, and exits with the code 137. Exit codes above 128 mean "killed by signal (code - 128)". Which signal is 137 - 128? And what does Kubernetes know about how much memory this container is allowed to use?
+A container that dies by itself usually leaves an error behind. This one left nothing. What could have ended it silently, without a word? And what does Kubernetes know about how much memory this container is allowed to use?
 </details>
 
 **2. Who ended it?** `describe` records the last state of the container that died.
 ```bash
-kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -A5 'Last State'
+kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -A4 'Last State'
 ```
 ```
     Last State:     Terminated
@@ -73,7 +73,7 @@ kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -A5 'Last State'
       Started:      Sun, 08 Nov 2026 09:58:50 +0530
       Finished:     Sun, 08 Nov 2026 09:58:52 +0530
 ```
-(Times will differ.) There is the answer in Kubernetes' own words: `Reason: OOMKilled`, `Exit Code: 137`. The container ran for only 2 seconds (`Started` to `Finished`). On a few setups the reason is shown as `Error` instead of `OOMKilled` (the kill is recorded a moment too early to name its cause); the exit code **137** is the constant clue.
+(Times will differ.) There is the answer in Kubernetes' own words: `Reason: OOMKilled`, `Exit Code: 137`. The container ran for only 2 seconds (`Started` to `Finished`). On a few setups the reason is shown as `Error` instead of `OOMKilled` (a runtime race on some setups); the exit code **137** is the constant clue.
 
 **3. What did the program say before it died?** Read the last words of the container that was killed.
 ```bash
@@ -88,7 +88,7 @@ The log stops in the middle of epoch 3, with no error message. A program that cr
 
 **4. What fence did we give it?** Look at the memory settings in the Deployment.
 ```bash
-kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A5 ' resources:'
+kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A4 ' resources:'
 ```
 ```
         resources:
@@ -102,7 +102,7 @@ The limit is **64Mi** (about 67 MB). Does the program need more than that? Each 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The training needs about **150 MB** (6 epochs x 25 MB, plus about 10 MB for Python itself); the container's memory limit is **64Mi** (about 67 MB). When epoch 3 pushed memory past the fence, the kernel's OOM killer sent SIGKILL. Python never saw it coming, so there was no error in the logs. Kubernetes recorded `OOMKilled`, exit code 137, and restarted the container, which hit the same wall at the same place.
+The training needs about **150 MB** (6 epochs x 25 MB, plus about 10 MB for Python itself); the container's memory limit is **64Mi** (about 67 MB). When epoch 3 pushed memory past the fence, the kernel's OOM killer sent SIGKILL. Python never saw it coming, so there was no error in the logs. Kubernetes recorded `OOMKilled`, exit code 137, and the kubelet restarted the container, which hit the same wall at the same place.
 
 Calibration (roughly, from about 10 MB for a bare Python 3.12 process plus 25 MB per epoch): after epoch 2 it holds about 60 MB, which still fits; epoch 3 needs about 85 MB and cannot. Allocation (150 MB) minus limit (about 67 MB) leaves a big overshoot, so the kill is certain, and the log ended at epoch 3 in every one of 5 consecutive runs of `break.sh` on the test cluster (kind), and on every restart.
 </details>
@@ -128,7 +128,7 @@ diff ../break/app.yaml app.yaml
 >             requests: { memory: 200Mi }
 >             limits: { memory: 256Mi }
 ```
-The limit goes from 64Mi to **256Mi**: the real need (about 160 MB) plus headroom. The request is raised to 200Mi so the scheduler reserves what the program really uses. When the model is finished the script simply waits (`sleep`), so the Pod stays `Running` instead of exiting and being restarted.
+The limit goes from 64Mi to **256Mi**: the real need (150 MB of data + about 10 MB for Python) plus headroom. The request is raised to 200Mi so the scheduler reserves what the program really uses. When the model is finished the script simply waits (`sleep`), so the Pod stays `Running` instead of exiting and being restarted.
 
 By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
@@ -160,7 +160,7 @@ epoch 6/6 ... loading 25 MB
 ```
 Past epoch 3 and all the way to `model trained`. And the new limit is in place:
 ```bash
-kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A5 ' resources:'
+kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A4 ' resources:'
 ```
 ```
         resources:
