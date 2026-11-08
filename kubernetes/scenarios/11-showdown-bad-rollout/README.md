@@ -40,9 +40,9 @@ What the room should see: the script releases v1 and waits for all 3 Pods, then 
 kubectl logs -f visitor -n k-11-bad-rollout
 ```
 ```
-✅ 05:10:03 v1.0.0
-✅ 05:10:05 v1.0.0
-✅ 05:10:07 v1.0.0
+✅ 09:02:53 v1.0.0
+✅ 09:02:55 v1.0.0
+✅ 09:02:57 v1.0.0
 ```
 (Press Ctrl+C to stop.) It stays green and on **v1.0.0**: that is the point. The release is broken, and the users have not noticed.
 
@@ -55,11 +55,11 @@ kubectl get pods -n k-11-bad-rollout
 ```
 ```
 NAME                        READY   STATUS             RESTARTS     AGE
-showdown-85c596fbc7-6nx2w   1/1     Running            0            27s
-showdown-85c596fbc7-7c9jw   1/1     Running            0            27s
-showdown-85c596fbc7-8fwhk   1/1     Running            0            27s
-showdown-86577586cd-qjqfw   0/1     CrashLoopBackOff   2 (7s ago)   25s
-visitor                     1/1     Running            0            27s
+showdown-85c596fbc7-7h5dj   1/1     Running            0            22s
+showdown-85c596fbc7-h4xp5   1/1     Running            0            22s
+showdown-85c596fbc7-hdms8   1/1     Running            0            22s
+showdown-86577586cd-wt9d6   0/1     CrashLoopBackOff   2 (3s ago)   19s
+visitor                     1/1     Running            0            22s
 ```
 (Ages and Pod names will differ.) Two Pod-name groups: three Pods share the prefix `showdown-85c596fbc7` and are Ready, and one Pod, `showdown-86577586cd`, is crash-looping. Three good Pods are serving, so no user is down. The odd one out is the new one.
 
@@ -67,7 +67,7 @@ visitor                     1/1     Running            0            27s
 Why did Kubernetes leave the 3 healthy Pods alone, and why is there only one new Pod instead of three? Which setting makes it keep the old ones until a new one is Ready? And once you know which Pod is the broken one: what did it say before it died, and what is different about the new release?
 </details>
 
-**2. Why hasn't the release finished?** Ask the Deployment what the rollout is doing. The `--timeout=5s` makes it give up quickly instead of waiting for ever.
+**2. Why hasn't the release finished?** Ask the Deployment what the rollout is doing. The `--timeout=5s` makes it give up quickly instead of waiting (up to `progressDeadlineSeconds`, 10 minutes by default, after which it reports a deadline error).
 ```bash
 kubectl rollout status deployment/showdown -n k-11-bad-rollout --timeout=5s
 ```
@@ -84,7 +84,7 @@ kubectl get rs -n k-11-bad-rollout
 ```
 NAME                  DESIRED   CURRENT   READY   AGE
 showdown-85c596fbc7   3         3         3       27s
-showdown-86577586cd   1         1         0       25s
+showdown-86577586cd   1         1         0       24s
 ```
 The old ReplicaSet (`85c596fbc7`) has 3 of 3 Ready. The new one (`86577586cd`) wants 1 and has 0 Ready. The rollout will not remove an old Pod until a new one is Ready.
 
@@ -102,7 +102,7 @@ Revision 2 is the Friday release. The CHANGE-CAUSE column comes from the `kubern
 
 **5. How did the new Pod die?** Use the name of the crashing Pod from step 1 (the one with `CrashLoopBackOff`; yours will differ).
 ```bash
-kubectl logs showdown-86577586cd-qjqfw -n k-11-bad-rollout --previous
+kubectl logs showdown-86577586cd-wt9d6 -n k-11-bad-rollout --previous
 ```
 ```
 Traceback (most recent call last):
@@ -135,7 +135,7 @@ kubectl rollout history deployment/showdown -n k-11-bad-rollout --revision=1 | g
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-Release v2 set `PORT: "eighty"`, so every v2 Pod crashes at startup and never passes its readiness probe. Because the Deployment uses `maxUnavailable: 0`, Kubernetes refuses to remove any Ready v1 Pod until a v2 Pod is Ready, and with `maxSurge: 1` it only ever starts one extra. So 3 v1 Pods keep serving, 1 v2 Pod crash-loops, and the rollout waits for ever. The users are fine; only the release is stuck.
+Release v2 set `PORT: "eighty"`, so every v2 Pod crashes at startup and never passes its readiness probe. Because the Deployment uses `maxUnavailable: 0`, Kubernetes refuses to remove any Ready v1 Pod until a v2 Pod is Ready, and with `maxSurge: 1` it only ever starts one extra. So 3 v1 Pods keep serving, 1 v2 Pod crash-loops, and the rollout waits (up to `progressDeadlineSeconds`, 10 minutes by default, then it reports a deadline error). The users are fine; only the release is stuck.
 </details>
 
 ## 🔧 Fix it
@@ -159,6 +159,7 @@ kubectl rollout undo deployment/showdown -n k-11-bad-rollout
 kubectl rollout status deployment/showdown -n k-11-bad-rollout
 ```
 ```
+deployment.apps/showdown rolled back
 deployment "showdown" successfully rolled out
 ```
 
@@ -178,19 +179,19 @@ kubectl get pods -n k-11-bad-rollout
 ```
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
-showdown-85c596fbc7-82wzf   1/1     Running   0          35s
-showdown-85c596fbc7-bqq6j   1/1     Running   0          35s
-showdown-85c596fbc7-gfdnv   1/1     Running   0          35s
-visitor                     1/1     Running   0          35s
+showdown-85c596fbc7-7h5dj   1/1     Running   0          33s
+showdown-85c596fbc7-h4xp5   1/1     Running   0          33s
+showdown-85c596fbc7-hdms8   1/1     Running   0          33s
+visitor                     1/1     Running   0          33s
 ```
-(Ages and Pod names will differ.) All 3 Ready, and they are the *same* Pods as before: look at their age and name. The rollback didn't even restart them. The visitor says the same thing:
+(Ages and Pod names will differ.) All 3 Ready, and they are the *same* Pods as in Investigate step 1 (`7h5dj`, `h4xp5`, `hdms8`): same names, ages that kept counting up. (Your names will differ, but they will match the names you saw before the fix.) The rollback didn't even restart them. The visitor says the same thing:
 ```bash
 kubectl logs visitor -n k-11-bad-rollout --tail=3
 ```
 ```
-✅ 05:10:25 v1.0.0
-✅ 05:10:27 v1.0.0
-✅ 05:10:29 v1.0.0
+✅ 09:03:03 v1.0.0
+✅ 09:03:05 v1.0.0
+✅ 09:03:07 v1.0.0
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
