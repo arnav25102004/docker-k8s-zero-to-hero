@@ -16,7 +16,8 @@ By default, a container in Kubernetes runs as whatever user its image says, and 
 
 - `securityContext.runAsNonRoot: true` is a **guard** on the Pod: "refuse to start any container that would run as user 0 (root)".
 - The guard **checks, it does not change**. It does not switch your container to a different user; it only says no. Kubernetes looks at the user the image declares (or the `runAsUser` you set). If that is root, or if it cannot tell the user is a number, the container is never created.
-- To pass the guard, the *image* must be built for a normal user (most often a numeric non-zero user), and everything that user touches (files, ports) must suit it. Normal users cannot listen on ports below 1024.
+- To pass the guard, the *image* must be built for a normal user (most often a numeric non-zero user), and everything that user touches (files, ports) must suit it. Traditionally, normal users can't use ports below 1024 (some platforms relax this), and the unprivileged image uses 8080 anyway.
+- `securityContext` can be set on the Pod (as here) or on a single container; the container's setting overrides the Pod-level one.
 - Analogy: the guard is a bouncer who refuses anyone wearing a "master key" badge. The bouncer does not take the badge off for you. You must bring someone who never carried one.
 
 ```
@@ -54,11 +55,11 @@ kubectl get pods -n k-21-nonroot
 ```
 ```
 NAME                     READY   STATUS                       RESTARTS   AGE
-board-85fd494b8f-hzbwq   0/1     CreateContainerConfigError   0          13s
-board-85fd494b8f-r6cps   0/1     CreateContainerConfigError   0          13s
+board-85fd494b8f-2bhcm   0/1     CreateContainerConfigError   0          14s
+board-85fd494b8f-rmkhl   0/1     CreateContainerConfigError   0          14s
 visitor                  1/1     Running                      0          13s
 ```
-(Ages and Pod names will differ. Right after `break.sh`, one Pod may still say `ContainerCreating` for a second.) The `visitor` runs, but both `board` Pods say `CreateContainerConfigError`, with `0` restarts: the container was never even created. That is different from a crash: nothing ran and died.
+(Ages and Pod names will differ.) The `visitor` runs, but both `board` Pods say `CreateContainerConfigError`, with `0` restarts: the container was never even created. That is different from a crash: nothing ran and died.
 
 <details><summary>💡 Hint</summary>
 The image is fine, it was pulled (or was already there), and the Pod was given a node. Something about the container's <em>configuration</em> made the kubelet refuse to create it. Ask the Pod for its last words, then look at what the Deployment says about how the Pod must behave. What changed yesterday?
@@ -66,15 +67,15 @@ The image is fine, it was pulled (or was already there), and the Pod was given a
 
 **2. What did the kubelet say?** The kubelet (the node's agent) leaves a note on the Pod when it refuses. Use one of your own Pod names from step 1:
 ```bash
-kubectl describe pod board-85fd494b8f-hzbwq -n k-21-nonroot | grep -A8 '^Events'
+kubectl describe pod board-85fd494b8f-2bhcm -n k-21-nonroot | grep -A8 '^Events'
 ```
 ```
 Events:
-  Type     Reason     Age              From               Message
-  ----     ------     ----             ----               -------
-  Normal   Scheduled  1s               default-scheduler  Successfully assigned k-21-nonroot/board-85fd494b8f-hzbwq to z2h-test-worker2
-  Normal   Pulled     0s (x2 over 1s)  kubelet            spec.containers{board}: Container image "nginx:1.27.5-alpine" already present on machine
-  Warning  Failed     0s (x2 over 1s)  kubelet            spec.containers{board}: Error: container has runAsNonRoot and image will run as root (pod: "board-85fd494b8f-hzbwq_k-21-nonroot(715b9011-f439-40a2-81a2-298831fc20ba)", container: board)
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  13s                default-scheduler  Successfully assigned k-21-nonroot/board-85fd494b8f-2bhcm to z2h-test-worker2
+  Normal   Pulled     13s (x2 over 13s)  kubelet            spec.containers{board}: Container image "nginx:1.27.5-alpine" already present on machine
+  Warning  Failed     13s (x2 over 13s)  kubelet            spec.containers{board}: Error: container has runAsNonRoot and image will run as root (pod: "board-85fd494b8f-2bhcm_k-21-nonroot(e6f306e6-7a44-43f0-8280-5325532dc186)", container: board)
 ```
 (shortened; names, ages and the node will differ. The exact wording is Kubernetes-version dependent: older and newer versions word the first lines a little differently, so look for the `Failed` line that mentions `runAsNonRoot`.) The Pod was scheduled, the image arrived, and then the kubelet refused: the Pod demands "non-root", but this image would run as root.
 
@@ -85,7 +86,7 @@ kubectl get deploy board -n k-21-nonroot -o jsonpath='{.spec.template.spec.secur
 ```
 {"runAsNonRoot":true}
 ```
-There is the guard: the Pod must not run as root. And the image? The official `nginx` image declares no other user, so its main process starts as root (it needs root to listen on port 80 and to write into its own root-owned folders). The guard and the image disagree, so the container is never created.
+There is the guard: the Pod must not run as root. And the image? The official `nginx` image declares no other user, so its main process starts as root (it writes into root-owned folders such as `/var/cache/nginx`, and listens on port 80). The guard and the image disagree, so the container is never created.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -104,9 +105,9 @@ cd ../fix && ./fix.sh
 ```
 Within about twenty seconds once the new image is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```
-❌ 20:02:55 no answer from http://board
-✅ 20:02:57 HTTP 200
-✅ 20:02:59 HTTP 200
+❌ 20:07:47 no answer from http://board
+✅ 20:07:50 HTTP 200
+✅ 20:07:52 HTTP 200
 ```
 (shortened.) What changed:
 ```bash
@@ -118,29 +119,27 @@ diff ../break/app.yaml app.yaml
 < # The security team rolled out a new policy yesterday; this Deployment was updated to follow it.
 ---
 > # K21 fix: the same notice board and the same policy, but on an image built to run as a normal user.
-18c17
-<       # Added by the security team.
----
->       # Added by the security team. Unchanged: the policy stays.
-23c22,23
+17a17
+>       # Unchanged: the policy stays.
+22c22,23
 <           image: nginx:1.27.5-alpine
 ---
->           # nginx-unprivileged runs as user 101 and listens on 8080 (a normal user may not use ports below 1024).
+>           # nginx-unprivileged runs as user 101 and listens on 8080 instead of 80.
 >           image: nginxinc/nginx-unprivileged:1.27.5-alpine
-25c25
+24c25
 <             - containerPort: 80
 ---
 >             - containerPort: 8080
-29c29
+28c29
 <               port: 80
 ---
 >               port: 8080
-48c48
+47c48
 <       targetPort: 80
 ---
 >       targetPort: 8080
 ```
-Three things moved together: the **image** (built to run as user 101), the **container port** (8080, because a normal user may not use ports below 1024) and the Service's **targetPort** (so traffic still reaches the right port; the Service itself still answers on 80). The `securityContext` was not touched. The page is mounted at the same path, `/usr/share/nginx/html`, in both images.
+Three things moved together: the **image** (built to run as user 101), the **container port** (8080: traditionally normal users can't use ports below 1024, though some platforms relax this, and this image uses 8080 anyway) and the Service's **targetPort** (so traffic still reaches the right port; the Service itself still answers on 80). The `securityContext` was not touched. The page is mounted at the same path, `/usr/share/nginx/html`, in both images.
 
 By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
@@ -149,7 +148,7 @@ kubectl apply -f app.yaml
 
 **Why not just delete `runAsNonRoot`?** Because it would work, and that is the trap. The board would come up in seconds, and you would have quietly switched off the security team's rule for this app, and you would be the person who did it. A guard that is removed whenever it is inconvenient is not a guard. The policy was right: running a web server as root gives an attacker far more than they need. The thing that did not fit was the image, so the image is what we change.
 
-**Why not set `runAsUser: 101` on the original image?** It is tempting, and it passes the guard, but the plain `nginx` image was built for root. It wants to write its PID file and caches into root-owned folders and to listen on port 80, which a normal user is not allowed to do. The Pod would get past the guard and then crash with permission errors, and you would patch that with more settings, one fragile fix at a time. (That path exists, and is sometimes the only option for an image you cannot replace, but you must then fix every path and port yourself.) An image built for a normal user does all of this by design.
+**Why not set `runAsUser: 101` on the original image?** It is tempting, and it passes the guard, but the plain `nginx` image was built for root. The reason that is always true: it wants to write into root-owned folders (such as `/var/cache/nginx` and `/var/run`), and user 101 is not allowed to. On top of that it listens on port 80, which traditionally a normal user may not do (some platforms relax this). The Pod would get past the guard and then crash with permission errors, and you would patch that with more settings, one fragile fix at a time. (That path exists, and is sometimes the only option for an image you cannot replace, but you must then fix every path and port yourself.) An image built for a normal user does all of this by design.
 
 ## ✅ Verify it yourself
 ```bash
@@ -157,8 +156,8 @@ kubectl get pods -n k-21-nonroot
 ```
 ```
 NAME                     READY   STATUS    RESTARTS   AGE
-board-5695884889-rh282   1/1     Running   0          5s
-board-5695884889-s6mfs   1/1     Running   0          7s
+board-5695884889-9gxfd   1/1     Running   0          5s
+board-5695884889-n6cjg   1/1     Running   0          6s
 visitor                  1/1     Running   0          20s
 ```
 (Names and ages will differ.) Both board Pods are `Running`. Is the guard still on? And who is the board really running as?
@@ -175,9 +174,9 @@ The rule is still there, and the board runs as user 101. The visitor's log is gr
 kubectl logs visitor -n k-21-nonroot --tail=3
 ```
 ```
-✅ 20:02:57 HTTP 200
-✅ 20:02:59 HTTP 200
-✅ 20:03:01 HTTP 200
+✅ 20:07:50 HTTP 200
+✅ 20:07:52 HTTP 200
+✅ 20:07:54 HTTP 200
 ```
 Now look at the board yourself. In a **second terminal** (leave it running):
 ```bash
@@ -200,7 +199,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9221
 ## 🎯 Key takeaways
 - **`runAsNonRoot: true` is a guard, not a switch.** It refuses root; it never changes the user for you.
 - **`CreateContainerConfigError` means the container was never created.** `kubectl describe pod` → Events says why.
-- **Normal users cannot use ports below 1024 or write to root-owned folders.** "Unprivileged" images move to port 8080 and use writable paths for exactly this reason.
+- **Normal users can't write to root-owned folders, and traditionally can't use ports below 1024** (some platforms relax that). "Unprivileged" images use port 8080 and user-writable paths for exactly this reason.
 - Fix the side that is wrong: the image does not fit the rule, so change the image. Do not delete the rule, and do not paper over it with `runAsUser` on an image built for root.
 
 ## 💎 Lifelong lesson

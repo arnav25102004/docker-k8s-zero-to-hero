@@ -15,7 +15,6 @@ spec:
       labels:
         app: board
     spec:
-      # Added by the security team.
       securityContext:
         runAsNonRoot: true
       containers:

@@ -14,12 +14,12 @@ spec:
       labels:
         app: board
     spec:
-      # Added by the security team. Unchanged: the policy stays.
+      # Unchanged: the policy stays.
       securityContext:
         runAsNonRoot: true
       containers:
         - name: board
-          # nginx-unprivileged runs as user 101 and listens on 8080 (a normal user may not use ports below 1024).
+          # nginx-unprivileged runs as user 101 and listens on 8080 instead of 80.
           image: nginxinc/nginx-unprivileged:1.27.5-alpine
           ports:
             - containerPort: 8080
