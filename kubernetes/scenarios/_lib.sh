@@ -42,13 +42,21 @@ delete_ns() {
 # fresh_ns NS...: delete (and wait for) then create each namespace, labelled
 # z2h.scenario=<kNN> taken from the k-NN- prefix.
 fresh_ns() {
-  local ns id
+  local ns id i
   for ns in "$@"; do
     delete_ns "$ns"
     kubectl create namespace "$ns" >/dev/null || return 1
     id="k${ns#k-}"
     id="${id%%-*}"
     kubectl label namespace "$ns" "z2h.scenario=$id" --overwrite >/dev/null || return 1
+    # The "default" ServiceAccount is created a moment later by a controller; Pods created
+    # straight away would be refused ("serviceaccount default not found"). Wait for it.
+    i=0
+    while ! kubectl get serviceaccount default -n "$ns" >/dev/null 2>&1; do
+      i=$((i + 1))
+      [ "$i" -gt 30 ] && return 1
+      sleep 1
+    done
   done
 }
 

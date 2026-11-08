@@ -19,7 +19,7 @@ TMPD="$(mktemp -d)"
 cleanup_all() {
   [ -n "$PF_PID" ] && kill "$PF_PID" >/dev/null 2>&1
   pkill -f "port-forward -n k-98-selftest" >/dev/null 2>&1
-  for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest; do
+  for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest k-95-selftest; do
     kubectl delete namespace "$n" --ignore-not-found --wait=false >/dev/null 2>&1
   done
   rm -rf "$TMPD"
@@ -145,6 +145,14 @@ test_pod_reason() {
   return $f
 }
 
+test_fresh_ns_has_default_sa() {
+  local f=0
+  bash -c "source '$LIB'; fresh_ns k-95-selftest" >/dev/null 2>&1
+  check "default ServiceAccount exists right after fresh_ns" kubectl get sa default -n k-95-selftest || f=1
+  bash -c "source '$LIB'; delete_ns k-95-selftest" >/dev/null 2>&1
+  return $f
+}
+
 # Builds a dummy scenario in a temp dir. $1 = expected first assert value (ok/bad).
 make_dummy_scenario() { # DIR
   local d="$1"
@@ -205,7 +213,7 @@ test_lib_sourcing_is_quiet() {
 
 for t in test_no_cluster_message test_refuses_foreign_context test_lib_sourcing_is_quiet \
          test_cleanup_waits_for_namespace test_cleanup_stops_port_forward \
-         test_showdown_configmap test_pod_reason \
+         test_showdown_configmap test_pod_reason test_fresh_ns_has_default_sa \
          test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert; do
   run_test "$t"
 done

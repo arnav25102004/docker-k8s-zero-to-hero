@@ -22,7 +22,7 @@
 | K12 | [Same cluster, same name, "never heard of it"](12-showdown-dns-namespaces/README.md) | Cats vs Dogs + Redis | *The Redis is running. The app is running. And the app swears Redis does not exist.* | `9212` | 82 MB |
 | K13 | [Security hardened the network. Now nothing can find anything.](13-lockdown-blocks-dns/README.md) | Cats vs Dogs + Redis | *Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.* | `9213` | 82 MB |
 | K14 | [The bot has an ID card, but the door stays shut](14-leaderboard-bot-forbidden/README.md) | a "leaderboard bot" (terminal only) | *The bot has a valid ID card. The API still says: not allowed.* | - | 16 MB |
-| K15 | [The mystery variable](15-mystery-redis-port/README.md) | a Python score worker + Redis (terminal only) | *Nobody set `REDIS_PORT`. Kubernetes did.* | - | 78 MB |
+| K15 | [The mystery variable](15-mystery-redis-port/README.md) | a Python score worker + Redis (terminal only) | *Nobody set `REDIS_PORT`. Kubernetes did.* | - | 82 MB |
 
 Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. The login for any app that has one is `change-me-123`. All images and sizes are in [IMAGES.md](IMAGES.md).
 
@@ -45,7 +45,7 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 
 | Where | What to know |
 |-------|--------------|
-| kind | Works. kind's default network add-on enforces NetworkPolicy, so K13 runs. The default StorageClass is `standard`. |
+| kind | Works. The default network add-on of recent kind versions enforces NetworkPolicy, so K13 runs. The default StorageClass is `standard`. |
 | minikube | Works with a default StorageClass (`standard`). A plain `minikube start` may **not enforce NetworkPolicy**, so K13 stops with a clear message: start it with `minikube start --cni=calico` for K13. |
 | Docker Desktop (Kubernetes enabled) | Works. The StorageClass is called `hostpath`. NetworkPolicy is often **not enforced**, so K13 may stop with its message (that is the check working, not a bug). |
 | Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `92NN`. Both enforce NetworkPolicy. |
@@ -76,7 +76,7 @@ Stay calm. Nothing here touches anything outside the `k-NN-...` namespaces. In t
 ## Instructor preload checklist
 
 - [ ] **Check which cluster you are on:** `kubectl config current-context`. The preload loads images into the cluster of the **current** context, so make sure it is the demo cluster.
-- [ ] **The day before**, on good Wi-Fi: `./kubernetes/scenarios/preload.sh`. It pulls every image in [IMAGES.md](IMAGES.md) (about 240 MB) with Docker, and prints ✅/❌ per image and a total. If the current context is `kind-<name>` it also runs `kind load docker-image` into that cluster, and for `minikube` it runs `minikube image load`. Other clusters (Docker Desktop, Killercoda, iximiuz) download images when a Pod first starts, so run each scenario once there instead.
+- [ ] **The day before**, on good Wi-Fi: `./kubernetes/scenarios/preload.sh`. It pulls every image in [IMAGES.md](IMAGES.md) (about 240 MB download) with Docker, and prints ✅/❌ per image and a total. If the current context is `kind-<name>` it also runs `kind load docker-image` into that cluster, and for `minikube` it runs `minikube image load`. Other clusters (Docker Desktop, Killercoda, iximiuz) download images when a Pod first starts, so run each scenario once there instead.
 - [ ] **Then run every scenario once** (break, fix, cleanup), so you have seen each output on your own machine.
 - [ ] On the morning: `kubectl get ns | grep '^k-'` prints nothing (or run `./labs.sh k8s clean`), and no leftover `kubectl port-forward` is running.
 
