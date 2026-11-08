@@ -1,0 +1,9 @@
+# K23 break (2/4): the page settings. The design team switches dark mode on right after the first
+# deploy (break.sh does that for you).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-settings
+  namespace: k-23-dark-mode
+data:
+  THEME: "light"

@@ -1,0 +1,24 @@
+# K23 break (4/4): a small visitor that asks the page for its theme every 2 seconds.
+# The design team wants dark: a ✅ means the page agrees.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-23-dark-mode
+spec:
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            t=$(wget -q -T 2 -O - http://theme/theme 2>/dev/null | tr -d '\r\n')
+            if [ "$t" = "dark" ]; then
+              echo "✅ $(date +%T) the site is dark"
+            else
+              echo "❌ $(date +%T) the site is ${t:-not answering}, the design team wants dark"
+            fi
+            sleep 2
+          done
