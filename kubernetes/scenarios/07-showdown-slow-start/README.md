@@ -1,6 +1,6 @@
 # K07 · The impatient guard
 
-*A perfectly healthy app keeps getting killed, every 10 seconds.*
+*A perfectly healthy app keeps getting killed, again and again, every few seconds.*
 
 ⏱ 10 min · beginner · Cats vs Dogs voting app (`python:3.12-alpine`, about 19 MB) · liveness probe, startup probe, slow starters
 
@@ -65,7 +65,7 @@ showdown-976689b99-z7b86   0/1     Running             4 (1s ago)   41s
 showdown-976689b99-z7b86   0/1     CrashLoopBackOff    4 (1s ago)   46s
 showdown-976689b99-z7b86   0/1     Running             5 (50s ago)  95s
 ```
-(Shortened: it keeps going. Ages, Pod names and exact timings will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod is `Running` but never `1/1`, and `RESTARTS` climbs: the first restart comes after only about 6 seconds, the next about 5 seconds later. The kubelet **backs off** between restarts, so the waits grow (about 10 s at first, then longer, doubling up to 5 minutes) and `CrashLoopBackOff` appears in between, as in [K03](../03-showdown-crashloop/README.md). Nobody typed `kubectl delete`: something is killing it.
+(Shortened: it keeps going. Ages, Pod names and exact timings will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod is `Running` but never `1/1`, and `RESTARTS` climbs: the first restart comes after only about 6 seconds, the next about 5 seconds later. The kubelet **backs off** between restarts, so the waits between restarts grow (a few seconds at first, then longer and longer, up to 5 minutes) and `CrashLoopBackOff` appears in between, as in [K03](../03-showdown-crashloop/README.md). Nobody typed `kubectl delete`: something is killing it.
 
 <details><summary>💡 Hint</summary>
 Is the app crashing, or is somebody killing it? Which part of Kubernetes is allowed to kill a container, and what rule does it use? Compare the app's start-up time with how long Kubernetes waits before it first checks.

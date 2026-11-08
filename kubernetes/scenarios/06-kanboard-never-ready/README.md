@@ -210,4 +210,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K07](../07-showdown-slow-start/README.md): A perfectly healthy app keeps getting killed, every 10 seconds.
+[K07](../07-showdown-slow-start/README.md): A perfectly healthy app keeps getting killed, again and again, every few seconds.
