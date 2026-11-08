@@ -18,7 +18,7 @@ Every container can say two things about memory:
 
 A limit is a hard wall, not a polite warning, and the container gets no chance to log "I ran out". Think of a hotel room with a fixed number of beds: the 6th guest is not asked nicely to leave, the door is simply shut.
 
-This app is honest about its appetite. On its own it needs about 16 MiB. In this demo, its start command also loads a "vote history" into memory before the web server starts: 40 MiB of filler, standing in for the cache or dataset a real app would load. (We measured: plain `python:3.12-alpine` running this app idles at about 16 MiB, so we add that load on purpose, and the YAML says so in a comment.) With that load the whole Pod needs roughly 56 MiB.
+The app itself needs about 16 MiB. In this demo, its start command also loads a "vote history" into memory before the web server starts: 40 MiB of filler, standing in for the cache or dataset a real app would load. (We measured: plain `python:3.12-alpine` running this app idles at about 16 MiB, so we add that load on purpose, and the YAML says so in a comment.) With that load the whole Pod needs roughly 56 MiB (about 16 MiB plus the demo's 40 MiB preload).
 
 ## 🏢 Where you'll meet this at work
 - **Shared clusters with guard rails:** platform teams give every namespace sensible defaults so one careless Pod cannot eat a node (platform team, SRE).
@@ -29,7 +29,7 @@ This app is honest about its appetite. On its own it needs about 16 MiB. In this
 ```bash
 cd break && ./break.sh
 ```
-What the room should see: the script deploys the app (2 replicas) and a small `visitor` Pod, waits until Kubernetes has killed the app, and stops. The visitor asks the app for `/healthz` every 2 seconds:
+What the room should see: the script deploys the app (2 replicas) and a small `visitor` Pod, waits until the app has started crashing, and stops. The visitor asks the app for `/healthz` every 2 seconds:
 ```bash
 kubectl logs -f visitor -n k-20-limitrange
 ```
@@ -53,7 +53,7 @@ showdown-754579769b-frtw5   0/1     CrashLoopBackOff   2 (8s ago)   23s
 showdown-754579769b-jg5cl   0/1     CrashLoopBackOff   2 (6s ago)   23s
 visitor                     1/1     Running            0            23s
 ```
-(Ages and Pod names will differ.) Both app Pods restart again and again and are never Ready, so the Service has nobody to send visitors to. The visitor itself is fine.
+(Ages and Pod names will differ, and STATUS may read `OOMKilled` or `CrashLoopBackOff` depending on the moment you look.) Both app Pods restart again and again and are never Ready, so the Service has nobody to send visitors to. The visitor itself is fine.
 
 <details><summary>💡 Hint</summary>
 Why did the container die: did the app crash, or was it killed? Then a stranger question: look at what the Pod's spec says about memory, and compare it with what is written in the Deployment YAML you applied. Are they the same? If not, who wrote the difference?
@@ -80,9 +80,9 @@ kubectl describe pod showdown-754579769b-frtw5 -n k-20-limitrange | grep -A8 "La
 ```bash
 kubectl logs showdown-754579769b-frtw5 -n k-20-limitrange --previous
 ```
-```
-```
-Nothing at all. An OOM kill is not an error inside the app: the kernel ends the process instantly, so the app never gets to print anything. That silence is itself a clue.
+(no output)
+
+Nothing at all. An OOM kill is not an error message from the app: the kernel ends the process instantly, so the app never gets to print anything. (A real app may have logged some startup lines before it died. Here it is silent because the preload runs first.) That silence is itself a clue.
 
 **4. What did *we* write about memory?** Look at the Deployment's own template.
 ```bash
@@ -102,13 +102,12 @@ kubectl get pod showdown-754579769b-frtw5 -n k-20-limitrange -o jsonpath='{.spec
 ```
 There it is: a `limits.memory` of 32Mi and a request of 16Mi, **which nobody wrote**. Something added them between our YAML and the running Pod. Look at the Pod's metadata for a signature:
 ```bash
-kubectl get pod showdown-754579769b-frtw5 -n k-20-limitrange -o yaml | sed -n 4,7p
+kubectl get pod showdown-754579769b-frtw5 -n k-20-limitrange -o yaml | grep -A2 limit-ranger
 ```
 ```
-  annotations:
     kubernetes.io/limit-ranger: 'LimitRanger plugin set: memory request for container
       showdown; memory limit for container showdown'
-  creationTimestamp: "2026-11-08T19:54:36Z"
+  creationTimestamp: "2026-11-08T19:59:34Z"
 ```
 Kubernetes left a note: a "LimitRanger plugin" set the memory request and limit for our container. Where does it get its numbers from?
 
@@ -139,12 +138,12 @@ kubectl get pod visitor -n k-20-limitrange -o jsonpath='{.spec.containers[0].res
 ```
 {"limits":{"memory":"32Mi"},"requests":{"memory":"16Mi"}}
 ```
-The visitor got the same defaults. Busybox needs only a few MiB, so it is perfectly happy, and so are the short-lived `curlimages/curl` Pods you may run to test (also well under 32Mi). Only our app, which needs about 56 MiB, is too big.
+The visitor got the same defaults. Busybox needs only a few MiB, so it is perfectly happy, and so are the short-lived `curlimages/curl` Pods you may run to test (also well under 32Mi). Only our app (about 16 MiB plus the demo's 40 MiB preload) is too big.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The namespace has a **LimitRange** that gives every container without its own `resources` a default memory request of 16Mi and a default limit of 32Mi. Our Deployment sets no `resources`, so the API server quietly filled in 32Mi when it created each Pod. The app needs about 56 MiB at start, so the kernel kills it the moment it crosses 32Mi, over and over (CrashLoopBackOff). Nobody wrote the limit in the YAML, and nothing in the YAML showed it: it only appears in the Pod that actually ran.
+The namespace has a **LimitRange** that gives every container without its own `resources` a default memory request of 16Mi and a default limit of 32Mi. Our Deployment sets no `resources`, so the API server quietly filled in 32Mi when it created each Pod. The app needs more than that at start (about 16 MiB plus the demo's 40 MiB preload), so the kernel kills it the moment it crosses 32Mi, over and over (CrashLoopBackOff). Nobody wrote the limit in the YAML, and nothing in the YAML showed it: it only appears in the Pod that actually ran.
 </details>
 
 ## 🔧 Fix it
@@ -165,20 +164,21 @@ Watch the visitor go from ❌ to ✅ (Ctrl+C to stop it). There are two honest w
 | Right when | this one app genuinely needs more memory | many apps in the namespace hit the same default, or the default is too small for the namespace's normal workloads |
 | Risk | none to others | affects every future Pod without its own `resources`, and can hide apps that forgot to set them |
 
-We do the app team's fix, because one app needs more, and explicit values always beat the defaults (a LimitRange only fills in what is missing). `fix.sh` applies this change; here is exactly what is different from the broken file:
+We do the app team's fix, because one app needs more, and explicit values always beat the defaults (a LimitRange only fills in each missing value: set only a limit, and it still fills in the request).
+
+Two LimitRange details worth knowing. In its YAML, the key `default` means the default **limit** and `defaultRequest` means the default **request** (as the `describe` columns showed). And defaults are applied only **when a Pod is created**: if the platform team edits the LimitRange, existing Pods keep what they got until they are recreated, for example with `kubectl rollout restart deployment/showdown -n k-20-limitrange`.
+
+`fix.sh` applies the change below; here is exactly what is different from the broken file:
 ```bash
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,4c1,2
-< # K20 break: the Cats vs Dogs app with NO resources section at all. Nobody wrote a memory limit.
-< # The app itself needs about 16Mi to run. This Deployment's start command also loads a
-< # "vote history" (40 MiB of filler, standing in for a cache) into memory before the app
-< # starts, so the whole Pod needs roughly 56Mi: more than the 32Mi the LimitRange hands out.
+1c1,2
+< # K20 break: Cats vs Dogs with no resources section. The start command preloads a 40 MiB "vote history" (demo filler) before the app starts.
 ---
 > # K20 fix: the same Deployment, now with an explicit resources section (the app team's fix).
-> # Explicit values always win over the LimitRange defaults, which only fill in what is missing.
-40a39,43
+> # Explicit values always win over the LimitRange defaults, which only fill in each missing value.
+37a39,43
 >           resources:
 >             requests:
 >               memory: 64Mi
@@ -240,7 +240,7 @@ Or open http://localhost:9220 in your browser and cast a vote. Press Ctrl+C in t
 
 ## 🎯 Key takeaways
 - **A Pod can have a limit nobody wrote.** A LimitRange in the namespace fills in missing `resources` when the Pod is created.
-- **An OOM kill is silent:** exit code 137, reason `OOMKilled`, and no log line from the app.
+- **An OOM kill is silent:** exit code 137, reason `OOMKilled`, and no error message from the app (a real app may have logged earlier lines).
 - **Compare the spec you wrote with the spec that ran:** `kubectl get pod <name> -o yaml` (or a `-o jsonpath` query), and look for the `kubernetes.io/limit-ranger` annotation.
 - **Say what you need.** Explicit `resources` always win over defaults, and the app team knows the app best. Change the LimitRange only when the namespace rule itself is wrong.
 

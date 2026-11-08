@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K20 break: the namespace has a LimitRange (32Mi default memory limit); the app sets no limit, so it gets 32Mi and needs more.
+# K20 break: deploys the Cats vs Dogs app (no resources section) and a visitor; the app starts crashing.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -26,12 +26,12 @@ fresh_ns "$NS" || die "Could not create the namespace $NS."
 create_showdown_configmap "$NS" || die "Could not create the ConfigMap showdown-code."
 
 say "Deploying the Cats vs Dogs app and a visitor…"
-# The LimitRange goes in first: it only affects Pods created after it exists.
+# Namespace settings first: they only affect Pods created after they exist.
 kubectl apply -f "$HERE/limitrange.yaml" >/dev/null || die "kubectl apply of the LimitRange failed. Is the cluster healthy?"
 kubectl apply -f "$HERE/app.yaml" -f "$HERE/visitor.yaml" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
 
-wait_for "the app to be killed for using too much memory" 180 killed \
-  || die "Expected the app to be killed, but it wasn't. Run cleanup.sh and try again."
+wait_for "the app Pods to start misbehaving" 180 killed \
+  || die "Expected the app to start crashing, but it didn't. Run cleanup.sh and try again."
 
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."

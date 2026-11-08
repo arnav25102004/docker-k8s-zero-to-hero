@@ -1,5 +1,4 @@
 # A small visitor that asks for the app every 2 seconds: the live signal on stage.
-# It has no resources section either, so it also gets the LimitRange's 32Mi (plenty for busybox).
 apiVersion: v1
 kind: Pod
 metadata:

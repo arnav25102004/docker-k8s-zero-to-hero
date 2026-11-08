@@ -1,7 +1,4 @@
-# K20 break: the Cats vs Dogs app with NO resources section at all. Nobody wrote a memory limit.
-# The app itself needs about 16Mi to run. This Deployment's start command also loads a
-# "vote history" (40 MiB of filler, standing in for a cache) into memory before the app
-# starts, so the whole Pod needs roughly 56Mi: more than the 32Mi the LimitRange hands out.
+# K20 break: Cats vs Dogs with no resources section. The start command preloads a 40 MiB "vote history" (demo filler) before the app starts.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

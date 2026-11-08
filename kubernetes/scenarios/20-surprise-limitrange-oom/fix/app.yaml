@@ -1,5 +1,5 @@
 # K20 fix: the same Deployment, now with an explicit resources section (the app team's fix).
-# Explicit values always win over the LimitRange defaults, which only fill in what is missing.
+# Explicit values always win over the LimitRange defaults, which only fill in each missing value.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
