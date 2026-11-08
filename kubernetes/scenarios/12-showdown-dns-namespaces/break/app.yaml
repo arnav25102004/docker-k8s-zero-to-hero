@@ -1,0 +1,52 @@
+# K12 break: the app lives in k-12-dns-app but Redis lives in k-12-dns-data.
+# REDIS_HOST=redis is a SHORT name, so DNS looks for it only in the app's own namespace.
+# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-12-dns-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: REDIS_HOST
+              value: "redis"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showdown
+  namespace: k-12-dns-app
+spec:
+  selector:
+    app: showdown
+  ports:
+    - port: 80
+      targetPort: 8080

@@ -1,0 +1,50 @@
+# K12 fix: same app, one changed line: REDIS_HOST is now the FULL name (service.namespace.svc.cluster.local).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-12-dns-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: REDIS_HOST
+              value: "redis.k-12-dns-data.svc.cluster.local"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showdown
+  namespace: k-12-dns-app
+spec:
+  selector:
+    app: showdown
+  ports:
+    - port: 80
+      targetPort: 8080
