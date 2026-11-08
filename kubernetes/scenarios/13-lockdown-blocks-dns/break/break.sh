@@ -17,7 +17,7 @@ app_cannot_resolve() {
   kubectl logs -n "$NS" -l app=showdown --tail=50 2>&1 | grep -q "readiness failed"
 }
 
-# Does this cluster really enforce NetworkPolicy? Some don't (Docker Desktop, default minikube):
+# Does this cluster really enforce NetworkPolicy? Some don't (often Docker Desktop or a default minikube):
 # there a policy is accepted and silently ignored, and this scenario would show nothing.
 # Test: a client reaches a target Service; then a deny-all-egress policy goes on the client;
 # if the client can STILL reach the target, nothing is enforcing policies.
@@ -33,6 +33,7 @@ metadata:
   name: target
   labels: {app: target}
 spec:
+  terminationGracePeriodSeconds: 1
   containers:
     - name: target
       image: busybox:1.36
@@ -52,6 +53,7 @@ metadata:
   name: client
   labels: {app: client}
 spec:
+  terminationGracePeriodSeconds: 1
   containers:
     - name: client
       image: busybox:1.36
@@ -77,10 +79,17 @@ spec:
     matchLabels: {app: client}
   policyTypes: [Egress]
 YAML
-  # Enforcement can take a moment to arrive: give it about 5 seconds.
+  # Enforcement can take a moment to arrive: try up to 8 times. Only 2 failures in a row count
+  # as "enforced" (one odd exec error must not pass for a blocked connection).
   i=0
-  while [ "$i" -lt 5 ]; do
-    if ! kubectl exec -n "$PROBE" client -- wget -q -T 1 -O /dev/null "http://$ip/" >/dev/null 2>&1; then
+  fails=0
+  while [ "$i" -lt 8 ]; do
+    if kubectl exec -n "$PROBE" client -- wget -q -T 1 -O /dev/null "http://$ip/" >/dev/null 2>&1; then
+      fails=0
+    else
+      fails=$((fails + 1))
+    fi
+    if [ "$fails" -ge 2 ]; then
       enforced=0
       break
     fi
@@ -94,7 +103,7 @@ need_cluster
 bash "$HERE/../cleanup.sh"
 port_free 9213 || die "Port 9213 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 
-say "Checking that this cluster enforces NetworkPolicy (a quick 5-second test)…"
+say "Checking that this cluster enforces NetworkPolicy (a quick check, about 15 seconds)…"
 probe_enforces
 rc=$?
 delete_ns "$PROBE"

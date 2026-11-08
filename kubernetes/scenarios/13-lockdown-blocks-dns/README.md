@@ -6,7 +6,7 @@
 
 ⬇️ First run downloads about 19 MB (Python), about 59 MB (Redis) and a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
 
-⚠️ This scenario needs a cluster that **enforces** NetworkPolicy: kind, Killercoda or iximiuz. `break.sh` checks this first (a throwaway test in a namespace called `k-13-probe`, deleted straight after). On Docker Desktop or a default minikube it stops with a clear message, because there a policy is accepted and silently ignored.
+⚠️ This scenario needs a cluster that **enforces** NetworkPolicy: kind, Killercoda or iximiuz. `break.sh` checks this first (a throwaway test in a namespace called `k-13-probe`, deleted straight after). Some clusters (often Docker Desktop or a default minikube) accept NetworkPolicy objects but ignore them: the script checks yours first, and if policies aren't enforced it stops with a clear message.
 
 Output columns and wording can differ a little between kubectl, container runtimes and clusters. The ideas never change.
 
@@ -172,7 +172,7 @@ diff ../break/app.yaml app.yaml
 ```
 One real change: a second egress rule that lets the app reach `kube-system` (where CoreDNS lives) on port 53, UDP and TCP. (The first lines are only comments.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `./fix.sh`, so you don't need to run both; `cd ../fix` first if you are not already there): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -237,7 +237,7 @@ Or open http://localhost:9213 in your browser and vote (playground: open the URL
 - **DNS is traffic too.** Every egress policy needs a rule for port 53 (UDP and TCP) to CoreDNS in `kube-system`.
 - **Slow failure means dropped; instant failure means refused or unknown.** "Try again" after 5 seconds points at a firewall, not at a typo.
 - Debug path: the app's log (can't resolve) → resolve by hand (slow fail) → connect by IP (works!) → `get networkpolicy -o yaml` (no port 53).
-- Not every cluster enforces policies. Docker Desktop and a default minikube accept them and ignore them, so the same YAML "works" in dev and blocks in production.
+- Not every cluster enforces policies. Some clusters (often Docker Desktop or a default minikube) accept them and ignore them, so the same YAML "works" in dev and blocks in production.
 
 ## 💎 Lifelong lesson
 > When everything breaks at once, suspect the shared thing: DNS.
