@@ -20,7 +20,7 @@ Think of the **floor manager** knocking on a hotel room door every few minutes: 
 ## 🏢 Where you'll meet this at work
 - **Load balancers** that stop sending traffic to servers that fail their health check (SRE, platform team).
 - **Docker Compose `depends_on: condition: service_healthy`**, where one service waits for another to be healthy before it starts (developer).
-- **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong liveness probe restarts a perfectly good app forever (see K-06 and K-07).
+- **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([K06](../../../kubernetes/scenarios/06-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([K07](../../../kubernetes/scenarios/07-showdown-slow-start/README.md)).
 
 ## 💥 Break it
 ```bash

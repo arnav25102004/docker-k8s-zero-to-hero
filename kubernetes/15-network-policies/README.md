@@ -93,7 +93,7 @@ kubectl exec -n netpol-lab frontend -- wget -qO- -T 3 http://api:8080/; echo
 
 ## 🏭 In production
 - Start every namespace with **default deny** and add explicit allows. It's the Kubernetes version of a zero-trust network.
-- Forgetting DNS egress is the #1 NetworkPolicy outage ([scenario K-13](../troubleshooting/README.md)).
+- Forgetting DNS egress is the #1 NetworkPolicy outage ([scenario K13](../scenarios/13-lockdown-blocks-dns/README.md)).
 - Cilium and Calico add L7 rules (HTTP paths), FQDN egress rules (e.g. allow only `api.stripe.com`), and policy visualisation.
 
 ## ✅ Checkpoint

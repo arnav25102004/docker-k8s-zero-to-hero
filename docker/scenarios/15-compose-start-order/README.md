@@ -167,4 +167,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-That was the last Docker scenario, well done. Next → Kubernetes track (coming next). Or go back to the [scenario list](../README.md).
+That was the last Docker scenario, well done. Next → the [Kubernetes break-and-fix scenarios](../../../kubernetes/scenarios/README.md). Or go back to the [scenario list](../README.md).

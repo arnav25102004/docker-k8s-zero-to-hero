@@ -34,7 +34,7 @@ For every block in [`manifests/`](manifests/), name the lab where you learned it
 |---|---|
 | [`namespace.yaml`](manifests/namespace.yaml) | Pod Security `restricted` (K16) |
 | [`redis.yaml`](manifests/redis.yaml) | StatefulSet, volumeClaimTemplates, headless Service, fsGroup (K10, K16) |
-| [`api.yaml`](manifests/api.yaml) | ConfigMap → envFrom (K07), startup/liveness/readiness (K08), resources (K09), rolling strategy + preStop (K06), topology spread (K17), securityContext (K16), `enableServiceLinks: false` (scenario K-15) |
+| [`api.yaml`](manifests/api.yaml) | ConfigMap → envFrom (K07), startup/liveness/readiness (K08), resources (K09), rolling strategy + preStop (K06), topology spread (K17), securityContext (K16), `enableServiceLinks: false` ([scenario K15](../scenarios/15-mystery-redis-port/README.md)) |
 | [`frontend.yaml`](manifests/frontend.yaml) | read-only root FS with a `/tmp` emptyDir |
 | [`resilience.yaml`](manifests/resilience.yaml) | HPA (K13), PDBs (K17), ResourceQuota (K09) |
 | [`network-policies.yaml`](manifests/network-policies.yaml) | default deny + explicit allows (K15) |
@@ -114,4 +114,4 @@ kubectl delete -f kubernetes/18-capstone/gateway.yaml --ignore-not-found
 kubectl delete -k kubernetes/18-capstone/manifests      # also deletes the namespace and the Redis PVC
 ```
 
-🎉 **Zero to hero: done.** Now go break things on purpose: [Kubernetes troubleshooting scenarios](../troubleshooting/README.md), then 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+🎉 **Zero to hero: done.** Now go break things on purpose: [Kubernetes break-and-fix scenarios](../scenarios/README.md), then 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).

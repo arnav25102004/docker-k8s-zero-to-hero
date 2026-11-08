@@ -19,7 +19,7 @@ Think of a hostel mess with one plate per student. Take more than one plate and 
 - Docker records it: `OOMKilled=true`, and the exit code is **137 = 128 + 9**.
 
 ## 🏢 Where you'll meet this at work
-- **Kubernetes `OOMKilled`** in `kubectl describe pod`: same cause, same exit code 137 (SRE, platform team; this is scenario K-08).
+- **Kubernetes `OOMKilled`** in `kubectl describe pod`: same cause, same exit code 137 (SRE, platform team; this is [scenario K08](../../../kubernetes/scenarios/08-ai-trainer-oomkilled/README.md)).
 - **A Java service whose heap is bigger than the container limit**: it runs fine on a laptop and dies in production (developer).
 - **Data jobs on big files**: a nightly batch loads a file that grew this month (data engineer).
 

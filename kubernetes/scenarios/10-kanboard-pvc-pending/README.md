@@ -4,7 +4,7 @@
 
 ⏱ 12 min · beginner · Kanboard (`kanboard/kanboard`, about 33 MB) · PersistentVolumeClaim, StorageClass, provisioner, PersistentVolume
 
-⬇️ The tiny 4 MB visitor image downloads when you break it. The Kanboard image (about 33 MB) downloads only at fix time, because the board Pod never starts while it is broken. On a cold cluster the fix moment waits on that download (up to a minute or two). Presenters: preload it (`kubernetes/scenarios/preload.sh`, coming) or run the scenario once before class, on good Wi-Fi.
+⬇️ The tiny 4 MB visitor image downloads when you break it. The Kanboard image (about 33 MB) downloads only at fix time, because the board Pod never starts while it is broken. On a cold cluster the fix moment waits on that download (up to a minute or two). Presenters: preload it (`kubernetes/scenarios/preload.sh`) or run the scenario once before class, on good Wi-Fi.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 

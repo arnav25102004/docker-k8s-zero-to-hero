@@ -27,6 +27,8 @@ IMAGES=(
   excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
   corentinth/it-tools:2024.10.22-7ca5933
   redis:7.4.12-alpine nginx:1.27.5-alpine postgres:16.15-alpine
+  # Kubernetes break/fix scenarios (exact pins; the full list is kubernetes/scenarios/IMAGES.md)
+  kanboard/kanboard:v1.2.57 adminer:5.4.1
 )
 
 head1 "🧰 Tools"
