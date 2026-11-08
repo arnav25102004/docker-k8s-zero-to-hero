@@ -53,9 +53,16 @@ nothing_left_k8s() {
   # Label keys appear as JSON object keys ("z2h-foo": "value").
   left=$(kubectl get nodes -o json 2>/dev/null | grep -o '"z2h-[^"]*":')
   [ -z "$left" ] || return 1
-  # Anything a scenario installed cluster-wide (e.g. metrics-server, ID k25).
-  left=$(kubectl get "$(kubectl api-resources --verbs=list -o name 2>/dev/null | grep -v -E '^(events|events\.events\.k8s\.io)$' | paste -sd, -)" \
-    -A -l "z2h.scenario=${id}-installed" -o name 2>/dev/null)
+  # Anything a scenario installed cluster-wide (e.g. metrics-server, ID k25). endpoints and
+  # endpointslices are skipped: they are derived objects that briefly copy Service labels.
+  local res
+  res=$(kubectl api-resources --verbs=list -o name 2>/dev/null |
+    grep -v -E '^(events|events\.events\.k8s\.io|endpoints|endpointslices\.discovery\.k8s\.io)$' | paste -sd, -)
+  if [ -z "$res" ]; then
+    printf 'nothing_left_k8s: could not list API resources, cannot verify leftovers\n' >&2
+    return 1
+  fi
+  left=$(kubectl get "$res" -A -l "z2h.scenario=${id}-installed" -o name 2>/dev/null)
   [ -z "$left" ]
 }
 

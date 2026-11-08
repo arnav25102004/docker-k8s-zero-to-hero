@@ -125,11 +125,11 @@ scenario_k8s_cleanup() {
 
 # ---- Cluster-level helpers (batch 3) ---------------------------------------
 
-# schedulable_node_count: print how many nodes carry no NoSchedule/NoExecute taint
-# (a tainted control-plane node therefore does not count).
+# schedulable_node_count: print how many nodes accept new Pods: no NoSchedule/NoExecute
+# taint (PreferNoSchedule does not count) and not cordoned (spec.unschedulable).
 schedulable_node_count() {
-  kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"="}{range .spec.taints[*]}{.effect}{","}{end}{"\n"}{end}' 2>/dev/null |
-    grep -c -v -E 'NoSchedule|NoExecute'
+  kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" U="}{.spec.unschedulable}{" "}{range .spec.taints[*]}{"|"}{.effect}{"|"}{end}{"\n"}{end}' 2>/dev/null |
+    grep -c -v -E ' U=true |\|NoSchedule\||\|NoExecute\|'
   return 0
 }
 
@@ -145,26 +145,43 @@ _ms_available() {
   [ "$(kubectl get apiservice v1beta1.metrics.k8s.io -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null)" = "True" ]
 }
 
-# ensure_metrics_server ID: install metrics-server unless it is already available.
-# The shipped manifest labels every object z2h.scenario=k25-installed; for another
-# ID it is rewritten with sed into a temp file, so the label is always <ID>-installed.
-# Waits up to 180 s until `kubectl top nodes` works. Returns 1 on timeout.
+# ensure_metrics_server ID: make `kubectl top` work.
+#  - APIService Available: print "metrics-server already present", return 0.
+#  - An APIService or Deployment metrics-server exists that is NOT labelled
+#    z2h.scenario=<ID>-installed (someone else's, maybe still starting): never touch
+#    it; only wait (bounded) for it to become usable.
+#  - Otherwise (nothing there, or ours from an interrupted run): apply the manifest.
+# The shipped manifest labels every object z2h.scenario=k25-installed; for another ID it
+# is rewritten with sed into a temp file, so the label is always <ID>-installed.
+# Waits up to 180 s (override: Z2H_MS_WAIT, used by the self-test) until `kubectl top nodes` works. Returns 1 on timeout.
 ensure_metrics_server() {
-  local id="$1" tmp i=0
+  local id="$1" sel tmp i=0 present=0 ours=0
+  sel="z2h.scenario=${id}-installed"
   if _ms_available; then
     printf 'metrics-server already present\n'
     return 0
   fi
-  tmp=$(mktemp "${TMPDIR:-/tmp}/z2h-ms.XXXXXX") || return 1
-  sed "s/k25-installed/${id}-installed/g" "$_K8S_LIB_DIR/_addons/metrics-server.yaml" >"$tmp"
-  kubectl apply -f "$tmp" >/dev/null || { rm -f "$tmp"; return 1; }
-  rm -f "$tmp"
-  while [ "$i" -lt 180 ]; do
+  if kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1 ||
+     kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
+    present=1
+  fi
+  if [ -n "$(kubectl get apiservice,deployment -A -l "$sel" -o name 2>/dev/null)" ]; then
+    ours=1
+  fi
+  if [ "$present" -eq 1 ] && [ "$ours" -eq 0 ]; then
+    printf 'metrics-server already present (not installed by us), waiting for it to become ready\n'
+  else
+    tmp=$(mktemp "${TMPDIR:-/tmp}/z2h-ms.XXXXXX") || return 1
+    sed "s/k25-installed/${id}-installed/g" "$_K8S_LIB_DIR/_addons/metrics-server.yaml" >"$tmp"
+    kubectl apply -f "$tmp" >/dev/null || { rm -f "$tmp"; return 1; }
+    rm -f "$tmp"
+  fi
+  while [ "$i" -lt "${Z2H_MS_WAIT:-180}" ]; do
     kubectl top nodes >/dev/null 2>&1 && return 0
     sleep 2
     i=$((i + 2))
   done
-  warn "metrics-server did not become ready within 180s. Check: kubectl -n kube-system get pods -l k8s-app=metrics-server"
+  warn "metrics-server did not become ready within ${Z2H_MS_WAIT:-180}s. Check: kubectl -n kube-system get pods -l k8s-app=metrics-server"
   return 1
 }
 

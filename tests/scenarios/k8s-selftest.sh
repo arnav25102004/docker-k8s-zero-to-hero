@@ -26,6 +26,15 @@ cleanup_all() {
   for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest k-95-selftest; do
     kubectl delete namespace "$n" --ignore-not-found --wait=false >/dev/null 2>&1
   done
+  # Revert cluster-level test changes too (taints, labels, metrics-server, dummies).
+  ( # shellcheck source=/dev/null
+    source "$LIB" >/dev/null 2>&1
+    untaint_all z2h-selftest; untaint_all z2h-x
+    kubectl label nodes --all z2h-lbl- >/dev/null 2>&1
+    remove_metrics_server_if_ours k99
+    kubectl delete configmap z2h-selftest-dummy -n kube-system --ignore-not-found >/dev/null 2>&1
+    kubectl delete deployment metrics-server -n kube-system -l z2h-selftest=dummy --ignore-not-found >/dev/null 2>&1
+  ) 2>/dev/null
   rm -rf "$TMPD"
 }
 trap cleanup_all EXIT
@@ -230,19 +239,43 @@ test_untaint_all_is_idempotent() {
   bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1; check "second untaint_all returns 0" rc_is "$?" 0 || f=1
   left=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' | grep -c '^z2h-selftest$')
   check "no node has the taint (found $left)" rc_is "$left" 0 || f=1
+  # Mixed case: only one node tainted.
+  kubectl taint nodes "$(kubectl get nodes -o name | tail -n 1 | sed 's#^node/##')" z2h-selftest=yes:NoExecute --overwrite >/dev/null 2>&1
+  bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1; check "untaint_all with one tainted node returns 0" rc_is "$?" 0 || f=1
+  left=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' | grep -c '^z2h-selftest$')
+  check "mixed case: none left (found $left)" rc_is "$left" 0 || f=1
   return $f
 }
 
+# Independent count: JSON + python, exact effect match, honouring cordon.
+independent_schedulable() {
+  kubectl get nodes -o json | python3 -I -c '
+import json,sys
+n=0
+for i in json.load(sys.stdin)["items"]:
+    sp=i["spec"]
+    bad=sp.get("unschedulable") or any(t["effect"] in ("NoSchedule","NoExecute") for t in sp.get("taints",[]))
+    n+=0 if bad else 1
+print(n)'
+}
+
 test_schedulable_node_count() {
-  local f=0 got want
-  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
-  # Independent computation: custom-columns lists each node's taint effects; count rows without a blocking one.
-  want=$(kubectl get nodes --no-headers -o custom-columns=T:.spec.taints[*].effect | grep -c -v -E 'NoSchedule|NoExecute')
+  local f=0 got want node
+  node=$(kubectl get nodes -o name | tail -n 1 | sed 's#^node/##')
+  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1); want=$(independent_schedulable)
   check "count $got equals independent count $want" rc_is "$got" "$want" || f=1
-  kubectl taint nodes "$(kubectl get nodes -o name | tail -n 1 | sed "s#^node/##")" z2h-selftest=yes:NoExecute --overwrite >/dev/null 2>&1
+  kubectl taint nodes "$node" z2h-selftest=yes:NoExecute --overwrite >/dev/null 2>&1
   got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
   check "a NoExecute taint lowers the count ($got = $((want - 1)))" rc_is "$got" "$((want - 1))" || f=1
+  kubectl taint nodes "$node" z2h-selftest=yes:PreferNoSchedule --overwrite >/dev/null 2>&1
+  kubectl taint nodes "$node" z2h-selftest=yes:NoExecute- >/dev/null 2>&1
+  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
+  check "PreferNoSchedule does not lower the count ($got = $want)" rc_is "$got" "$want" || f=1
   bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1
+  kubectl cordon "$node" >/dev/null 2>&1
+  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
+  kubectl uncordon "$node" >/dev/null 2>&1
+  check "a cordoned node lowers the count ($got = $((want - 1)))" rc_is "$got" "$((want - 1))" || f=1
   return $f
 }
 
@@ -280,6 +313,24 @@ test_metrics_server_kept_if_preexisting() {
   return $f
 }
 
+test_metrics_server_never_adopts_foreign() {
+  local f=0 out
+  if kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1 ||
+     kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
+    printf '    skip: the test cluster already has metrics-server\n'
+    return 0
+  fi
+  # An unavailable, unlabelled Deployment named like metrics-server (z2h-selftest=dummy only marks it for the trap).
+  kubectl create deployment metrics-server -n kube-system --image=busybox:1.36 --replicas=0 >/dev/null 2>&1
+  kubectl label deployment metrics-server -n kube-system z2h-selftest=dummy >/dev/null 2>&1
+  out=$(Z2H_MS_WAIT=4 bash -c "source '$LIB'; ensure_metrics_server k99" 2>&1)
+  check "says it is not ours" has "$out" "not installed by us" || f=1
+  check "our label was not added" [ -z "$(kubectl get deployment,apiservice,service -A -l z2h.scenario=k99-installed -o name 2>/dev/null)" ] || f=1
+  check "nothing applied (no APIService)" ms_absent || f=1
+  kubectl delete deployment metrics-server -n kube-system --ignore-not-found >/dev/null 2>&1
+  return $f
+}
+
 test_nothing_left_detects_taint() {
   local f=0 node
   node=$(kubectl get nodes -o name | tail -n 1)
@@ -299,7 +350,8 @@ for t in test_no_cluster_message test_refuses_foreign_context test_lib_sourcing_
          test_showdown_configmap test_pod_reason test_fresh_ns_has_default_sa \
          test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert \
          test_untaint_all_is_idempotent test_schedulable_node_count \
-         test_metrics_server_kept_if_preexisting test_nothing_left_detects_taint; do
+         test_metrics_server_kept_if_preexisting test_metrics_server_never_adopts_foreign \
+         test_nothing_left_detects_taint; do
   run_test "$t"
 done
 
