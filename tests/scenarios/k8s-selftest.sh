@@ -38,6 +38,7 @@ check() { # check MSG CMD... (passes when CMD succeeds)
 rc_is() { [ "$1" -eq "$2" ]; }
 has() { printf '%s' "$1" | grep -q -- "$2"; }
 no_ns() { ! kubectl get namespace "$1" >/dev/null 2>&1; }
+fails() { ! "$@"; }
 no_pf() { ! pgrep -f "port-forward -n $1" >/dev/null 2>&1; }
 
 run_test() {
@@ -218,10 +219,87 @@ test_lib_sourcing_is_quiet() {
   check "no output when sourced" [ -z "$out" ]
 }
 
+test_untaint_all_is_idempotent() {
+  local f=0 n left
+  for n in $(kubectl get nodes -o name); do
+    kubectl taint nodes "${n#node/}" z2h-selftest=yes:NoSchedule --overwrite >/dev/null 2>&1
+  done
+  left=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' | grep -c '^z2h-selftest$')
+  check "setup: every node is tainted (found $left)" [ "$left" -gt 0 ] || f=1
+  bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1; check "first untaint_all returns 0" rc_is "$?" 0 || f=1
+  bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1; check "second untaint_all returns 0" rc_is "$?" 0 || f=1
+  left=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' | grep -c '^z2h-selftest$')
+  check "no node has the taint (found $left)" rc_is "$left" 0 || f=1
+  return $f
+}
+
+test_schedulable_node_count() {
+  local f=0 got want
+  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
+  # Independent computation: custom-columns lists each node's taint effects; count rows without a blocking one.
+  want=$(kubectl get nodes --no-headers -o custom-columns=T:.spec.taints[*].effect | grep -c -v -E 'NoSchedule|NoExecute')
+  check "count $got equals independent count $want" rc_is "$got" "$want" || f=1
+  kubectl taint nodes "$(kubectl get nodes -o name | tail -n 1 | sed "s#^node/##")" z2h-selftest=yes:NoExecute --overwrite >/dev/null 2>&1
+  got=$(bash -c "source '$LIB'; schedulable_node_count" 2>&1)
+  check "a NoExecute taint lowers the count ($got = $((want - 1)))" rc_is "$got" "$((want - 1))" || f=1
+  bash -c "source '$LIB'; untaint_all z2h-selftest" >/dev/null 2>&1
+  return $f
+}
+
+ms_available() { [ "$(kubectl get apiservice v1beta1.metrics.k8s.io -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null)" = "True" ]; }
+ms_absent() { ! kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1; }
+
+test_metrics_server_kept_if_preexisting() {
+  local f=0 out
+  if kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1; then
+    printf '    skip: the test cluster already has metrics-server\n'
+    return 0
+  fi
+  # Case 1: we installed it -> remove deletes it, and leaves an unlabelled neighbour alone.
+  out=$(bash -c "source '$LIB'; ensure_metrics_server k99" 2>&1); check "ensure_metrics_server k99 returns 0" rc_is "$?" 0 || f=1
+  check "APIService Available" ms_available || f=1
+  check "kubectl top nodes works" kubectl top nodes >/dev/null 2>&1 || f=1
+  out=$(bash -c "source '$LIB'; ensure_metrics_server k99" 2>&1)
+  check "second call says already present" has "$out" "metrics-server already present" || f=1
+  kubectl create configmap z2h-selftest-dummy -n kube-system --from-literal=a=b >/dev/null 2>&1
+  check "labelled objects found (nothing_left would fail)" fails nothing_left_k8s k99 || f=1
+  bash -c "source '$LIB'; remove_metrics_server_if_ours k99" >/dev/null 2>&1; check "remove returns 0" rc_is "$?" 0 || f=1
+  check "APIService gone" ms_absent || f=1
+  check "dummy object stays" kubectl get configmap z2h-selftest-dummy -n kube-system || f=1
+  check "no k99-installed objects left" nothing_left_k8s k99 || f=1
+  kubectl delete configmap z2h-selftest-dummy -n kube-system >/dev/null 2>&1
+  # Case 2: pre-existing (label dropped) -> remove keeps it.
+  bash -c "source '$LIB'; ensure_metrics_server k99" >/dev/null 2>&1
+  kubectl label apiservice,deployment,service,serviceaccount,clusterrole,clusterrolebinding,rolebinding -A \
+    -l z2h.scenario=k99-installed z2h.scenario- >/dev/null 2>&1
+  bash -c "source '$LIB'; remove_metrics_server_if_ours k99" >/dev/null 2>&1
+  check "unlabelled (pre-existing) APIService remains" kubectl get apiservice v1beta1.metrics.k8s.io || f=1
+  # Clean up: delete what the manifest created.
+  kubectl delete -f "$REPO/kubernetes/scenarios/_addons/metrics-server.yaml" --ignore-not-found >/dev/null 2>&1
+  check "cluster back to no metrics-server" ms_absent || f=1
+  return $f
+}
+
+test_nothing_left_detects_taint() {
+  local f=0 node
+  node=$(kubectl get nodes -o name | tail -n 1)
+  check "clean cluster passes nothing_left_k8s" nothing_left_k8s k99 k-99-x || f=1
+  kubectl taint nodes "${node#node/}" z2h-x=1:NoSchedule --overwrite >/dev/null 2>&1
+  check "taint is detected" fails nothing_left_k8s k99 k-99-x || f=1
+  bash -c "source '$LIB'; untaint_all z2h-x" >/dev/null 2>&1
+  kubectl label "$node" z2h-lbl=1 --overwrite >/dev/null 2>&1
+  check "label is detected" fails nothing_left_k8s k99 k-99-x || f=1
+  kubectl label "$node" z2h-lbl- >/dev/null 2>&1
+  check "clean again" nothing_left_k8s k99 k-99-x || f=1
+  return $f
+}
+
 for t in test_no_cluster_message test_refuses_foreign_context test_lib_sourcing_is_quiet \
          test_cleanup_waits_for_namespace test_cleanup_stops_port_forward \
          test_showdown_configmap test_pod_reason test_fresh_ns_has_default_sa \
-         test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert; do
+         test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert \
+         test_untaint_all_is_idempotent test_schedulable_node_count \
+         test_metrics_server_kept_if_preexisting test_nothing_left_detects_taint; do
   run_test "$t"
 done
 

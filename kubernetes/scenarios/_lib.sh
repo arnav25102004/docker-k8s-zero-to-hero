@@ -122,3 +122,60 @@ scenario_k8s_cleanup() {
   printf '✅ Scenario %s cleaned up\n' "$id"
   return 0
 }
+
+# ---- Cluster-level helpers (batch 3) ---------------------------------------
+
+# schedulable_node_count: print how many nodes carry no NoSchedule/NoExecute taint
+# (a tainted control-plane node therefore does not count).
+schedulable_node_count() {
+  kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"="}{range .spec.taints[*]}{.effect}{","}{end}{"\n"}{end}' 2>/dev/null |
+    grep -c -v -E 'NoSchedule|NoExecute'
+  return 0
+}
+
+# untaint_all KEY: remove the taint KEY (any value, any effect) from every node.
+# Silent and idempotent ("not found" is ignored). Always returns 0.
+untaint_all() {
+  kubectl taint nodes --all "$1-" >/dev/null 2>&1
+  return 0
+}
+
+# _ms_available: 0 when the metrics.k8s.io APIService reports Available=True.
+_ms_available() {
+  [ "$(kubectl get apiservice v1beta1.metrics.k8s.io -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null)" = "True" ]
+}
+
+# ensure_metrics_server ID: install metrics-server unless it is already available.
+# The shipped manifest labels every object z2h.scenario=k25-installed; for another
+# ID it is rewritten with sed into a temp file, so the label is always <ID>-installed.
+# Waits up to 180 s until `kubectl top nodes` works. Returns 1 on timeout.
+ensure_metrics_server() {
+  local id="$1" tmp i=0
+  if _ms_available; then
+    printf 'metrics-server already present\n'
+    return 0
+  fi
+  tmp=$(mktemp "${TMPDIR:-/tmp}/z2h-ms.XXXXXX") || return 1
+  sed "s/k25-installed/${id}-installed/g" "$_K8S_LIB_DIR/_addons/metrics-server.yaml" >"$tmp"
+  kubectl apply -f "$tmp" >/dev/null || { rm -f "$tmp"; return 1; }
+  rm -f "$tmp"
+  while [ "$i" -lt 180 ]; do
+    kubectl top nodes >/dev/null 2>&1 && return 0
+    sleep 2
+    i=$((i + 2))
+  done
+  warn "metrics-server did not become ready within 180s. Check: kubectl -n kube-system get pods -l k8s-app=metrics-server"
+  return 1
+}
+
+# remove_metrics_server_if_ours ID: delete only objects labelled
+# z2h.scenario=<ID>-installed (a metrics-server that was already there stays).
+# Silent, always returns 0.
+remove_metrics_server_if_ours() {
+  local sel="z2h.scenario=$1-installed"
+  # The APIService first, so `kubectl api-resources` stops complaining at once.
+  kubectl delete apiservice -l "$sel" --ignore-not-found >/dev/null 2>&1
+  kubectl delete deployment,service,serviceaccount,rolebinding -n kube-system -l "$sel" --ignore-not-found >/dev/null 2>&1
+  kubectl delete clusterrolebinding,clusterrole -l "$sel" --ignore-not-found >/dev/null 2>&1
+  return 0
+}

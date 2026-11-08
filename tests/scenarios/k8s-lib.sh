@@ -36,7 +36,8 @@ wait_ready() {
   kubectl wait --for=condition=Ready pod -l "$2" -n "$1" --timeout="${3}s" >/dev/null 2>&1
 }
 
-# nothing_left_k8s ID NS...: no namespace, no port-forward, no labelled cluster-scoped object.
+# nothing_left_k8s ID NS...: no namespace, no port-forward, no labelled cluster-scoped object,
+# no z2h-* node taint or label, and no object anywhere labelled z2h.scenario=ID-installed.
 nothing_left_k8s() {
   local id="$1" ns left
   shift
@@ -45,6 +46,16 @@ nothing_left_k8s() {
     pgrep -f "port-forward -n $ns" >/dev/null 2>&1 && return 1
   done
   left=$(kubectl get clusterroles,clusterrolebindings,persistentvolumes -l "z2h.scenario=$id" -o name 2>/dev/null)
+  [ -z "$left" ] || return 1
+  # Node taints / labels with a z2h- key prefix (K16 and friends).
+  left=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null | grep '^z2h-')
+  [ -z "$left" ] || return 1
+  # Label keys appear as JSON object keys ("z2h-foo": "value").
+  left=$(kubectl get nodes -o json 2>/dev/null | grep -o '"z2h-[^"]*":')
+  [ -z "$left" ] || return 1
+  # Anything a scenario installed cluster-wide (e.g. metrics-server, ID k25).
+  left=$(kubectl get "$(kubectl api-resources --verbs=list -o name 2>/dev/null | grep -v -E '^(events|events\.events\.k8s\.io)$' | paste -sd, -)" \
+    -A -l "z2h.scenario=${id}-installed" -o name 2>/dev/null)
   [ -z "$left" ]
 }
 
