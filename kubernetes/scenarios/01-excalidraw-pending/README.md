@@ -44,7 +44,7 @@ kubectl logs -f visitor -n k-01-pending
 ❌ 00:28:31 no answer from http://draw
 ❌ 00:28:34 no answer from http://draw
 ```
-Leave that running in a second terminal if you like (Ctrl+C to stop). It turns green when we fix things.
+You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
@@ -58,6 +58,7 @@ NAME                    READY   STATUS    RESTARTS   AGE
 draw-5c698fdb55-pxm6x   0/1     Pending   0          9s
 visitor                 1/1     Running   0          9s
 ```
+(Ages will differ.)
 `Pending`, with `0` restarts. The `visitor` is fine, so the cluster works. Only the whiteboard Pod is stuck, and it never even started (nothing to restart).
 
 <details><summary>💡 Hint</summary>
@@ -102,7 +103,7 @@ z2h-test-control-plane   4     8125288Ki
 z2h-test-worker          4     8125288Ki
 z2h-test-worker2         4     8125288Ki
 ```
-(Your node names and sizes will differ.) About 8 million Ki is roughly 8 GiB per node. The Pod wants 64 GiB. No node is even close.
+(Your node names and sizes will differ.) About 8 million Ki is roughly 8 GiB per node. The Pod wants 64 GiB. Unless your node really has 64 GiB free, none is even close.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -111,10 +112,15 @@ The Deployment's `resources.requests.memory` is `64Gi`, far more than any node h
 </details>
 
 ## 🔧 Fix it
+Before you run it, open a **second terminal** and start the live visitor log, so the room sees red turn green:
+```bash
+kubectl logs -f visitor -n k-01-pending
+```
+Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-What changed: the request shrinks to what a whiteboard needs, and we add a limit as a safety cap.
+Within a few seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it). What changed: the request shrinks to what a whiteboard needs, and we add a limit as a safety cap.
 ```bash
 diff ../break/app.yaml app.yaml
 ```
@@ -145,17 +151,17 @@ kubectl get pods -n k-01-pending
 ```
 ```
 NAME                    READY   STATUS    RESTARTS   AGE
-draw-65fdd4465f-g7vd9   1/1     Running   0          6s
-visitor                 1/1     Running   0          15s
+draw-65fdd4465f-67xwc   1/1     Running   0          15s
+visitor                 1/1     Running   0          21s
 ```
-The whiteboard Pod is `Running` and `1/1` Ready. The visitor's log turns green:
+(Ages and Pod names will differ.) The whiteboard Pod is `Running` and `1/1` Ready. The visitor's log is green again (if you still see a ❌, wait a few seconds and run it again):
 ```bash
 kubectl logs visitor -n k-01-pending --tail=3
 ```
 ```
-❌ 00:28:37 no answer from http://draw
-✅ 00:28:39 HTTP 200
-✅ 00:28:41 HTTP 200
+✅ 00:32:01 HTTP 200
+✅ 00:32:03 HTTP 200
+✅ 00:32:05 HTTP 200
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
