@@ -51,6 +51,28 @@ esac
 echo "Not the cluster you meant? Stop now (Ctrl+C) and check: kubectl config current-context"
 echo
 
+# Newer Docker (containerd image store) keeps multi-platform images as an index, and a plain
+# "load docker-image" can fail with "content digest ... not found". Fallback: save just this
+# machine's platform to a tar file and load that file instead.
+case "$(docker info --format '{{.Architecture}}' 2>/dev/null)" in
+  aarch64|arm64) PLATFORM="linux/arm64" ;;
+  *)             PLATFORM="linux/amd64" ;;
+esac
+
+# load_via_archive REF LOADER...  (LOADER gets the tar path as its last argument)
+load_via_archive() {
+  local ref="$1" tar rc
+  shift
+  tar=$(mktemp -t z2h-preload.XXXXXX) || return 1
+  if docker save --platform "$PLATFORM" -o "$tar" "$ref" >/dev/null 2>&1 && "$@" "$tar" >/dev/null 2>&1; then
+    rc=0
+  else
+    rc=1
+  fi
+  rm -f "$tar"
+  return "$rc"
+}
+
 total=0
 failed=0
 for ref in $IMAGES; do
@@ -66,7 +88,8 @@ for ref in $IMAGES; do
       if ! command -v kind >/dev/null 2>&1; then
         printf '❌ %s (pulled, but the kind command is missing, so it was not loaded)\n' "$ref"
         failed=$((failed + 1))
-      elif kind load docker-image "$ref" --name "$CLUSTER" >/dev/null 2>&1; then
+      elif kind load docker-image "$ref" --name "$CLUSTER" >/dev/null 2>&1 \
+        || load_via_archive "$ref" kind load image-archive --name "$CLUSTER"; then
         printf '✅ %s (pulled, loaded into kind "%s")\n' "$ref" "$CLUSTER"
       else
         printf '❌ %s (pulled, but loading into kind "%s" failed)\n' "$ref" "$CLUSTER"
@@ -76,7 +99,8 @@ for ref in $IMAGES; do
       if ! command -v minikube >/dev/null 2>&1; then
         printf '❌ %s (pulled, but the minikube command is missing, so it was not loaded)\n' "$ref"
         failed=$((failed + 1))
-      elif minikube image load "$ref" >/dev/null 2>&1; then
+      elif minikube image load "$ref" >/dev/null 2>&1 \
+        || load_via_archive "$ref" minikube image load; then
         printf '✅ %s (pulled, loaded into minikube)\n' "$ref"
       else
         printf '❌ %s (pulled, but loading into minikube failed)\n' "$ref"

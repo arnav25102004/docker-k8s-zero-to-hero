@@ -134,7 +134,9 @@ test_pod_reason() {
   bash -c "source '$LIB'; fresh_ns k-97-selftest" >/dev/null 2>&1
   kubectl run -n k-97-selftest bad --image=busybox:1.36 --restart=Never --labels=app=bad -- sh -c 'exit 3' >/dev/null 2>&1
   i=0
-  while [ "$i" -lt 60 ] && [ -z "$(kubectl get pod bad -n k-97-selftest -o jsonpath='{.status.containerStatuses[0].state.terminated.reason}' 2>/dev/null)" ]; do
+  # Wait for the Pod PHASE to be Failed (the container's terminated state shows up a moment
+  # earlier, while the phase can still read Pending when the image is already on the node).
+  while [ "$i" -lt 60 ] && [ "$(kubectl get pod bad -n k-97-selftest -o jsonpath='{.status.phase}' 2>/dev/null)" != "Failed" ]; do
     sleep 1; i=$((i + 1))
   done
   r=$(bash -c "source '$LIB'; pod_reason k-97-selftest app=bad" 2>&1)
