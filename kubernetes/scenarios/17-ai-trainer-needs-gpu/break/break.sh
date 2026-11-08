@@ -17,7 +17,7 @@ need_cluster
 bash "$HERE/../cleanup.sh"
 fresh_ns "$NS" || die "Could not create the namespace $NS."
 
-say "Starting the AI trainer, which asks for a GPU node…"
+say "Starting the AI trainer…"
 kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
 
 wait_for "the scheduler to refuse the trainer" 60 refused \

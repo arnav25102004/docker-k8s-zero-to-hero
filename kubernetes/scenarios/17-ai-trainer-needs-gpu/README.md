@@ -9,7 +9,7 @@
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
 ## 📖 The story
-Arjun has copied a training script from a blog post. The post said the model "needs a GPU node", so he adds `accelerator: nvidia-gpu` to his Deployment and applies it to the college lab cluster. The Pod never starts. It doesn't crash and prints no error, because it never even began. It sits in `Pending`, forever. The lab cluster has only ordinary CPU nodes: there is no GPU anywhere. The script, as it happens, would run fine on a plain CPU; it only trains a tiny "model".
+Arjun copies a training Deployment from a blog post and applies it to the college lab cluster. The Pod never starts. It doesn't crash and prints no error, because it never even began: it sits in `Pending`, forever. Nothing else on the cluster is wrong.
 
 ## 🧠 The concept: why, what, how
 The **scheduler** is the part of Kubernetes that decides which node a new Pod runs on. By default it picks any node with enough room. Sometimes you want to steer it:
@@ -28,7 +28,7 @@ Think of booking a cab. "Only an electric car" is a requirement: no electric car
    node A  no label ─✗   node B  no label ─✗   node C  no label ─✗   ──▶ Pending, forever
 
  preferred affinity accelerator=nvidia-gpu   (a wish)
-   node A  no label ─▶ fine    node B  ─▶ fine    node C  ─▶ fine     ──▶ Running (a GPU node would win, if one existed)
+   node A  no label ─▶ fine    node B  ─▶ fine    node C  ─▶ fine     ──▶ Running (a GPU node would be favoured, if one existed)
 ```
 
 ## 🏢 Where you'll meet this at work
@@ -98,7 +98,7 @@ z2h-test-worker2         Ready    <none>          45m   v1.33.1
 
 The Deployment has `nodeSelector: {accelerator: nvidia-gpu}`, a **required** rule, and **no node in the cluster has that label** (the cluster has no GPU nodes at all). The scheduler can't place the Pod anywhere, so it records a `FailedScheduling` event (`didn't match Pod's node affinity/selector`) and the Pod stays `Pending`. It will wait forever, and it will start the moment *some* node gets that label, which is the other way to fix this.
 
-The deeper point: the program doesn't even need a GPU. The word "GPU" was a hard requirement where, at most, a *preference* was meant.
+The lab cluster has only ordinary CPU nodes, so no node can ever match. The deeper point: this little script doesn't even need a GPU (it only "trains" a tiny model). The word "GPU" was a hard requirement where, at most, a *preference* was meant.
 </details>
 
 ## 🔧 Fix it
@@ -132,6 +132,8 @@ diff ../break/app.yaml app.yaml
 >                     values: ["nvidia-gpu"]
 ```
 The hard `nodeSelector` becomes a **preferred** node affinity: "I'd love a GPU node, but any node will do." On this cluster no node has a GPU, so the scheduler simply picks a normal one.
+
+**Careful with "preferred".** It means "train on a CPU if there is no GPU". That is right here only because this script is fine on a CPU. For a real model, silently falling back to a CPU can be painfully slow. If a CPU is not acceptable, keep a *required* rule and make sure real GPU hardware (and the label) exists.
 
 **The other fix (not used here): give a node the label.** You could instead tell Kubernetes "this node counts as a GPU node" with `kubectl label node <node-name> accelerator=nvidia-gpu`, and the Pending Pod would start on it at once. That is the right move when a node really has a GPU. Here it would be a lie, and it changes a shared node, so we don't do it. (If you ever try it on your own practice cluster, undo it with `kubectl label node <node-name> accelerator-`.)
 

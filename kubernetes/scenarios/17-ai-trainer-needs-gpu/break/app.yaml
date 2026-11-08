@@ -32,6 +32,7 @@ spec:
               # Finished: stay Running instead of exiting, so Kubernetes doesn't restart a job that is done.
               while True:
                   time.sleep(3600)
+          # (The memory numbers only make the epochs visible; they are not a real model size.)
           resources:
             requests: { memory: 200Mi }
             limits: { memory: 256Mi }
