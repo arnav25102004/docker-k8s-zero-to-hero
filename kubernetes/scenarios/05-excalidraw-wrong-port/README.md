@@ -17,7 +17,7 @@ A request to a Service passes through two ports, and they don't have to be the s
 - **`port`** is the door the *Service* opens for callers (`http://draw` means port 80).
 - **`targetPort`** is the door on the *container* that the Service knocks on. It must be the port your app really listens on.
 - If `targetPort` points at a port where nothing listens, the Pod's operating system answers "nobody is home" immediately. That is a **connection refused**. It is not a timeout, and the Pod is perfectly healthy.
-- Think of a hotel again: the front desk (Service, port 80) forwards your call to a room extension (targetPort). Dial extension 8080 in a hotel that only has extension 80 and the line just goes dead, even though the room is occupied.
+- Think of a hotel: the front desk (Service, port 80) forwards your call to a room extension (targetPort). Dial extension 8080 in a hotel that only has extension 80 and the line just goes dead, even though the room is occupied.
 
 ```
  visitor ──▶ Service "draw"  port 80 ──▶ targetPort 8080 ──▶ Pod IP:8080   nothing listens: REFUSED
@@ -66,13 +66,13 @@ kubectl get endpointslices -n k-05-wrong-port -l kubernetes.io/service-name=draw
 NAME         ADDRESSTYPE   PORTS   ENDPOINTS                 AGE
 draw-nbj5p   IPv4          8080    10.244.1.56,10.244.2.63   3s
 ```
-(Addresses and ages will differ.) This time the addresses are there: two Pods found. The labels are fine. Look at the `PORTS` column, though: it says `8080`.
+(Addresses and ages will differ.) This time the addresses are there: two Pods found. The labels are fine.
 
 <details><summary>💡 Hint</summary>
 The Service found its Pods, so the problem is not <em>who</em> it sends traffic to but <em>which door</em> it knocks on. Compare the port the Service forwards to with the port Excalidraw really listens on.
 </details>
 
-**3. Which port does the Service forward to?**
+**3. Which port does the Service forward to?** The Service found its Pods, so the next suspect is the door it knocks on.
 ```bash
 kubectl get svc draw -n k-05-wrong-port -o jsonpath='{.spec.ports}'; echo
 ```
