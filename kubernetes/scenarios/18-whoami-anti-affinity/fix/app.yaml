@@ -1,0 +1,44 @@
+# K18 fix: the same whoami, but "different nodes" is a preference (preferred podAntiAffinity), not a rule.
+# Still no "replicas:" on purpose: apply keeps whatever scale break.sh set.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whoami
+  namespace: k-18-anti-affinity
+  labels: { app: whoami }
+spec:
+  # Recreate, not a rolling update: the old Pods still carry the old hard rule, and a hard rule also
+  # keeps NEW Pods away from them, so a rolling update could never find room for its first new Pod.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: whoami }
+  template:
+    metadata:
+      labels: { app: whoami }
+    spec:
+      affinity:
+        podAntiAffinity:
+          # "Preferred": spread across nodes as well as possible, but never leave a Pod without a home.
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels: { app: whoami }
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.10.4
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami
+  namespace: k-18-anti-affinity
+spec:
+  selector: { app: whoami }
+  ports:
+    - port: 80
+      targetPort: 80

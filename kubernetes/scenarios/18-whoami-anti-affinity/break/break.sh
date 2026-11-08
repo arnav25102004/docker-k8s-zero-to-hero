@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# K18 break: whoami with a hard rule on where its Pods may go, scaled to one Pod more than there are nodes.
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=/dev/null
+source "$HERE/../../_lib.sh"
+
+NS="k-18-anti-affinity"
+
+visitor_up() { [ "$(kubectl get pod visitor -n "$NS" -o jsonpath='{.status.phase}' 2>/dev/null)" = "Running" ]; }
+# The intended failure: exactly one Pod waits (Pending), the others run, and the scheduler wrote an event.
+one_waiting() {
+  [ "$(kubectl get pods -n "$NS" -l app=whoami --no-headers 2>/dev/null | grep -c ' Pending ')" = "1" ] &&
+    [ "$(kubectl get pods -n "$NS" -l app=whoami --no-headers 2>/dev/null | grep -c ' Running ')" = "$((REPLICAS - 1))" ] &&
+    kubectl get events -n "$NS" 2>/dev/null | grep -q 'FailedScheduling'
+}
+
+need_cluster
+bash "$HERE/../cleanup.sh"
+port_free 9218 || die "Port 9218 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
+
+# Replicas = nodes that accept new Pods + 1. (kind: the control-plane node is tainted, so 3 nodes -> 2 -> 3 replicas.)
+NODES=$(schedulable_node_count)
+[ "$NODES" -ge 1 ] || die "No node accepts new Pods right now (all tainted or cordoned). Check: kubectl get nodes"
+REPLICAS=$((NODES + 1))
+
+fresh_ns "$NS" || die "Could not create the namespace $NS."
+
+say "Scaling whoami for the open-house traffic ($REPLICAS Pods)…"
+kubectl create configmap visitor-config -n "$NS" --from-literal=want="$REPLICAS" >/dev/null || die "Could not create the visitor settings."
+kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
+kubectl scale deployment/whoami -n "$NS" --replicas="$REPLICAS" >/dev/null || die "Could not scale whoami."
+
+wait_for "the visitor to start" 180 visitor_up \
+  || die "The visitor Pod didn't start. Run cleanup.sh and try again."
+wait_for "whoami to finish scaling" 180 one_waiting \
+  || die "The Pods never settled as expected. Run cleanup.sh and try again."
+
+show_next \
+  "whoami is scaled out to $REPLICAS Pods for the open house, and the site still answers. But is every Pod pulling its weight? Watch the visitor: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
+  "kubectl get pods -n $NS"

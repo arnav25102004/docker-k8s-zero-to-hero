@@ -1,0 +1,42 @@
+# K18 break (2/2): a small visitor that calls the Service 20 times every round and reports how many
+# different Pods answered, against how many Pods the Deployment is supposed to have (ConfigMap visitor-config,
+# created by break.sh). The live signal on stage.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-18-anti-affinity
+  labels: { app: visitor }
+spec:
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      env:
+        - name: WANT
+          valueFrom:
+            configMapKeyRef:
+              name: visitor-config
+              key: want
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            seen=""
+            i=0
+            while [ "$i" -lt 20 ]; do
+              h=$(wget -q -T 2 -O - http://whoami 2>/dev/null | grep '^Hostname:' | cut -d' ' -f2)
+              if [ -n "$h" ]; then
+                case " $seen " in *" $h "*) ;; *) seen="$seen $h" ;; esac
+              fi
+              i=$((i + 1))
+            done
+            n=$(echo $seen | wc -w)
+            names=$(echo $seen | tr ' ' '\n' | sed 's/.*-//' | sort | paste -sd, -)
+            if [ "$n" -ge "$WANT" ]; then
+              echo "✅ $(date +%T) all $n of $WANT Pods answered ($names)"
+            else
+              echo "❌ $(date +%T) only $n of $WANT Pods answered ($names)"
+            fi
+            sleep 1
+          done
