@@ -8,3 +8,4 @@ All are pinned to an exact tag (or digest) and published for linux/amd64 and lin
 | `busybox:1.36` | about 4 MB | K01, K02 (the `visitor` Pod) |
 | `curlimages/curl:8.11.1` | about 12 MB | test harness only (`in_cluster_http`), not shown to learners |
 | `python:3.12-alpine` | about 19 MB download (about 80 MB on disk) | K03 and later Cats vs Dogs scenarios (the app code comes from a ConfigMap) |
+| `corentinth/it-tools:2024.10.22-7ca5933` | about 24 MB | K04 and later IT-Tools scenarios |

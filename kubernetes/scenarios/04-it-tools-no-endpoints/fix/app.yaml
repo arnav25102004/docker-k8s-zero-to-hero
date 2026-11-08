@@ -1,0 +1,40 @@
+# K04 fix: the Service selects the same labels the Pods carry (tier: backend).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tools
+  namespace: k-04-no-endpoints
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tools
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: tools
+        tier: backend
+    spec:
+      containers:
+        - name: tools
+          image: corentinth/it-tools:2024.10.22-7ca5933
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tools
+  namespace: k-04-no-endpoints
+spec:
+  selector:
+    app: tools
+    tier: backend
+  ports:
+    - port: 80
+      targetPort: 80
