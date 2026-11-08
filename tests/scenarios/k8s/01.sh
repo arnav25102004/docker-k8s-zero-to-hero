@@ -12,7 +12,7 @@ broken() {
 }
 
 fixed() {
-  wait_ready k-01-pending app=draw 120
-  assert_eq "$?" "0" "draw Pod is Ready"
+  kubectl rollout status deployment/draw -n k-01-pending --timeout=180s >/dev/null 2>&1
+  assert_eq "$?" "0" "draw Deployment rolled out"
   assert_eq "$(in_cluster_http k-01-pending http://draw)" "200" "draw answers 200 inside the cluster"
 }

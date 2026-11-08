@@ -57,7 +57,7 @@ NAME                    READY   STATUS             RESTARTS   AGE
 draw-74476d7d7c-49ggd   0/1     ImagePullBackOff   0          23s
 visitor                 1/1     Running            0          23s
 ```
-(Ages and Pod names will differ.) Run it a few times: `STATUS` flips between `ErrImagePull` and `ImagePullBackOff`. `0` restarts, because the container never even started. The `visitor` is fine, so the cluster works. Only the whiteboard Pod is stuck.
+(Ages and Pod names will differ.) Run it a few times: `STATUS` flips between `ErrImagePull` and `ImagePullBackOff` (you may catch both). `0` restarts, because the container never even started. The `visitor` is fine, so the cluster works. Only the whiteboard Pod is stuck.
 
 <details><summary>💡 Hint</summary>
 "Pull" means downloading the image. The status only says that the pull failed. Where does Kubernetes write <em>why</em>? And what is the exact image name the Deployment asks for? Read it letter by letter.
