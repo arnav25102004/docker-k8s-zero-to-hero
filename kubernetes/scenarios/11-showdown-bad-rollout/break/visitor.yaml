@@ -1,0 +1,23 @@
+# A small visitor that asks the app which version it got, every 2 seconds: the live signal on stage.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-11-bad-rollout
+spec:
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            v=$(wget -q -T 2 -O- http://showdown/api/info 2>/dev/null | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+            if [ -n "$v" ]; then
+              echo "✅ $(date +%T) v$v"
+            else
+              echo "❌ $(date +%T) no answer from http://showdown/api/info"
+            fi
+            sleep 2
+          done

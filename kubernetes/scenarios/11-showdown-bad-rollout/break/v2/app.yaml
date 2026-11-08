@@ -1,0 +1,56 @@
+# K11 break, step 2: release v2 (the Friday release). PORT is a word, so every new Pod crashes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-11-bad-rollout
+  annotations:
+    kubernetes.io/change-cause: "v2 Friday release"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: APP_VERSION
+              value: "2.0.0"
+            - name: PORT
+              value: "eighty"    # a word, not a number
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 2
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
