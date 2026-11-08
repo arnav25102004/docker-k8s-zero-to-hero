@@ -32,6 +32,9 @@ delete_ns() {
       sleep 1
       i=$((i + 1))
     done
+    if kubectl get namespace "$ns" >/dev/null 2>&1; then
+      warn "Namespace $ns is still terminating after 120s. Check: kubectl get namespace $ns"
+    fi
   done
   return 0
 }
@@ -100,9 +103,12 @@ pod_reason() {
 
 # scenario_k8s_cleanup NS...: stop port-forwards, delete namespaces. Never fails.
 scenario_k8s_cleanup() {
-  local first="$1" id
+  local first="$1" id ns
   stop_port_forwards "$@"
   delete_ns "$@"
+  for ns in "$@"; do
+    kubectl get namespace "$ns" >/dev/null 2>&1 && return 0
+  done
   id="k${first#k-}"
   id="${id%%-*}"
   printf '✅ Scenario %s cleaned up\n' "$id"

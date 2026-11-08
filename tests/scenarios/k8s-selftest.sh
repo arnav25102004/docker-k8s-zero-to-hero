@@ -19,7 +19,7 @@ TMPD="$(mktemp -d)"
 cleanup_all() {
   [ -n "$PF_PID" ] && kill "$PF_PID" >/dev/null 2>&1
   pkill -f "port-forward -n k-98-selftest" >/dev/null 2>&1
-  for n in k-99-selftest k-98-selftest k-97-selftest; do
+  for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest; do
     kubectl delete namespace "$n" --ignore-not-found --wait=false >/dev/null 2>&1
   done
   rm -rf "$TMPD"
@@ -130,13 +130,68 @@ test_showdown_configmap() {
 }
 
 test_pod_reason() {
-  local f=0 r
+  local f=0 r i
   bash -c "source '$LIB'; fresh_ns k-97-selftest" >/dev/null 2>&1
   kubectl run -n k-97-selftest bad --image=busybox:1.36 --restart=Never --labels=app=bad -- sh -c 'exit 3' >/dev/null 2>&1
-  sleep 8
+  i=0
+  while [ "$i" -lt 60 ] && [ -z "$(kubectl get pod bad -n k-97-selftest -o jsonpath='{.status.containerStatuses[0].state.terminated.reason}' 2>/dev/null)" ]; do
+    sleep 1; i=$((i + 1))
+  done
   r=$(bash -c "source '$LIB'; pod_reason k-97-selftest app=bad" 2>&1)
   check "reason is Error or Failed (got $r)" bash -c "[ \"$r\" = Error ] || [ \"$r\" = Failed ]" || f=1
   bash -c "source '$LIB'; delete_ns k-97-selftest" >/dev/null 2>&1
+  return $f
+}
+
+# Builds a dummy scenario in a temp dir. $1 = expected first assert value (ok/bad).
+make_dummy_scenario() { # DIR
+  local d="$1"
+  mkdir -p "$d/break" "$d/fix"
+  cat >"$d/cleanup.sh" <<SH
+#!/usr/bin/env bash
+source '$LIB'
+scenario_k8s_cleanup k-96-selftest
+SH
+  cat >"$d/break/break.sh" <<SH
+#!/usr/bin/env bash
+source '$LIB'
+fresh_ns k-96-selftest
+kubectl run -n k-96-selftest bb --image=busybox:1.36 --restart=Never -- sleep 3600
+SH
+  cat >"$d/fix/fix.sh" <<SH
+#!/usr/bin/env bash
+kubectl label pod bb -n k-96-selftest fixed=yes
+SH
+}
+
+run_dummy_cycle() { # DIR BROKEN_EXPECT -> runs run_cycle_k8s in a subshell
+  (
+    # shellcheck source=/dev/null
+    source "$REPO/tests/scenarios/k8s-lib.sh"
+    BROKEN_EXPECT="$2"
+    broken() { assert_eq "$(kubectl get pod bb -n k-96-selftest -o jsonpath='{.metadata.labels.fixed}')" "$BROKEN_EXPECT" "pod not fixed yet"; }
+    fixed() { assert_eq "$(kubectl get pod bb -n k-96-selftest -o jsonpath='{.metadata.labels.fixed}')" "yes" "pod fixed"; }
+    run_cycle_k8s "$1" k96 k-96-selftest
+  )
+}
+
+test_run_cycle_k8s_happy_path() {
+  local f=0 d="$TMPD/dummy-ok" rc
+  make_dummy_scenario "$d"
+  run_dummy_cycle "$d" "" >"$TMPD/ok.out" 2>&1; rc=$?
+  cat "$TMPD/ok.out"
+  check "run_cycle_k8s returns 0 on success" rc_is "$rc" 0 || f=1
+  return $f
+}
+
+test_run_cycle_k8s_failing_assert() {
+  local f=0 d="$TMPD/dummy-bad" rc out
+  make_dummy_scenario "$d"
+  out=$(run_dummy_cycle "$d" "WRONG" 2>&1); rc=$?
+  printf '%s\n' "$out"
+  check "run_cycle_k8s returns 1 on failing assert" rc_is "$rc" 1 || f=1
+  check "reports the failed step" has "$out" "FAILED at step: broken" || f=1
+  bash "$d/cleanup.sh" >/dev/null 2>&1
   return $f
 }
 
@@ -148,7 +203,8 @@ test_lib_sourcing_is_quiet() {
 
 for t in test_no_cluster_message test_refuses_foreign_context test_lib_sourcing_is_quiet \
          test_cleanup_waits_for_namespace test_cleanup_stops_port_forward \
-         test_showdown_configmap test_pod_reason; do
+         test_showdown_configmap test_pod_reason \
+         test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert; do
   run_test "$t"
 done
 

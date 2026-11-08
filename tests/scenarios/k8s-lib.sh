@@ -27,6 +27,12 @@ in_cluster_http() {
 
 # wait_ready NS SELECTOR SECONDS: wait until the selected Pods are Ready.
 wait_ready() {
+  local i=0
+  # kubectl wait -l errors at once when no Pod matches yet: poll for existence first.
+  while [ "$i" -lt "$3" ] && [ -z "$(kubectl get pods -n "$1" -l "$2" -o name 2>/dev/null)" ]; do
+    sleep 1
+    i=$((i + 1))
+  done
   kubectl wait --for=condition=Ready pod -l "$2" -n "$1" --timeout="${3}s" >/dev/null 2>&1
 }
 
@@ -45,7 +51,7 @@ nothing_left_k8s() {
 # run_cycle_k8s DIR ID NS...: cleanup -> break -> broken -> fix -> fixed -> cleanup
 # -> nothing left. Twice. broken() and fixed() must be defined by the caller.
 run_cycle_k8s() {
-  local dir="$1" id="$2" n ns
+  local dir="$1" id="$2" n
   shift 2
   for n in 1 2; do
     printf '  -- cycle %s/2\n' "$n"
@@ -56,8 +62,6 @@ run_cycle_k8s() {
     _check fixed "$n" fixed || return 1
     _step "final cleanup" "$n" "$dir/cleanup.sh" || return 1
     nothing_left_k8s "$id" "$@" || { printf '  FAILED at step: nothing-left check (cycle %s)\n' "$n"; return 1; }
-    for ns in "$@"; do
-      kubectl get namespace "$ns" >/dev/null 2>&1 && { printf '  FAILED: namespace %s still exists (cycle %s)\n' "$ns" "$n"; return 1; }
-    done
   done
+  return 0
 }

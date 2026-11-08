@@ -23,6 +23,11 @@ else
   done
 fi
 
+if [ -z "${NUMS# }" ]; then
+  printf 'No scenarios found under kubernetes/scenarios/ (and none given on the command line).\n' >&2
+  exit 1
+fi
+
 PASSED=""; FAILED=""
 for nn in $NUMS; do
   printf '== Scenario %s\n' "$nn"
