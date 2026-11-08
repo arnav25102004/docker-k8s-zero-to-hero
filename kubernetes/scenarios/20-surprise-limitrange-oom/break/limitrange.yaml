@@ -1,0 +1,14 @@
+# The namespace's house rule, set by the "platform team": every container that does not
+# say how much memory it needs gets a 16Mi request and a 32Mi limit.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-memory
+  namespace: k-20-limitrange
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        memory: 16Mi
+      default:
+        memory: 32Mi
