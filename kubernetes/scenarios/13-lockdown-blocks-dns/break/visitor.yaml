@@ -1,0 +1,23 @@
+# A small visitor that asks the app "are you ready?" (waiting up to 8 s: the broken lookup takes 5 s to give up): the live signal on stage.
+# (Its label is not "app: showdown", so the lockdown policy does not touch it.)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-13-lockdown
+spec:
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            if wget -q -T 8 -O /dev/null http://showdown/readyz 2>/dev/null; then
+              echo "✅ $(date +%T) HTTP 200"
+            else
+              echo "❌ $(date +%T) http://showdown/readyz says: not ready"
+            fi
+            sleep 2
+          done

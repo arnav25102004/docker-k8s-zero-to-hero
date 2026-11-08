@@ -1,0 +1,73 @@
+# K13 break: Cats vs Dogs plus a "security hardening" NetworkPolicy called lockdown.
+# Once a policy selects Pods for Egress, everything not listed is blocked.
+# lockdown lists only Redis on 6379, so the DNS lookup of "redis" (port 53) is dropped.
+# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-13-lockdown
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: REDIS_HOST
+              value: "redis"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showdown
+  namespace: k-13-lockdown
+spec:
+  selector:
+    app: showdown
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: lockdown
+  namespace: k-13-lockdown
+spec:
+  podSelector:
+    matchLabels:
+      app: showdown
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - port: 6379
+          protocol: TCP

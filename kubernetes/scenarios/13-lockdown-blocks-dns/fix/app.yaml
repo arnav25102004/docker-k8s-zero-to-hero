@@ -1,0 +1,80 @@
+# K13 fix: same app, same lockdown policy, plus one new egress rule: DNS (port 53) to kube-system.
+# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-13-lockdown
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: REDIS_HOST
+              value: "redis"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showdown
+  namespace: k-13-lockdown
+spec:
+  selector:
+    app: showdown
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: lockdown
+  namespace: k-13-lockdown
+spec:
+  podSelector:
+    matchLabels:
+      app: showdown
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - port: 6379
+          protocol: TCP
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
