@@ -12,3 +12,4 @@ All are pinned to an exact tag (or digest) and published for linux/amd64 and lin
 | `kanboard/kanboard:v1.2.57` | about 33 MB | K06, K10 |
 | `adminer:5.4.1` | about 46 MB | K09 |
 | `redis:7.4.12-alpine` | about 59 MB on disk | K12, K13 and K15 (the real Redis behind Service `redis`) |
+| `nginx:1.27.5-alpine` | about 21 MB download (about 50 MB on disk) | K16 (serves the Dosa Dash page from a ConfigMap) |
