@@ -7,4 +7,4 @@ if ! kubectl get --raw /readyz >/dev/null 2>&1; then
   warn "Can't reach the cluster: nothing to clean up."
   exit 0
 fi
-scenario_k8s_cleanup k-24-wrong-command
+scenario_k8s_cleanup k-24-never-ran

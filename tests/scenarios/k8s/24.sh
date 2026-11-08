@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Spec for scenario K24 (24-showdown-wrong-command). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
-NAMESPACES="k-24-wrong-command"
+NAMESPACES="k-24-never-ran"
 # shellcheck source=/dev/null
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && pwd)/_lib.sh"
 
-NS24="k-24-wrong-command"
+NS24="k-24-never-ran"
 
 broken() {
   assert_contains "$(kubectl get events -n "$NS24" 2>&1)" "executable file not found" "events say the executable was not found"

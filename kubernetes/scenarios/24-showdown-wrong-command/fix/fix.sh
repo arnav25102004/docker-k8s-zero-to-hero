@@ -5,7 +5,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
-NS="k-24-wrong-command"
+NS="k-24-never-ran"
 
 rolled_out() { kubectl rollout status deployment/showdown -n "$NS" --timeout=2s; }
 

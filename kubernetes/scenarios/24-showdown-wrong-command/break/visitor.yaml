@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: visitor
-  namespace: k-24-wrong-command
+  namespace: k-24-never-ran
 spec:
   containers:
     - name: visitor

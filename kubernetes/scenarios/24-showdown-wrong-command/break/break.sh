@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# K24 break: deploys the Cats vs Dogs app and waits until its Pod has failed to start.
+# K24 break: deploys the Cats vs Dogs app and waits for its Pod to settle.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
-NS="k-24-wrong-command"
+NS="k-24-never-ran"
 
-# The Pod has restarted at least once and the events carry the failure text.
+# Settled = the Pod has restarted at least once and a Warning event is recorded.
 settled() {
   local restarts
   restarts=$(kubectl get pods -n "$NS" -l app=showdown -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null)
   [ "${restarts:-0}" -ge 1 ] || return 1
-  kubectl get events -n "$NS" 2>/dev/null | grep -q "executable file not found"
+  kubectl get events -n "$NS" --field-selector type=Warning 2>/dev/null | grep -q "showdown"
 }
 
 visitor_up() { [ "$(kubectl get pod visitor -n "$NS" -o jsonpath='{.status.phase}' 2>/dev/null)" = "Running" ]; }

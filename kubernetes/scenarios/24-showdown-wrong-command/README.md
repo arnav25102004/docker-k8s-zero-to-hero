@@ -16,7 +16,7 @@ Starting a container is two steps, done by two different parties. The **kubelet*
 
 - If the program can't be started at all (the file isn't there, or it isn't executable), the runtime reports the failure to the kubelet, and the kubelet records it as an **Event**. Your app never ran, so it has nothing to say.
 - That is the difference from [K03](../03-showdown-crashloop/README.md), where the app *did* start, ran its own code and crashed with a traceback you could read in `logs --previous`. Here the kubelet could not even exec the program.
-- The status names depend on the runtime and the moment: you may see `RunContainerError` (first tries), `StartError` as the last state, then `CrashLoopBackOff` while the kubelet waits longer between tries. Same cause, different moment.
+- The status names depend on the runtime and the moment: you may see `RunContainerError` and `CrashLoopBackOff` alternate, with `StartError` as the container's last state. Same cause, different moment. Other runtimes (CRI-O, Docker Desktop) may use a different reason or exit code; the constant is the `executable file not found` text.
 
 Think of a taxi booking. K03 is a driver who arrives and then drives off the road. K24 is a booking app that sends the driver to an address that doesn't exist: there is no journey to report, only the dispatcher's note that the pickup failed.
 
@@ -37,12 +37,12 @@ cd break && ./break.sh
 ```
 What the room should see: the script says the app was deployed, but nobody can vote. A small `visitor` Pod keeps asking the app for `/healthz` every 2 seconds and gets no answer:
 ```bash
-kubectl logs -f visitor -n k-24-wrong-command
+kubectl logs -f visitor -n k-24-never-ran
 ```
 ```
-❌ 20:06:37 no answer from http://showdown/healthz
-❌ 20:06:40 no answer from http://showdown/healthz
-❌ 20:06:43 no answer from http://showdown/healthz
+❌ 20:11:29 no answer from http://showdown/healthz
+❌ 20:11:32 no answer from http://showdown/healthz
+❌ 20:11:35 no answer from http://showdown/healthz
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
@@ -51,18 +51,14 @@ Guess first, then run these **in order**.
 
 **1. What state is the Pod in?**
 ```bash
-kubectl get pods -n k-24-wrong-command
+kubectl get pods -n k-24-never-ran
 ```
 ```
 NAME                        READY   STATUS             RESTARTS      AGE
-showdown-664d656997-j2hzh   0/1     CrashLoopBackOff   1 (21s ago)   22s
-visitor                     1/1     Running            0             22s
+showdown-664d656997-ffhrx   0/1     CrashLoopBackOff   1 (17s ago)   18s
+visitor                     1/1     Running            0             18s
 ```
-(Ages and Pod names will differ.) The restart count is already going up. Run it again a few times: `STATUS` can also read `RunContainerError` for a moment, between `CrashLoopBackOff` periods:
-```
-NAME                        READY   STATUS              RESTARTS     AGE
-showdown-664d656997-j2hzh   0/1     RunContainerError   2 (8s ago)   30s
-```
+(Ages and Pod names will differ.) The restart count is already going up. Run it again a few times: `STATUS` can also read `RunContainerError` for a moment, alternating with `CrashLoopBackOff`.
 The `visitor` is fine, so the cluster works. Only the app Pod is stuck.
 
 <details><summary>💡 Hint</summary>
@@ -71,21 +67,23 @@ Every other time a Pod misbehaved, the app's own words told us what was wrong. A
 
 **2. What does the app say?** The natural first move for any sick Pod is its logs.
 ```bash
-kubectl logs -n k-24-wrong-command -l app=showdown
+kubectl logs -n k-24-never-ran -l app=showdown
 ```
 ```
+(no output)
 ```
-Nothing. (Your terminal just returns to the prompt, with no output at all.) The `--previous` flag won't help either, the dead container never wrote a line:
+Nothing. (Your terminal just returns to the prompt.) The `--previous` flag won't help either, the dead container never wrote a line:
 ```bash
-kubectl logs -n k-24-wrong-command -l app=showdown --previous
+kubectl logs -n k-24-never-ran -l app=showdown --previous
 ```
 ```
+(no output)
 ```
-Also nothing. That silence **is** the clue: a program that ran and crashed leaves words behind, as K03 showed. A program that never ran leaves none. So the answer is not in the logs. It's in what Kubernetes itself recorded.
+Also nothing (some runtimes print `previous terminated container not found` instead, which says the same thing). That silence **is** the clue: a program that ran and crashed leaves words behind, as K03 showed. A program that never ran leaves none. So the answer is not in the logs. It's in what Kubernetes itself recorded.
 
 **3. How did the container end?** `describe` shows the container's last state, and the restart count.
 ```bash
-kubectl describe pod -n k-24-wrong-command -l app=showdown | grep -A8 'Last State'
+kubectl describe pod -n k-24-never-ran -l app=showdown | grep -A8 'Last State'
 ```
 ```
     Last State:     Terminated
@@ -93,31 +91,32 @@ kubectl describe pod -n k-24-wrong-command -l app=showdown | grep -A8 'Last Stat
       Message:      failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "pyhton": executable file not found in $PATH
       Exit Code:    128
       Started:      Thu, 01 Jan 1970 05:30:00 +0530
-      Finished:     Mon, 09 Nov 2026 01:36:36 +0530
+      Finished:     Mon, 09 Nov 2026 01:41:28 +0530
     Ready:          False
     Restart Count:  1
+    Readiness:      http-get http://:8080/readyz delay=0s timeout=1s period=10s #success=1 #failure=3
 ```
-(Wording and the exact reason differ by runtime: `StartError` and `containerd` here, a different name on others.) Look at what is *missing*: the container was never really `Started` (that 1970 date is just "zero"), the exit code is 128 rather than the app's own, and the message comes from the runtime. It says it tried to run a program called `"pyhton"` and couldn't find it. `Restart Count` shows the kubelet tried again anyway.
+(Wording, reason and exit code differ by runtime: `StartError` and `containerd` here, something else on CRI-O or Docker Desktop, and some show no `Started` date.) Look at what is *missing*: the container was never really `Started` (that 1970 date is just "zero"), the exit code is 128 rather than the app's own, and the message comes from the runtime. It says it tried to run a program called `"pyhton"` and couldn't find it. `Restart Count` shows the kubelet tried again anyway.
 
 **4. What else did Kubernetes write down?** The Events at the bottom of `describe` are the kubelet's diary.
 ```bash
-kubectl describe pod -n k-24-wrong-command -l app=showdown | sed -n '/^Events:/,$p'
+kubectl describe pod -n k-24-never-ran -l app=showdown | sed -n '/^Events:/,$p'
 ```
 ```
 Events:
   Type     Reason     Age                From               Message
   ----     ------     ----               ----               -------
-  Normal   Scheduled  23s                default-scheduler  Successfully assigned k-24-wrong-command/showdown-664d656997-j2hzh to z2h-test-worker2
-  Warning  BackOff    13s (x2 over 21s)  kubelet            spec.containers{showdown}: Back-off restarting failed container showdown in pod showdown-664d656997-j2hzh_k-24-wrong-command(d71e9d41-1efc-4608-9045-b747fd83d49a)
-  Normal   Pulled     1s (x3 over 23s)   kubelet            spec.containers{showdown}: Container image "python:3.12-alpine" already present on machine
-  Normal   Created    1s (x3 over 23s)   kubelet            spec.containers{showdown}: Created container: showdown
-  Warning  Failed     1s (x3 over 22s)   kubelet            spec.containers{showdown}: Error: failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "pyhton": executable file not found in $PATH
+  Normal   Scheduled  18s                default-scheduler  Successfully assigned k-24-never-ran/showdown-664d656997-ffhrx to z2h-test-worker
+  Normal   Pulled     17s (x2 over 17s)  kubelet            spec.containers{showdown}: Container image "python:3.12-alpine" already present on machine
+  Normal   Created    17s (x2 over 17s)  kubelet            spec.containers{showdown}: Created container: showdown
+  Warning  Failed     17s (x2 over 17s)  kubelet            spec.containers{showdown}: Error: failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "pyhton": executable file not found in $PATH
+  Warning  BackOff    7s (x2 over 16s)   kubelet            spec.containers{showdown}: Back-off restarting failed container showdown in pod showdown-664d656997-ffhrx_k-24-never-ran(571b015a-700d-4c71-9a61-c8f96cf68951)
 ```
-(shortened: wording and the order of lines differ by Kubernetes version and runtime; yours may be `Failed to create ... ` instead.) The image was pulled fine, the container was created, and then the `Failed` event says `exec: "pyhton": executable file not found in $PATH`. The runtime looked for a program with that name and there is none.
+(Wording and order of lines differ by Kubernetes version and runtime. The `Failed` line is the one to look for.) The image was pulled fine, the container was created, and then the `Failed` event says `exec: "pyhton": executable file not found in $PATH`. The runtime looked for a program with that name and there is none.
 
 **5. Where does `pyhton` come from?**
 ```bash
-kubectl get deploy showdown -n k-24-wrong-command -o yaml | grep -A2 'command:'
+kubectl get deploy showdown -n k-24-never-ran -o yaml | grep -A2 'command:'
 ```
 ```
       - command:
@@ -135,7 +134,7 @@ The Deployment sets `command: ["pyhton", "/app/app.py"]`, a typo of `python`. Wh
 ## 🔧 Fix it
 Before you run it, open a **second terminal** and start the live visitor log, so the room sees red turn green:
 ```bash
-kubectl logs -f visitor -n k-24-wrong-command
+kubectl logs -f visitor -n k-24-never-ran
 ```
 Then, in the first terminal:
 ```bash
@@ -164,32 +163,32 @@ Kubernetes starts a new Pod with the right program name and removes the old one.
 
 ## ✅ Verify it yourself
 ```bash
-kubectl get pods -n k-24-wrong-command
+kubectl get pods -n k-24-never-ran
 ```
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
-showdown-598996fc89-5fgrh   1/1     Running   0          7s
-visitor                     1/1     Running   0          38s
+showdown-598996fc89-vxrtg   1/1     Running   0          9s
+visitor                     1/1     Running   0          35s
 ```
 (Ages and Pod names will differ.) One app Pod, `Running`, `1/1` Ready and `0` restarts. The visitor's log is green again (if you still see a ❌, wait a few seconds and run it again):
 ```bash
-kubectl logs visitor -n k-24-wrong-command --tail=3
+kubectl logs visitor -n k-24-never-ran --tail=3
 ```
 ```
-✅ 20:07:09 HTTP 200
-✅ 20:07:11 HTTP 200
-✅ 20:07:13 HTTP 200
+✅ 20:11:56 HTTP 200
+✅ 20:11:58 HTTP 200
+✅ 20:12:00 HTTP 200
 ```
 And now the app has something to say, because it finally got to run:
 ```bash
-kubectl logs -n k-24-wrong-command -l app=showdown
+kubectl logs -n k-24-never-ran -l app=showdown
 ```
 ```
-2026-11-08T20:07:07 [showdown-598996fc89-5fgrh] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in MEMORY (this container only)
+2026-11-08T20:11:54 [showdown-598996fc89-vxrtg] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in MEMORY (this container only)
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
-kubectl port-forward -n k-24-wrong-command svc/showdown 9224:80
+kubectl port-forward -n k-24-never-ran svc/showdown 9224:80
 ```
 ```
 Forwarding from 127.0.0.1:9224 -> 8080
