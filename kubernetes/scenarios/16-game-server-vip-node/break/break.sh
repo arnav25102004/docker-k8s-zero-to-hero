@@ -19,7 +19,7 @@ bash "$HERE/../cleanup.sh"
 port_free 9216 || die "Port 9216 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 fresh_ns "$NS" || die "Could not create the namespace $NS."
 
-say "Reserving every node for VIP workloads (taint z2h-vip=true:NoSchedule)…"
+say "Applying a cluster-wide node change (cleanup.sh reverts it)…"
 # --all also covers a control-plane node that already has its own taint, and the only node of a 1-node cluster.
 # --overwrite makes a re-run harmless. NoSchedule only stops NEW Pods; Pods already running stay.
 kubectl taint nodes --all z2h-vip=true:NoSchedule --overwrite >/dev/null || die "Could not taint the nodes."

@@ -2,16 +2,16 @@
 
 *The nodes are up. The game is ready. Kubernetes says: you're not on the list.*
 
-⏱ 12 min · beginner · Dosa Dash (a small HTML5 game, served by `nginx:1.27.5-alpine`) · taints and tolerations
+⏱ 12 min · beginner · Dosa Dash (a small HTML5 game, served by `nginx:1.27.5-alpine`) · how Pods get a node
 
 ⬇️ The tiny 4 MB visitor image downloads when you break it. The nginx image (about 21 MB) downloads only at fix time, because the game Pods never start while it is broken. On a cold cluster the fix moment waits on that download (up to a minute or two). Presenters: preload it (`kubernetes/scenarios/preload.sh`) or run the scenario once before class, on good Wi-Fi.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> **This scenario touches the whole cluster.** `break.sh` puts a *taint* (a label that repels Pods, see below) on **every node**; `cleanup.sh` takes it off again. Run it on a practice cluster, not a shared one, and always finish with `./cleanup.sh`.
+> **This scenario changes every node in the cluster; `cleanup.sh` reverts it exactly.** Run it on a practice cluster, not a shared one, and always finish with `./cleanup.sh`. If you skip it, the change stays on every node, and every later scenario's Pods will sit in `Pending` with an event that looks just like this one. Recovery: re-run `./cleanup.sh` (safe at any time), or run `kubectl taint nodes --all z2h-vip-`.
 
 ## 📖 The story
-Priya has built **Dosa Dash**, a catch-the-dosa game for the college fest, and Ravi deploys it. The cluster is healthy and every node says `Ready`. But the game never starts: both Pods sit in `Pending`. A day earlier, Meera from the platform team reserved every node "for VIP workloads" before the big fest demo, and nobody told the game's team. The cluster has room. The nodes simply won't take any Pod that isn't on the list.
+Priya has built **Dosa Dash**, a catch-the-dosa game for the college fest, and Ravi deploys it. The cluster is healthy and every node says `Ready`. But the game never starts: both Pods sit in `Pending`. Yesterday Meera from the platform team changed something on the nodes before the big fest demo, and nobody told the game's team. The cluster has plenty of room, yet nothing new gets a place.
 
 ## 🧠 The concept: why, what, how
 Normally the scheduler may put a Pod on any node with room. Sometimes a team wants to say "not here, unless you really need to be":
@@ -19,6 +19,7 @@ Normally the scheduler may put a Pod on any node with room. Sometimes a team wan
 - A **taint** is a mark on a **node** that *repels* Pods: `z2h-vip=true:NoSchedule` means "no new Pod may land here".
 - A **toleration** is a note in the **Pod** that says "I can live with that taint". It is a *permission*, not an instruction.
 - A toleration does **not attract** a Pod to a node. It only stops the node from refusing it. (Steering Pods *towards* certain nodes is a different tool: you will meet it in [K17](../17-ai-trainer-needs-gpu/README.md).)
+- `NoSchedule` only blocks *new* Pods; Pods already running stay. (`NoExecute`, not used here, also evicts running Pods that don't tolerate it.)
 - Think of a club with a guest list: the taint is the bouncer's rule ("VIPs only"), the toleration is your name on the list. Being on the list lets you in; it does not make you walk there.
 
 ```
@@ -37,7 +38,7 @@ Normally the scheduler may put a Pod on any node with room. Sometimes a team wan
 ```bash
 cd break && ./break.sh
 ```
-What the room should see: the script says it is reserving every node, then deploys the game and finishes. Two `game` Pods are not running. A small `visitor` Pod, which asks for the game every few seconds, gets no answer:
+What the room should see: the script announces a cluster-wide node change, then deploys the game and finishes. Two `game` Pods are not running. A small `visitor` Pod, which asks for the game every few seconds, gets no answer:
 ```bash
 kubectl logs -f visitor -n k-16-vip-node
 ```
@@ -46,7 +47,7 @@ kubectl logs -f visitor -n k-16-vip-node
 ❌ 19:41:15 no answer from http://game
 ❌ 19:41:18 no answer from http://game
 ```
-(Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things. (The visitor itself *does* run: it is the player, not the game, so it was given a toleration from the start. Otherwise the same taint would have refused it too.)
+(Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things. (The visitor itself *does* run: it is the player, not the game, so it was set up differently from the start. We'll see how later.)
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
@@ -201,7 +202,7 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
-This also removes the `z2h-vip` taint from every node. You can check: `kubectl describe nodes | grep -A2 Taints` no longer lists `z2h-vip`.
+This also removes the `z2h-vip` taint from every node. Don't skip it: otherwise the taint stays on every node, and every later scenario's Pods sit in `Pending` with an event that looks just like this one. If that happens, re-run `./cleanup.sh` (safe at any time) or run `kubectl taint nodes --all z2h-vip-`. You can check: `kubectl describe nodes | grep -A2 Taints` no longer lists `z2h-vip`.
 
 ## Next →
 [K17](../17-ai-trainer-needs-gpu/README.md): The trainer is waiting for a GPU that this cluster doesn't have.
