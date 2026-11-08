@@ -8,7 +8,7 @@
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> **This scenario changes every node in the cluster; `cleanup.sh` reverts it exactly.** Run it on a practice cluster, not a shared one, and always finish with `./cleanup.sh`. If you skip it, the change stays on every node, and every later scenario's Pods will sit in `Pending` with an event that looks just like this one. Recovery: re-run `./cleanup.sh` (safe at any time), or run `kubectl taint nodes --all z2h-vip-`.
+> **This scenario changes every node in the cluster; `cleanup.sh` reverts it exactly.** Run it on a practice cluster, not a shared one, and always finish with `./cleanup.sh`. If you skip it, the change stays on every node, and every later scenario's Pods will sit in `Pending` with an event that looks just like this one. Recovery: re-run `./cleanup.sh` (safe at any time; the Clean up section has the manual command).
 
 ## 📖 The story
 Priya has built **Dosa Dash**, a catch-the-dosa game for the college fest, and Ravi deploys it. The cluster is healthy and every node says `Ready`. But the game never starts: both Pods sit in `Pending`. Yesterday Meera from the platform team changed something on the nodes before the big fest demo, and nobody told the game's team. The cluster has plenty of room, yet nothing new gets a place.
