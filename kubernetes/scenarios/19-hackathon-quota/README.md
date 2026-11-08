@@ -16,7 +16,7 @@ A shared cluster is like a shared hostel kitchen: if one team switches on every 
 
 - A **ResourceQuota** is a budget for a whole namespace: "all Pods together may *request* at most 500m of CPU and 256Mi of memory, and may be *limited* to at most 1 CPU and 512Mi".
 - A Pod states its needs with **requests** (what it asks the scheduler to reserve) and **limits** (the ceiling it may not exceed).
-- Here is the surprise: once a quota covers CPU or memory, **every Pod in that namespace must declare those numbers**. The quota can't count what a Pod doesn't say, so it refuses the Pod.
+- Here is the surprise: once a quota covers CPU or memory, **every Pod in that namespace must declare the numbers the quota counts** (a quota on `requests.cpu` alone would only need that one request). The quota can't count what a Pod doesn't say, so it refuses the Pod.
 - And the refusal happens at the door: the API server says no *before the Pod exists*. A Pod that was never created can't be `Pending` or `Failed`. It just isn't there.
 - Who tries to create the Pods? Not you. A Deployment creates a **ReplicaSet**, and the ReplicaSet creates the Pods. So the complaint is written on the ReplicaSet.
 
@@ -43,7 +43,7 @@ kubectl logs -f visitor -n k-19-hackathon
 ❌ 19:53:09 no answer from http://dashboard
 ❌ 19:53:12 no answer from http://dashboard
 ```
-(Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
+(Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things. (The visitor itself *does* run: it declares its own numbers, and we'll see why.)
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
@@ -163,7 +163,7 @@ By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix
 kubectl apply -f app.yaml
 ```
 
-**Why add resources, and not raise the quota?** You *could* ask for a bigger quota, but here the budget was never the problem: the dashboard asks for very little (50m CPU and 32Mi per Pod), and the quota has room for many more. A quota is the platform team's decision, and the app team's job is to say what its Pods need. If the numbers truly don't fit, that is a conversation about the budget, not a reason to remove it. Keep the limits modest but not tiny: a Pod that tries to use more memory than its limit gets killed (you will meet exactly that in K08).
+**Why add resources, and not raise the quota?** You *could* ask for a bigger quota, but here the budget was never the problem: the dashboard asks for very little (50m CPU and 32Mi per Pod), and the quota has room for many more. A quota is the platform team's decision, and the app team's job is to say what its Pods need. If the numbers truly don't fit, that is a conversation about the budget, not a reason to remove it. A platform team has another option: a **LimitRange** fills in default requests and limits for containers that omit them, so the quota would admit them. This namespace has none, which is why the Pods were refused; [K20](../20-surprise-limitrange-oom/README.md) shows the surprising side of a LimitRange. Whatever the source, keep the limits modest but not tiny: a Pod that tries to use more memory than its limit gets killed (you will meet exactly that in K08).
 
 ## ✅ Verify it yourself
 ```bash
@@ -223,7 +223,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9219
 ```bash
 kubectl run test -n k-19-hackathon --image=busybox:1.36 --command -- sleep 60
 ```
-It is refused with the same `failed quota … must specify` message (the exact wording can differ by version). That is why the `visitor` Pod in this scenario declares its own requests and limits.
+It is refused with the same `failed quota … must specify` message, right at your terminal, because no ReplicaSet sits in between to hide the error (the exact wording can differ by version). That is why the `visitor` Pod in this scenario declares its own requests and limits.
 
 ## 🎯 Key takeaways
 - **A quota is a budget for a namespace.** Once it covers CPU or memory, every Pod there must declare `requests` and `limits`, and all of them together must fit.
