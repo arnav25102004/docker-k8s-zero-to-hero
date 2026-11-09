@@ -14,7 +14,6 @@ Every container gets its **own private network**, like its own flat in an apartm
 
 - `localhost` is a perspective, not a place: it means "me", whoever "me" is.
 - To reach another container, use its **name** (`d03-redis`) on a **user-defined network** (`d03-net`). Docker runs a tiny phone book there that turns names into addresses.
-- An image carries **defaults** (`ENV` lines in its Dockerfile). A container can override any of them **at run time** with `-e NAME=value`. The run-time value wins.
 
 ```
  Browser ──▶ API container ──✖──▶ "localhost" = the API itself
@@ -24,41 +23,42 @@ Every container gets its **own private network**, like its own flat in an apartm
 
 ## 🏢 Where you'll meet this at work
 - **The #1 docker-compose bug:** an app moved from a laptop (where everything was `localhost`) into containers (every developer, every platform team).
-- **A database URL baked into an image** that still says `localhost` after the app moves to Kubernetes (developer, SRE).
+- **A database URL in a config file** that still says `localhost` after the app moves to Kubernetes (developer, SRE).
 - **"Works on my machine"** during a Friday deploy, when the only difference is where the dependency lives (SRE).
 
 ## 💥 Break it
-Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They sit together so that the build command is just `docker build -t d03-api:1.0 .` (the `.` means "build from this folder"). Type these yourself, from inside a copy of the folder (`cp -R break work && cd work`):
+Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder (if `work/` already exists, run `rm -rf work` first):
 ```bash
-docker build -t d03-api:1.0 .
+cp -R break work
+docker build -t d03-api:1.0 work
 docker network create d03-net
 docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
 docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
 ```
-Or use the one-line shortcut, which makes a fresh `work/` copy and prints (`▶ $`) every command it runs:
+Or use the one-line shortcut, which prints (`▶ $`) every command it runs, the same ones as above:
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 (Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` first, so paths are not rewritten.) The room should see: open http://localhost:8103 (playground: the port 8103 URL), press a vote button, and the status bar blinks and the feed shows "Request failed: [Errno 111] Connection refused".
 
 The real run, from `./break.sh` (shortened; the build prints more lines the first time because nothing is cached):
 ```
 ✅ Scenario d03 cleaned up
-▶ fresh copy of break/ in work/
-▶ $ docker build -t d03-api:1.0 .
+▶ $ rm -rf work
+▶ $ cp -R break work
+▶ $ docker build -t d03-api:1.0 work
 ...
-#10 naming to docker.io/library/d03-api:1.0 done
 ▶ $ docker network create d03-net
-f14caba0a3ce877bfa5fb4d933c72965ff97caec8d37d763657f66bc9e4e5ce6
+ea04609a84124f4310d3f741505bacafa244744fa6c2f590e9241a3e41059973
 ▶ $ docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
-e26971635938e071ebcf60e62cf8379f4982d6f615cc6a4ad0c300c9df5184bc
+ac5c28f676421f9b75a800c1b6824a32aa629fe60a464ec4f8e791cbada44619
 ▶ $ docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
-def3acac233609d2fa05e616d2d44c1a63cc6ea5e6e8a91fceb414cff34db7d1
+6331b56e39d4cb041828c762ca49aee9a2584e97514688475530497ca065ecd5
 ⏳ Waiting for the API to answer on port 8103 . ✔ ready
 ```
 
 ## 🔍 Investigate
-Guess first, then run these **in order**. Stay in the scenario folder (`cd ..` if you are still in `break/`).
+Guess first, then run these **in order**. Stay in this scenario folder.
 
 **1. Is the app ready?** Start with the app's own health check.
 ```bash
@@ -89,9 +89,9 @@ Both **Up**, the API even says **(healthy)**. "Healthy" only means the web serve
 docker logs d03-api
 ```
 ```
-2026-11-09T09:14:28 [def3acac2336] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis localhost
-2026-11-09T09:14:29 [def3acac2336] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
-2026-11-09T09:14:34 [def3acac2336] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
+2026-11-09T10:07:02 [6331b56e39d4] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis localhost
+2026-11-09T10:07:03 [6331b56e39d4] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
+2026-11-09T10:07:08 [6331b56e39d4] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
 ```
 The very first line says it: votes are stored in `redis localhost`. (The lines repeat every few seconds.)
 
@@ -136,7 +136,7 @@ Both containers live on `d03-net`, so they *can* talk (the order may differ). Re
 docker exec d03-api python -c "import socket;print(socket.gethostbyname('d03-redis'))"
 ```
 ```
-172.19.0.2
+172.20.0.2
 ```
 (Your address may differ.) The name works. Now try the name the app is using:
 ```bash
@@ -159,14 +159,14 @@ What changed: the `Dockerfile` stays exactly as it is. Only the run line for the
 before: docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
 after:  docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0
 ```
-Why at run time, and not by editing the `ENV` line? A name like `d03-redis` is a fact about *where* the container runs (this network, this laptop), not about the image. If you bake it in, you need a new image for every place you run it. With `-e`, one image runs anywhere, and the same value later moves to a compose file or a Kubernetes manifest. (Just deleting the `ENV` line would be no fix: the app would find no Redis setting and quietly keep votes in its own memory instead.)
+An image carries **defaults** (`ENV` lines in its Dockerfile), and a container can override any of them **at run time** with `-e NAME=value`; the run-time value wins. So why fix it at run time, and not by editing the `ENV` line? A name like `d03-redis` is a fact about *where* the container runs (this network, this laptop), not about the image. If you bake it in, you need a new image for every place you run it. With `-e`, one image runs anywhere, and the same value later moves to a compose file or a Kubernetes manifest. (Just deleting the `ENV` line would be no fix: the app would find no Redis setting and quietly keep votes in its own memory instead.)
 
 By hand: remove the old API container and start a new one with the flag. The image is not rebuilt.
 ```bash
 docker rm -f d03-api
 docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0
 ```
-Or run `cd fix && ./fix.sh`, which does the same two commands and prints them.
+Or run `./fix/fix.sh`, which does the same two commands and prints them.
 
 ## ✅ Verify it yourself
 ```bash
@@ -192,14 +192,14 @@ curl -s "localhost:8103/api/vote?option=cats"
 curl -s "localhost:8103/api/vote?option=cats"
 ```
 ```
-{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "bd289c59da9e", "version": "1.0.0"}
-{"voted": "cats", "results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "bd289c59da9e", "version": "1.0.0"}
+{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
+{"voted": "cats", "results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
 ```
 ```bash
 curl -s localhost:8103/api/results
 ```
 ```
-{"results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "bd289c59da9e", "version": "1.0.0"}
+{"results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
 ```
 (`served_by` is the container ID, so yours will differ. If you voted in the browser first, your counts will be higher.)
 
@@ -214,7 +214,7 @@ curl -s localhost:8103/api/results
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 (This also removes the `work/` folder and the `d03-api:1.0` image.)
 

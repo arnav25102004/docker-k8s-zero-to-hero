@@ -14,10 +14,11 @@ port_free 8103 || die "Port 8103 is busy, so this scenario can't start. Free it 
 ensure_image "redis:7.4.12-alpine" "about 17 MB"
 ensure_image "python:3.12-alpine" "about 19 MB"
 
-prepare_work "$HERE"
-cd "$HERE/../work" || die "Could not enter work/."
+cd "$HERE/.." || die "Could not enter the scenario folder."
 
-run_shown docker build -t d03-api:1.0 . || die "The build failed. Read the message above."
+run_shown rm -rf work || die "Could not remove the old work/ folder."
+run_shown cp -R break work || die "Could not copy break/ to work/."
+run_shown docker build -t d03-api:1.0 work || die "The build failed. Read the message above."
 run_shown docker network create d03-net || die "Could not create the network d03-net."
 run_shown docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine || die "docker run failed. Is Docker healthy?"
 run_shown docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0 || die "docker run failed. Is port 8103 free?"
