@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · "Campus quick links" page (Homer dashboard, `b4bz/homer:v25.10.1`) · ConfigMap volumes, `items`, reading Events
 
-⬇️ The tiny 4 MB visitor image downloads when you break it. The Homer image (about 7 MB) usually downloads only at fix time, because the Pod is stuck before its container is ever created. That is quick, even on slow Wi-Fi. Presenters: preload it (`kubernetes/scenarios/preload.sh`) if you like.
+⬇️ The tiny 4 MB visitor image downloads when you break it. The Homer image (about 7 MB) is usually pulled later, at fix time. That is quick, even on slow Wi-Fi. Presenters: preload it (`kubernetes/scenarios/preload.sh`) if you like.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
@@ -35,8 +35,8 @@ What the room should see: the script deploys the dashboard and a small `visitor`
 kubectl logs -f visitor -n k-27-config-key
 ```
 ```
-❌ 00:18:27 no answer from http://dashboard
-❌ 00:18:30 no answer from http://dashboard
+❌ 00:27:07 no answer from http://dashboard
+❌ 00:27:10 no answer from http://dashboard
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
@@ -49,8 +49,8 @@ kubectl get pods -n k-27-config-key
 ```
 ```
 NAME                         READY   STATUS              RESTARTS   AGE
-dashboard-76b8d8f4cb-vk2w7   0/1     ContainerCreating   0          37s
-visitor                      1/1     Running             0          37s
+dashboard-76b8d8f4cb-stpjx   0/1     ContainerCreating   0          17s
+visitor                      1/1     Running             0          17s
 ```
 (Pod names and ages will differ.) The dashboard is `0/1` and `ContainerCreating`, and it has been for a while. `ContainerCreating` is normal for a few seconds (the Pod is being set up). Staying there is not. It has no restarts and no `CrashLoopBackOff`, so the container never even started.
 
@@ -66,10 +66,10 @@ kubectl describe pod -n k-27-config-key -l app=dashboard | sed -n '/^Events:/,$p
 Events:
   Type     Reason       Age               From               Message
   ----     ------       ----              ----               -------
-  Normal   Scheduled    37s               default-scheduler  Successfully assigned k-27-config-key/dashboard-76b8d8f4cb-vk2w7 to z2h-test-worker2
-  Warning  FailedMount  5s (x7 over 36s)  kubelet            MountVolume.SetUp failed for volume "config" : configmap references non-existent config key: config.yml
+  Normal   Scheduled    24s               default-scheduler  Successfully assigned k-27-config-key/dashboard-76b8d8f4cb-stpjx to z2h-test-worker2
+  Warning  FailedMount  8s (x6 over 24s)  kubelet            MountVolume.SetUp failed for volume "config" : configmap references non-existent config key: config.yml
 ```
-(Which node, and the exact wording, can differ a little between Kubernetes versions. The `x7` means the kubelet has tried, and failed, seven times already.) The Pod was **scheduled** fine. Then the **kubelet** failed to set up the volume called `config`, and the message says a key doesn't exist.
+(Which node, and the exact wording, can differ a little between Kubernetes versions. The `x6` means the kubelet has tried, and failed, six times already.) The Pod was **scheduled** fine. Then the **kubelet** failed to set up the volume called `config`, and the message says a key doesn't exist.
 
 **3. What does that volume look like?** The Events named the volume `config`: see what it is built from.
 ```bash
@@ -81,10 +81,10 @@ Volumes:
     Type:      ConfigMap (a volume populated by a ConfigMap)
     Name:      homer-config
     Optional:  false
-  kube-api-access-k2qmg:
+  kube-api-access-s726f:
     Type:                    Projected (a volume that contains injected data from multiple sources)
 ```
-The volume `config` comes from the ConfigMap `homer-config`, and it is **not optional**: the Pod will not start without it. (`kube-api-access-…` is a volume Kubernetes adds to every Pod; ignore it.)
+The volume `config` comes from the ConfigMap `homer-config`, and it is **not optional** (`Optional: false`). We checked what that means for `items`: a listed key that is missing stops the Pod, unless the volume says `optional: true`, in which case the Pod starts anyway, just without that file. Failing loudly is the safer default, because skipping silently would hide a typo like this one. (`kube-api-access-…` is a volume Kubernetes adds to every Pod; ignore it.)
 
 **4. What does the Deployment ask for from it?** The `items` list is the shopping list.
 ```bash
@@ -119,12 +119,12 @@ Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-It prints a couple of "waiting" lines and finishes. On our cold test cluster it took about half a minute, and the visitor flipped from ❌ to ✅ (Ctrl+C to stop it):
+`fix.sh` corrects the ConfigMap and also restarts the Pod, so you don't wait out the kubelet's retry timer. It prints a few "waiting" lines and finishes. On our test cluster, with Homer already downloaded, it finished in a couple of seconds (add the 7 MB download the first time), and the visitor flipped from ❌ to ✅ (Ctrl+C to stop it):
 ```
-❌ 00:19:00 no answer from http://dashboard
-❌ 00:19:03 no answer from http://dashboard
-✅ 00:19:05 HTTP 200
-✅ 00:19:07 HTTP 200
+❌ 00:27:58 no answer from http://dashboard
+❌ 00:28:01 no answer from http://dashboard
+✅ 00:28:03 HTTP 200
+✅ 00:28:05 HTTP 200
 ```
 (shortened.) What changed: only the name of the key in the ConfigMap. Run this from the `27-dashboard-config-missing-key` folder:
 ```bash
@@ -145,10 +145,13 @@ diff break/links.yaml fix/links.yaml
 By hand (this replaces `./fix.sh`, so you don't need to run both):
 ```bash
 kubectl apply -f fix/links.yaml
+kubectl rollout restart deployment/dashboard -n k-27-config-key
 kubectl rollout status deployment/dashboard -n k-27-config-key --timeout=180s
 ```
 
-**Did we need to restart the Pod?** No, and it is worth knowing why. We did not touch the Pod: the kubelet was already retrying the volume setup in a loop, with pauses that grow between attempts (up to about 2 minutes). Once the key existed, the next retry worked and the container started by itself: it is the **same Pod** as before (compare the name in Verify with step 1). So after fixing the ConfigMap you may wait up to a couple of minutes, depending on where the retry timer is. If you don't want to wait, `kubectl rollout restart deployment/dashboard -n k-27-config-key` makes a new Pod straight away.
+**Why the restart?** Side note: it is not strictly needed here. The kubelet keeps retrying the failed volume setup, with pauses that grow up to about 2 minutes, so once the key exists the **same Pod** would start by itself (we saw that on our cluster in an earlier rehearsal, about half a minute after the fix). But at a presenter's pace the retry timer may be at its longest, which means dead air. The restart replaces the Pod at once.
+
+**Careful, this only worked because the container never started.** With a mount that uses `subPath`, like this one, a **running** Pod never sees later edits to the ConfigMap. So when you change config for a Pod that is already running, restart it (see [K23](../23-dark-mode-not-applied/README.md)).
 
 ## ✅ Verify it yourself
 ```bash
@@ -156,16 +159,16 @@ kubectl get pods -n k-27-config-key
 ```
 ```
 NAME                         READY   STATUS    RESTARTS   AGE
-dashboard-76b8d8f4cb-vk2w7   1/1     Running   0          71s
+dashboard-5675cc44ff-zvl6r   1/1     Running   0          16s
 visitor                      1/1     Running   0          71s
 ```
-(Names and ages will differ.) The dashboard is `1/1` and `Running`, with **0 restarts**, and it is the same Pod name as in step 1. The visitor's log is green (if you still see a ❌, wait a few seconds and run it again):
+(Names and ages will differ.) The dashboard is `1/1` and `Running`, with **0 restarts**, and it is a **new** Pod (a different name and a younger age than the visitor), because `fix.sh` restarted it. The visitor's log is green (if you still see a ❌, wait a few seconds and run it again):
 ```bash
 kubectl logs visitor -n k-27-config-key --tail=2
 ```
 ```
-✅ 00:19:05 HTTP 200
-✅ 00:19:07 HTTP 200
+✅ 00:28:21 HTTP 200
+✅ 00:28:23 HTTP 200
 ```
 Now open the page yourself. In a **second terminal** (leave it running):
 ```bash
@@ -191,7 +194,7 @@ header: true
 - **`ContainerCreating` that never ends** means the container was never created: look at the Pod's Events, not its logs.
 - **`FailedMount` in the Events** is the kubelet saying "I couldn't build a volume". Read the rest of the line: it names the volume and what was missing.
 - **Names must match exactly.** A key listed under `items` has to exist in the ConfigMap; `.yml` and `.yaml` are different strings.
-- **Fix the ConfigMap, and the kubelet's own retry finishes the job.** No restart is needed, only some patience (up to about two minutes).
+- **Fix the ConfigMap, then restart the Pod.** A stuck Pod would start by itself on the kubelet's next retry (up to about two minutes), but restart it to skip the wait. And remember the caveat: that worked only because the container never started. A running Pod with a `subPath` mount never sees later ConfigMap edits, so restart it.
 
 ## 💎 Lifelong lesson
 > `ContainerCreating` that never ends is almost always storage or config. Read the Events.

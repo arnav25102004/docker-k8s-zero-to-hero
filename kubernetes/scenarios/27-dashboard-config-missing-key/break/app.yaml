@@ -24,8 +24,8 @@ spec:
               path: /
               port: 8080
           volumeMounts:
-            # Homer reads its settings from /www/assets/config.yml. A single-file mount (subPath)
-            # leaves the rest of /www/assets (icons, fonts) in place.
+            # Homer reads its settings from /www/assets. A single-file mount (subPath)
+            # leaves the rest of that folder in place.
             - name: config
               mountPath: /www/assets/config.yml
               subPath: config.yml
