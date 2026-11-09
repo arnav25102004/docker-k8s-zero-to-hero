@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · "Campus Today" notice page (a tiny Python page, `python:3.12-alpine`, about 19 MB) · ConfigMaps, `envFrom`, `rollout restart`
 
-⬇️ First run downloads about 19 MB (Python) plus a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
+⬇️ First run downloads about 19 MB (Python) plus a tiny visitor image (a few MB). A slow first download is normal: do it on good Wi-Fi, before the session.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
@@ -14,7 +14,7 @@ The campus has screens in the canteen, the library and the main gate, all showin
 ## 🧠 The concept: why, what, how
 A **ConfigMap** keeps settings outside your container image, so one image can run in many places with different settings. A Pod can receive a ConfigMap in two main ways:
 
-- **As environment variables** (`envFrom` or `env`): Kubernetes copies the values into the container's environment at the moment the container is created. After that, they are part of that running process, like a name tag pinned on a person.
+- **As environment variables** (`envFrom` or `env`): Kubernetes copies the values into the container's environment at the moment the container is created. After that, they are part of that running process.
 - **As a mounted file**: the ConfigMap shows up as files in a folder. When the ConfigMap changes, Kubernetes eventually updates those files in running Pods (it can take a minute or so).
 
 Analogy: the ConfigMap is the notice on the office board, the environment variable is what you wrote on your hand this morning. Changing the board doesn't change your hand.
@@ -35,9 +35,8 @@ What the room should see: the script deploys the page, waits until it is ready, 
 kubectl logs -f visitor -n k-23-dark-mode
 ```
 ```
-❌ 20:02:49 the site is light, the design team wants dark
-❌ 20:02:51 the site is light, the design team wants dark
-❌ 20:02:53 the site is light, the design team wants dark
+❌ 00:02:18 the site is light, the design team wants dark
+❌ 00:02:20 the site is light, the design team wants dark
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
@@ -50,13 +49,13 @@ kubectl get pods,configmap -n k-23-dark-mode
 ```
 ```
 NAME                         READY   STATUS    RESTARTS   AGE
-pod/theme-5bcbd76f65-ck7vp   1/1     Running   0          22s
-pod/visitor                  1/1     Running   0          22s
+pod/theme-57d49d955c-cmfpf   1/1     Running   0          18s
+pod/visitor                  1/1     Running   0          18s
 
 NAME                         DATA   AGE
-configmap/kube-root-ca.crt   1      23s
-configmap/theme-code         1      22s
-configmap/ui-settings        1      22s
+configmap/kube-root-ca.crt   1      18s
+configmap/theme-code         1      18s
+configmap/ui-settings        1      18s
 ```
 (Pod names and ages will differ.) Everything is `Running` and `1/1`. No restarts, no errors. A healthy-looking cluster with a wrong page.
 
@@ -74,7 +73,7 @@ data:
   THEME: dark
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2026-11-08T20:02:32Z"
+  creationTimestamp: "2026-11-09T00:02:01Z"
   name: ui-settings
   namespace: k-23-dark-mode
 ```
@@ -82,12 +81,12 @@ metadata:
 
 **3. What does the running container see?** Ask the Pod itself, from the inside.
 ```bash
-kubectl exec deploy/theme -n k-23-dark-mode -- env | grep '^THEME='
+kubectl exec deploy/theme -n k-23-dark-mode -- printenv THEME
 ```
 ```
-THEME=light
+light
 ```
-**Light.** The ConfigMap says dark and the container says light. (We use `'^THEME='` because Kubernetes also adds variables like `THEME_SERVICE_HOST` for the Service named `theme`; a plain `grep THEME` would list those too.)
+**Light.** The ConfigMap says dark and the container says light.
 
 **4. What did the app itself report?** The app prints one line when it starts.
 ```bash
@@ -106,6 +105,7 @@ kubectl describe pod -n k-23-dark-mode -l app=theme | grep -A3 "Environment Vari
     Environment Variables from:
       ui-settings  ConfigMap  Optional: false
     Environment:   <none>
+    Mounts:
 ```
 The whole ConfigMap `ui-settings` is passed in as environment variables. So the container did get its value from the right place. The question is *when*.
 
@@ -115,10 +115,10 @@ kubectl get pod -n k-23-dark-mode -l app=theme -o jsonpath='Container started: {
 kubectl get cm ui-settings -n k-23-dark-mode -o jsonpath='{range .metadata.managedFields[?(@.manager=="kubectl-patch")]}ConfigMap changed:  {.time}{"\n"}{end}'
 ```
 ```
-Container started: 2026-11-08T20:02:32Z
-ConfigMap changed:  2026-11-08T20:02:34Z
+Container started: 2026-11-09T00:02:02Z
+ConfigMap changed:  2026-11-09T00:02:03Z
 ```
-(Times will differ, and the gap is only a couple of seconds here because `break.sh` patches the ConfigMap right after the page is ready; in real life it is often days.) The container started **before** the ConfigMap changed. The Pod is older than the change.
+(The second command only reads *when* the patch happened from the ConfigMap's bookkeeping; it changes nothing.) (Times will differ, and the gap is only a couple of seconds here because `break.sh` patches the ConfigMap right after the page is ready; in real life it is often days.) The container started **before** the ConfigMap changed. The Pod is older than the change.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -135,19 +135,18 @@ Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-Within about half a minute the log flips from ❌ to ✅ (there may be a short "not answering" while the new Pod takes over; Ctrl+C to stop it):
+Within about half a minute the log flips from ❌ to ✅ (Ctrl+C to stop it):
 ```
-❌ 20:03:07 the site is light, the design team wants dark
-❌ 20:03:11 the site is not answering, the design team wants dark
-✅ 20:03:13 the site is dark
-✅ 20:03:15 the site is dark
+❌ 00:02:20 the site is light, the design team wants dark
+✅ 00:02:22 the site is dark
+✅ 00:02:24 the site is dark
 ```
 (shortened.) What changed: there is no file to diff this time. The fix is a **new Pod**. `rollout restart` stamps a time into the Pod template, and a changed template makes the Deployment replace its Pods:
 ```bash
 kubectl get deploy theme -n k-23-dark-mode -o jsonpath='{.spec.template.metadata.annotations}{"\n"}'
 ```
 ```
-{"kubectl.kubernetes.io/restartedAt":"2026-11-09T01:33:07+05:30"}
+{"kubectl.kubernetes.io/restartedAt":"2026-11-09T05:32:19+05:30"}
 ```
 (The time will differ.) The new Pod started *after* the ConfigMap changed, so it copied `dark`.
 
@@ -157,7 +156,7 @@ kubectl rollout restart deployment/theme -n k-23-dark-mode
 kubectl rollout status deployment/theme -n k-23-dark-mode
 ```
 
-It is a rolling restart: the new Pod must be Ready before the old one goes away. (Deleting the Pod by hand would also work for one Pod, but `rollout restart` is the polite way for a Deployment.)
+It is a rolling restart: the new Pod must be Ready before the old one goes away, and the old Pod waits a few seconds before stopping (a small `preStop` pause in `break/app.yaml`), so visitors never see a gap. (Deleting the Pod by hand would also work for one Pod, but `rollout restart` is the polite way for a Deployment.)
 
 **Doing this properly, so nobody has to remember.** Two common ways, shown here only so you recognise them; we don't run them:
 
@@ -177,24 +176,24 @@ kubectl get pods -n k-23-dark-mode
 ```
 ```
 NAME                     READY   STATUS    RESTARTS   AGE
-theme-85df5847d8-ncwlb   1/1     Running   0          18s
-visitor                  1/1     Running   0          53s
+theme-78b9dbb88d-79rjx   1/1     Running   0          16s
+visitor                  1/1     Running   0          34s
 ```
-(Names and ages will differ. The old Pod may show `Terminating` for a few seconds first.) The Pod is new (18s, while the visitor is older). Ask it what it sees now:
+(Names and ages will differ. The old Pod may show `Terminating` for a few seconds first.) The Pod is new (16s, while the visitor is older). Ask it what it sees now:
 ```bash
-kubectl exec deploy/theme -n k-23-dark-mode -- env | grep '^THEME='
+kubectl exec deploy/theme -n k-23-dark-mode -- printenv THEME
 ```
 ```
-THEME=dark
+dark
 ```
 The visitor's log is green (if you still see a ❌, wait a few seconds and run it again):
 ```bash
 kubectl logs visitor -n k-23-dark-mode --tail=3
 ```
 ```
-✅ 20:03:19 the site is dark
-✅ 20:03:21 the site is dark
-✅ 20:03:23 the site is dark
+✅ 00:02:30 the site is dark
+✅ 00:02:32 the site is dark
+✅ 00:02:34 the site is dark
 ```
 Now open the page yourself. In a **second terminal** (leave it running):
 ```bash

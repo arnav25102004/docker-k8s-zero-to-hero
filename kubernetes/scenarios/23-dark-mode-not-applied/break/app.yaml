@@ -21,6 +21,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: ui-settings
+          # On shutdown, wait 5 s before stopping the app. This keeps the old Pod serving until the
+          # Service stops sending it traffic, so a restart leaves no gap for visitors.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
           ports:
             - containerPort: 8080
           readinessProbe:

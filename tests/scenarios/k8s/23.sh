@@ -27,5 +27,12 @@ broken() {
 fixed() {
   kubectl rollout status deployment/theme -n k-23-dark-mode --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "theme Deployment rolled out"
-  assert_eq "$(in_cluster_body k-23-dark-mode http://theme/theme)" "dark" "the page answers dark"
+  # The old Pod may still be answering for a moment while the Service updates: allow a short settle time.
+  local i body=""
+  for i in 1 2 3 4 5 6; do
+    body=$(in_cluster_body k-23-dark-mode http://theme/theme)
+    [ "$body" = "dark" ] && break
+    sleep 2
+  done
+  assert_eq "$body" "dark" "the page answers dark"
 }
