@@ -10,9 +10,9 @@ app_answers() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 http://
 need_docker
 cd "$HERE" || die "Could not enter $HERE"
 docker image inspect d13-site:1.0 >/dev/null 2>&1 || {
-  say "Building Priya's portfolio: docker build -t d13-site:1.0 ."
+  say "Building Priya's portfolio: docker build -t d13-site:1.0 fix"
   docker build -q --label z2h.scenario=d13 -t d13-site:1.0 . >/dev/null \
-    || die "The build failed. Try: docker build -t d13-site:1.0 ."
+    || die "The build failed. Try: docker build -t d13-site:1.0 fix"
 }
 docker rm -f d13-site >/dev/null 2>&1
 say "Starting it again, no mount: docker run -d --name d13-site -p 8113:80 d13-site:1.0"

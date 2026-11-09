@@ -10,7 +10,7 @@ export WEATHER_API_KEY="z2h-demo-key-NOT-REAL-123"
 
 need_docker
 cd "$HERE" || die "Could not enter $HERE"
-say "Rebuilding with a build secret: docker build --secret id=weather_key,env=WEATHER_API_KEY -t d14-weather:fixed ."
+say "Rebuilding with a build secret: docker build --secret id=weather_key,env=WEATHER_API_KEY -t d14-weather:fixed fix"
 docker build --label z2h.scenario=d14 --secret id=weather_key,env=WEATHER_API_KEY -t d14-weather:fixed . \
   || die "The build failed. Is Docker up to date? Try: docker version"
 say "Running it, with the key given at runtime: docker run --rm -e WEATHER_API_KEY=<demo key> d14-weather:fixed"

@@ -28,7 +28,7 @@ Scenario `NN` uses host port `81NN` (a second app, if any, uses `82NN`). The log
 
 ## How a session runs
 
-Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`).
+Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`), in all 15 scenarios: `./break/break.sh`, `./fix/fix.sh`, `./cleanup.sh`, no `cd`. (D01 to D09 are files-first, as described below. D10 to D15 start from the shortcut and build the files in `break/` and `fix/` directly, with paths like `docker build -t X break`.)
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
 2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`; D06 adds `--build`). The one-line shortcut is `./break/break.sh`. It prints every Docker command it runs, exactly as you would type it.

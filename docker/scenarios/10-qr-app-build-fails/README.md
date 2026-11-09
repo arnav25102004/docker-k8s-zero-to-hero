@@ -28,7 +28,7 @@ your folder ──▶ .dockerignore filter ──▶ build context (the box) ─
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 The room should see a wall of red text: `docker build` stops with an error, and then `docker run` complains that the image `d10-qr:1.0` can't be found. Nothing is running at http://localhost:8110 (playground: the port 8110 URL) because the app was never built.
 
@@ -45,9 +45,9 @@ ERROR: failed to build: failed to solve: ... "/qrcode.min.js": not found
 ```
 Step 3 of 4 failed: Docker says `/qrcode.min.js` doesn't exist. (The two lines before it, `index.html` and the base image, were fine.)
 
-**2. Is the file really missing?** Look at the folder:
+**2. Is the file really missing?** Look at the `break` folder (you are still in the scenario folder):
 ```bash
-ls
+ls break
 ```
 ```
 Dockerfile    LICENSE       break.sh      index.html    qrcode.min.js
@@ -60,7 +60,7 @@ Docker doesn't read your folder, it reads a package your computer sends to it. I
 
 **3. What else is in this folder?** Show the hidden files too:
 ```bash
-ls -a
+ls -a break
 ```
 ```
 .              .dockerignore  LICENSE        index.html
@@ -70,7 +70,7 @@ ls -a
 
 **4. What does it say?**
 ```bash
-cat .dockerignore
+cat break/.dockerignore
 ```
 ```
 *.js
@@ -79,7 +79,7 @@ One line: leave out every file ending in `.js`. `qrcode.min.js` ends in `.js`.
 
 **5. Does Docker agree?** Build again with the full, plain log, and look at the start:
 ```bash
-docker build --progress=plain -t d10-qr:1.0 .
+docker build --progress=plain -t d10-qr:1.0 break
 ```
 ```
 #1 [internal] load build definition from Dockerfile
@@ -108,14 +108,14 @@ Just the header: no image was built.
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 What changed: `break/` and `fix/` hold the same app. Only `.dockerignore` differs:
 ```bash
-diff -r ../break . | grep -v "^Only in"
+diff -r break fix | grep -v "^Only in"
 ```
 ```
-diff --color -r ../break/.dockerignore ./.dockerignore
+diff --color -r break/.dockerignore fix/.dockerignore
 1c1,2
 < *.js
 ---
@@ -124,8 +124,8 @@ diff --color -r ../break/.dockerignore ./.dockerignore
 ```
 (The first line may read just `diff -r ...` without `--color` on your computer.) Now it leaves out only test files (`*.test.js`) and the huge `node_modules/` folder, and `qrcode.min.js` goes through. By hand, the fix is to edit `.dockerignore` and build again:
 ```bash
-printf '*.test.js\nnode_modules/\n' > .dockerignore
-docker build -t d10-qr:1.0 .
+printf '*.test.js\nnode_modules/\n' > fix/.dockerignore
+docker build -t d10-qr:1.0 fix
 docker run -d --name d10-qr -p 8110:80 d10-qr:1.0
 ```
 
@@ -180,7 +180,7 @@ src="qrcode.min.js"
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 
 ## Credits

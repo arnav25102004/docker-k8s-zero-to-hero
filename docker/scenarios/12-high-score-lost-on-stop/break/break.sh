@@ -15,10 +15,10 @@ bash "$HERE/../cleanup.sh"
 port_free 8112 || die "Port 8112 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 ensure_image "$BASE_IMAGE" "about 19 MB"
 
-say "Building the game: docker build -t d12-game:1.0 ."
+say "Building the game: docker build -t d12-game:1.0 break"
 cd "$HERE" || die "Could not enter $HERE"
 docker build -q --label z2h.scenario=d12 -t d12-game:1.0 . >/dev/null \
-  || die "The build failed. Try: docker build -t d12-game:1.0 ."
+  || die "The build failed. Try: docker build -t d12-game:1.0 break"
 docker volume create --label z2h.scenario=d12 d12-data >/dev/null || die "Could not create the volume d12-data."
 say "Starting it: docker run -d --name d12-game -p 8112:8000 -v d12-data:/data d12-game:1.0"
 docker run -d --name d12-game --label z2h.scenario=d12 -p 8112:8000 -v d12-data:/data d12-game:1.0 >/dev/null \

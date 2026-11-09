@@ -9,8 +9,8 @@ app_answers() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 http://
 
 need_docker
 cd "$HERE" || die "Could not enter $HERE"
-say "Building the QR app: docker build -t d10-qr:1.0 ."
-docker build --label z2h.scenario=d10 -t d10-qr:1.0 . || die "The build failed. Did you run break.sh first? Try: docker build -t d10-qr:1.0 ."
+say "Building the QR app: docker build -t d10-qr:1.0 fix"
+docker build --label z2h.scenario=d10 -t d10-qr:1.0 . || die "The build failed. Did you run break.sh first? Try: docker build -t d10-qr:1.0 fix"
 docker rm -f d10-qr >/dev/null 2>&1
 say "Starting it: docker run -d --name d10-qr -p 8110:80 d10-qr:1.0"
 docker run -d --name d10-qr --label z2h.scenario=d10 -p 8110:80 d10-qr:1.0 >/dev/null \

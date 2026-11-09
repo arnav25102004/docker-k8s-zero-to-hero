@@ -30,7 +30,7 @@ service_healthy         db starts ─▶ health check… healthy ─▶ app star
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 The script runs `docker compose up -d` and waits a moment. The room should see Compose's own output, ending with both containers started and no error (shortened; the exact look depends on your Compose version):
 ```
@@ -98,11 +98,11 @@ Same code, same files, now it works. That is the "run it again and it works?!" m
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 What changed: `break/` and `fix/` hold the same `app.py`. Only `compose.yaml` differs:
 ```bash
-diff ../break/compose.yaml compose.yaml
+diff break/compose.yaml fix/compose.yaml
 ```
 ```
 1c1
@@ -120,9 +120,9 @@ diff ../break/compose.yaml compose.yaml
 >       db:
 >         condition: service_healthy
 ```
-The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool; `-h 127.0.0.1` makes it knock on the network door the app will use), and the app waits for `service_healthy`. By hand, this replaces `./fix.sh`:
+The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool; `-h 127.0.0.1` makes it knock on the network door the app will use), and the app waits for `service_healthy`. By hand, this replaces `./fix/fix.sh`:
 ```bash
-docker compose -p d15 -f compose.yaml up -d
+docker compose -p d15 -f fix/compose.yaml up -d
 ```
 
 ## ✅ Verify it yourself
@@ -163,7 +163,7 @@ db-1   | 2026-11-07T18:55:23.473254631Z 2026-11-07 18:55:23 UTC [1] LOG:  databa
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 
 ## Next →

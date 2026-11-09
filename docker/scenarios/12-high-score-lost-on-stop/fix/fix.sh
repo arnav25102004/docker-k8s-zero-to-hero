@@ -9,9 +9,9 @@ app_answers() { curl -s -o /dev/null --max-time 2 http://localhost:8112/api/scor
 
 need_docker
 cd "$HERE" || die "Could not enter $HERE"
-say "Rebuilding with the fixed Dockerfile: docker build -t d12-game:1.0 ."
+say "Rebuilding with the fixed Dockerfile: docker build -t d12-game:1.0 fix"
 docker build -q --label z2h.scenario=d12 -t d12-game:1.0 . >/dev/null \
-  || die "The build failed. Try: docker build -t d12-game:1.0 ."
+  || die "The build failed. Try: docker build -t d12-game:1.0 fix"
 docker rm -f d12-game >/dev/null 2>&1
 docker volume create --label z2h.scenario=d12 d12-data >/dev/null || die "Could not create the volume d12-data."
 say "Starting it again: docker run -d --name d12-game -p 8112:8000 -v d12-data:/data d12-game:1.0"

@@ -37,7 +37,7 @@ Think of a **password written into every printed answer booklet**: whoever gets 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 The room should see a normal, happy build: the widget runs and prints a Bengaluru forecast, and the image gets a second name, `d14-weather:shared`, as if it were sent to the team. Nothing is red. (Docker may print a yellow warning about `SecretsUsedInArgOrEnv` while building. Most people scroll past it.) Notice that the widget started without anyone passing it a key.
 
@@ -115,21 +115,21 @@ The Dockerfile takes the key as a build **`ARG`** and uses it in a **`RUN`** ste
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 What changed: `break/` and `fix/` hold the same app. Only the `Dockerfile` differs. These are the lines that matter:
 ```bash
-grep -n -E '^(ARG|RUN)' ../break/Dockerfile Dockerfile
+grep -n -E '^(ARG|RUN)' break/Dockerfile fix/Dockerfile
 ```
 ```
-../break/Dockerfile:5:ARG WEATHER_API_KEY
-../break/Dockerfile:7:RUN echo "key=$WEATHER_API_KEY" > /app/config
-Dockerfile:7:RUN --mount=type=secret,id=weather_key \
+break/Dockerfile:5:ARG WEATHER_API_KEY
+break/Dockerfile:7:RUN echo "key=$WEATHER_API_KEY" > /app/config
+fix/Dockerfile:7:RUN --mount=type=secret,id=weather_key \
 ```
-The `ARG` is gone, and nothing writes the key to a file any more. The build gets the key as a **secret** that only one `RUN` step can see, and the running app gets its key at **runtime** with `-e`. By hand (this replaces `./fix.sh`):
+The `ARG` is gone, and nothing writes the key to a file any more. The build gets the key as a **secret** that only one `RUN` step can see, and the running app gets its key at **runtime** with `-e`. By hand (this replaces `./fix/fix.sh`):
 ```bash
 export WEATHER_API_KEY=z2h-demo-key-NOT-REAL-123
-docker build --secret id=weather_key,env=WEATHER_API_KEY -t d14-weather:fixed .
+docker build --secret id=weather_key,env=WEATHER_API_KEY -t d14-weather:fixed fix
 docker run --rm -e WEATHER_API_KEY d14-weather:fixed
 ```
 (`env=WEATHER_API_KEY` means "take the secret from my shell variable of that name". `-e WEATHER_API_KEY` with no `=` passes that variable's value on to the container.)
@@ -195,7 +195,7 @@ That is why a real leak means **rotating the key**, not just rebuilding.
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 This also removes every `d14-weather` image tag.
 

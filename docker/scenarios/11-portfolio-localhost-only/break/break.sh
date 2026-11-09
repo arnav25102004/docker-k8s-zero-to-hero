@@ -15,10 +15,10 @@ bash "$HERE/../cleanup.sh"
 port_free 8111 || die "Port 8111 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 ensure_image "$BASE_IMAGE" "about 19 MB"
 
-say "Building Priya's portfolio: docker build -t d11-portfolio:1.0 ."
+say "Building Priya's portfolio: docker build -t d11-portfolio:1.0 break"
 cd "$HERE" || die "Could not enter $HERE"
 docker build -q --label z2h.scenario=d11 -t d11-portfolio:1.0 . >/dev/null \
-  || die "The build failed. Try: docker build -t d11-portfolio:1.0 ."
+  || die "The build failed. Try: docker build -t d11-portfolio:1.0 break"
 say "Starting it: docker run -d --name d11-portfolio -p 8111:8000 d11-portfolio:1.0"
 docker run -d --name d11-portfolio --label z2h.scenario=d11 -p 8111:8000 d11-portfolio:1.0 >/dev/null \
   || die "docker run failed. Is port 8111 free?"

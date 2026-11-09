@@ -15,10 +15,10 @@ bash "$HERE/../cleanup.sh"
 port_free 8113 || die "Port 8113 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 ensure_image "$BASE_IMAGE" "about 23 MB"
 
-say "Building Priya's portfolio: docker build -t d13-site:1.0 ."
+say "Building Priya's portfolio: docker build -t d13-site:1.0 break"
 cd "$HERE" || die "Could not enter $HERE"
 docker build -q --label z2h.scenario=d13 -t d13-site:1.0 . >/dev/null \
-  || die "The build failed. Try: docker build -t d13-site:1.0 ."
+  || die "The build failed. Try: docker build -t d13-site:1.0 break"
 say "Starting it with live edits: docker run -d --name d13-site -p 8113:80 -v $HERE/dev-notes:/usr/share/nginx/html d13-site:1.0"
 docker run -d --name d13-site --label z2h.scenario=d13 -p 8113:80 \
   -v "$HERE/dev-notes:/usr/share/nginx/html" d13-site:1.0 >/dev/null \

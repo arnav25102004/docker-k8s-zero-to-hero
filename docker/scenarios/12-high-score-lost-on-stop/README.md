@@ -30,7 +30,7 @@ docker stop ──SIGTERM──▶ PID 1 = python ─▶ saves scores ─▶ exi
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 The script plays three fest scores (Lakshmi 42, Ravi 35, Meera 28), then "deploys": it stops the server (about 10 seconds of waiting) and starts it again. The room should see the script finish happily. Now open http://localhost:8112 (playground: the port 8112 URL): the **Top 5** table says *No scores yet. Be the first!* Nothing in the script printed an error.
 
@@ -123,20 +123,20 @@ The shell-form `CMD` made `/bin/sh` PID 1. `docker stop` sent SIGTERM to the she
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 What changed: `break/` and `fix/` hold the same game and the same `server.py`. Only the `Dockerfile` differs:
 ```bash
-grep -n '^CMD' ../break/Dockerfile Dockerfile
+grep -n '^CMD' break/Dockerfile fix/Dockerfile
 ```
 ```
-../break/Dockerfile:9:CMD python server.py | tee /data/server.log
-Dockerfile:8:CMD ["python", "server.py"]
+break/Dockerfile:9:CMD python server.py | tee /data/server.log
+fix/Dockerfile:8:CMD ["python", "server.py"]
 ```
-Exec form (a JSON list) makes Python PID 1. We also dropped the `| tee`: the server already prints its own log lines, and `docker logs` shows them. By hand, this replaces `./fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again (the volume `d12-data` keeps its data):
+Exec form (a JSON list) makes Python PID 1. We also dropped the `| tee`: the server already prints its own log lines, and `docker logs` shows them. By hand, this replaces `./fix/fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again (the volume `d12-data` keeps its data):
 ```bash
 docker rm -f d12-game
-docker build -t d12-game:1.0 .
+docker build -t d12-game:1.0 fix
 docker run -d --name d12-game -p 8112:8000 -v d12-data:/data d12-game:1.0
 ```
 
@@ -195,7 +195,7 @@ Refresh the page: Priya is on the board. 🎉
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 
 ## Next →

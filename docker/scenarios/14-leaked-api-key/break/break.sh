@@ -15,9 +15,9 @@ bash "$HERE/../cleanup.sh"
 ensure_image "$BASE_IMAGE" "about 19 MB"
 
 cd "$HERE" || die "Could not enter $HERE"
-say "Building the widget: docker build --build-arg WEATHER_API_KEY=<demo key> -t d14-weather:broken ."
+say "Building the widget: docker build --build-arg WEATHER_API_KEY=<demo key> -t d14-weather:broken break"
 docker build --label z2h.scenario=d14 --build-arg "WEATHER_API_KEY=$DEMO_KEY" -t d14-weather:broken . \
-  || die "The build failed. Try again: docker build -t d14-weather:broken ."
+  || die "The build failed. Try again: docker build -t d14-weather:broken break"
 say "Testing it: docker run --rm d14-weather:broken"
 docker run --rm --label z2h.scenario=d14 d14-weather:broken
 say "Sharing it with the team: docker tag d14-weather:broken d14-weather:shared"

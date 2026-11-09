@@ -31,7 +31,7 @@ You met the same idea from the outside in [Lab D01, §4 "The student survival ki
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 The room should see the script finish happily ("container is running"). Now open http://localhost:8111 (playground: the port 8111 URL): the browser says the site **can't be reached** (or the connection was reset). Nothing in the script printed an error.
 
@@ -103,20 +103,20 @@ The `Dockerfile` starts the server with `--bind 127.0.0.1`. Inside a container, 
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 What changed: `break/` and `fix/` hold the same page. Only the `Dockerfile` differs:
 ```bash
-grep -n '^CMD' ../break/Dockerfile Dockerfile
+grep -n '^CMD' break/Dockerfile fix/Dockerfile
 ```
 ```
-../break/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "127.0.0.1"]
-Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "0.0.0.0"]
+break/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "127.0.0.1"]
+fix/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "0.0.0.0"]
 ```
-`0.0.0.0` means "listen on every network interface". By hand, this replaces `./fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
+`0.0.0.0` means "listen on every network interface". By hand, this replaces `./fix/fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
 ```bash
 docker rm -f d11-portfolio
-docker build -t d11-portfolio:1.0 .
+docker build -t d11-portfolio:1.0 fix
 docker run -d --name d11-portfolio -p 8111:8000 d11-portfolio:1.0
 ```
 
@@ -159,7 +159,7 @@ curl -s localhost:8111 | grep -o '<title>.*</title>'
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 
 ## Next →

@@ -9,9 +9,9 @@ app_answers() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 http://
 
 need_docker
 cd "$HERE" || die "Could not enter $HERE"
-say "Rebuilding with the fixed Dockerfile: docker build -t d11-portfolio:1.0 ."
+say "Rebuilding with the fixed Dockerfile: docker build -t d11-portfolio:1.0 fix"
 docker build -q --label z2h.scenario=d11 -t d11-portfolio:1.0 . >/dev/null \
-  || die "The build failed. Try: docker build -t d11-portfolio:1.0 ."
+  || die "The build failed. Try: docker build -t d11-portfolio:1.0 fix"
 docker rm -f d11-portfolio >/dev/null 2>&1
 say "Starting it again: docker run -d --name d11-portfolio -p 8111:8000 d11-portfolio:1.0"
 docker run -d --name d11-portfolio --label z2h.scenario=d11 -p 8111:8000 d11-portfolio:1.0 >/dev/null \
