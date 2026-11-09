@@ -16,8 +16,7 @@ ensure_image "python:3.12-alpine" "about 19 MB"
 
 cd "$HERE/.." || die "Could not enter the scenario folder."
 
-run_shown rm -rf work || die "Could not remove the old work/ folder."
-run_shown cp -R break work || die "Could not copy break/ to work/."
+prepare_work "$HERE"
 run_shown docker build -t d03-api:1.0 work || die "The build failed. Read the message above."
 run_shown docker network create d03-net || die "Could not create the network d03-net."
 run_shown docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine || die "docker run failed. Is Docker healthy?"

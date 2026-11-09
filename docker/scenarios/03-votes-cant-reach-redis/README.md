@@ -27,9 +27,9 @@ Every container gets its **own private network**, like its own flat in an apartm
 - **"Works on my machine"** during a Friday deploy, when the only difference is where the dependency lives (SRE).
 
 ## 💥 Break it
-Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder (if `work/` already exists, run `rm -rf work` first):
+Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder:
 ```bash
-cp -R break work
+rm -rf work && cp -R break work
 docker build -t d03-api:1.0 work
 docker network create d03-net
 docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
@@ -44,16 +44,15 @@ Or use the one-line shortcut, which prints (`▶ $`) every command it runs, the 
 The real run, from `./break.sh` (shortened; the build prints more lines the first time because nothing is cached):
 ```
 ✅ Scenario d03 cleaned up
-▶ $ rm -rf work
-▶ $ cp -R break work
+▶ $ rm -rf work && cp -R break work
 ▶ $ docker build -t d03-api:1.0 work
 ...
 ▶ $ docker network create d03-net
-ea04609a84124f4310d3f741505bacafa244744fa6c2f590e9241a3e41059973
+fb0d9e31927f59b20c75cdd2f8a67229b19430e5b249c0d2882b62dcae38a93e
 ▶ $ docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
-ac5c28f676421f9b75a800c1b6824a32aa629fe60a464ec4f8e791cbada44619
+ecef7fbef26f6e1a07fac4bd9f115e1532240994981a691e44b47a31b7489d52
 ▶ $ docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
-6331b56e39d4cb041828c762ca49aee9a2584e97514688475530497ca065ecd5
+da73a6b7c5e6cb041828c762ca49aee9a2584e97514688475530497ca065ecd5
 ⏳ Waiting for the API to answer on port 8103 . ✔ ready
 ```
 
@@ -89,9 +88,9 @@ Both **Up**, the API even says **(healthy)**. "Healthy" only means the web serve
 docker logs d03-api
 ```
 ```
-2026-11-09T10:07:02 [6331b56e39d4] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis localhost
-2026-11-09T10:07:03 [6331b56e39d4] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
-2026-11-09T10:07:08 [6331b56e39d4] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
+2026-11-09T10:10:05 [da73a6b7c5e6] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis localhost
+2026-11-09T10:10:06 [da73a6b7c5e6] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
+2026-11-09T10:10:11 [da73a6b7c5e6] readiness failed: cannot reach redis at localhost:6379: [Errno 111] Connection refused
 ```
 The very first line says it: votes are stored in `redis localhost`. (The lines repeat every few seconds.)
 
@@ -192,14 +191,14 @@ curl -s "localhost:8103/api/vote?option=cats"
 curl -s "localhost:8103/api/vote?option=cats"
 ```
 ```
-{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
-{"voted": "cats", "results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
+{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "f979600b276d", "version": "1.0.0"}
+{"voted": "cats", "results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "f979600b276d", "version": "1.0.0"}
 ```
 ```bash
 curl -s localhost:8103/api/results
 ```
 ```
-{"results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "6db8d9f37fda", "version": "1.0.0"}
+{"results": {"cats": 2, "dogs": 0}, "total": 2, "storage": "redis", "served_by": "f979600b276d", "version": "1.0.0"}
 ```
 (`served_by` is the container ID, so yours will differ. If you voted in the browser first, your counts will be higher.)
 
