@@ -5,6 +5,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 jupyter_up() { curl -s -f -o /dev/null --max-time 2 "http://localhost:8107/api/status?token=change-me-123"; }
 backup_done() { [ "$(docker compose -p d07 ps -a backup --format '{{.State}} {{.ExitCode}}' 2>/dev/null)" = "exited 0" ]; }

@@ -4,6 +4,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 has_exited() { [ "$(docker inspect -f '{{.State.Status}}' d06-trainer-1 2>/dev/null)" = "exited" ]; }
 

@@ -4,6 +4,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 tools_up() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8105)" = "200" ]; }
 

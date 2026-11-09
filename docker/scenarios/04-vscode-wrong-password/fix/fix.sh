@@ -6,6 +6,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 SCEN="$(dirname "$HERE")"
 # shellcheck source=/dev/null
 source "$SCEN/../_lib.sh"
+refuse_if_in_work "$HERE"
 
 IMAGE="codercom/code-server:4.145.2"
 

@@ -42,13 +42,23 @@ port_free() {
   return 0
 }
 
-# ensure_image IMAGE SIZE_TEXT: pull IMAGE (with visible progress) if missing.
+# ensure_image IMAGE SIZE_TEXT: pull IMAGE (the pull command is printed, with
+# visible progress) if it is missing.
 ensure_image() {
   local image="$1" size="${2:-}"
   if ! docker image inspect "$image" >/dev/null 2>&1; then
     say "⬇️  Downloading $image ($size, first time only)…"
-    docker pull "$image" || die "Could not download $image. Check your internet connection and try again."
+    run_shown docker pull "$image" || die "Could not download $image. Check your internet connection and try again."
   fi
+}
+
+# refuse_if_in_work DIR: call this first in every break.sh / fix.sh, BEFORE
+# cleanup. work/ holds a copy of the scripts, and running that copy would let
+# cleanup delete the folder the script lives in. DIR is the script's own folder.
+refuse_if_in_work() {
+  local here
+  here="$(cd "$1" 2>/dev/null && pwd)" || return 0
+  [ "$(basename "$here")" != "work" ] || die "This is the copy in work/. Run ./break/break.sh or ./fix/fix.sh from the scenario folder instead."
 }
 
 # wait_for DESCRIPTION SECONDS COMMAND...: poll COMMAND once a second.
@@ -155,21 +165,22 @@ scenario_cleanup() {
   for x in $(docker volume ls -q --filter "label=$label" 2>/dev/null); do
     docker volume rm -f "$x" >/dev/null 2>&1
   done
-  # Also catch things made by hand (no label): anything named "ID-...". The name
-  # filter is a substring match, so keep only names that really start with "ID-".
-  for x in $(docker ps -a --filter "name=${id}-" --format '{{.Names}}' 2>/dev/null | grep "^${id}-"); do
+  # Also catch things made by hand (no label): anything named "ID-..." or "ID_..."
+  # (compose names networks and volumes ID_default, ID_data). The name filter is a
+  # substring match, so keep only names that really start with "ID-" or "ID_".
+  for x in $(docker ps -a --filter "name=${id}" --format '{{.Names}}' 2>/dev/null | grep -E "^${id}[-_]"); do
     docker rm -fv "$x" >/dev/null 2>&1
   done
-  for x in $(docker network ls --filter "name=${id}-" --format '{{.Name}}' 2>/dev/null | grep "^${id}-"); do
+  for x in $(docker network ls --filter "name=${id}" --format '{{.Name}}' 2>/dev/null | grep -E "^${id}[-_]"); do
     docker network rm "$x" >/dev/null 2>&1
   done
-  for x in $(docker volume ls --filter "name=${id}-" --format '{{.Name}}' 2>/dev/null | grep "^${id}-"); do
+  for x in $(docker volume ls --filter "name=${id}" --format '{{.Name}}' 2>/dev/null | grep -E "^${id}[-_]"); do
     docker volume rm -f "$x" >/dev/null 2>&1
   done
   for x in $(docker images -q --filter "label=$label" 2>/dev/null); do
     docker rmi -f "$x" >/dev/null 2>&1
   done
-  # Images built by hand from a README (no label): every tag of "ID-...".
+  # Images built by hand from a README (no label): every tag of "ID-..." (d01-mine, d03-api ...).
   for x in $(docker images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null | grep "^${id}-"); do
     docker rmi -f "$x" >/dev/null 2>&1
   done

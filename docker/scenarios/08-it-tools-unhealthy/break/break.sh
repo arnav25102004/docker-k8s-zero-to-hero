@@ -4,6 +4,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 TOOLS_IMAGE="corentinth/it-tools:2024.10.22-7ca5933"
 

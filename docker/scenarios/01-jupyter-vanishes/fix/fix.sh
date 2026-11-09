@@ -5,6 +5,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 jupyter_up() {
   [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 'http://localhost:8101/api/status?token=change-me-123')" = "200" ]

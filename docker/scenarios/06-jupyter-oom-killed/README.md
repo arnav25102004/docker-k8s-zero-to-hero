@@ -4,7 +4,7 @@
 
 ⏱ 12 min · beginner · a small Python "AI trainer" (`python:3.12-alpine`) run with Docker Compose · compose files, exit codes, reading `docker inspect`
 
-⬇️ First run downloads about 19 MB (`python:3.12-alpine`, probably already on your laptop from other scenarios). Do it before the session anyway. The trainer image is built on your machine from a 5-line `Dockerfile`; there is no big Jupyter download in this one.
+⬇️ First run downloads about 19 MB (`python:3.12-alpine`, probably already on your laptop from other scenarios). Do it before the session anyway. The trainer image is built on your machine from a short `Dockerfile`; there is no big Jupyter download in this one.
 
 ## 📖 The story
 It's exam week at Christ University and your final-year project is a "model" that learns from a big dataset. You start the training in a container on the lab server (the kind of job you would normally run in a Jupyter notebook) and go for a filter coffee. When you come back, the output has stopped part-way through the epochs: no red error, no traceback, nothing. The container is just... gone. Your teammate says, *"Maybe Python crashed?"* Python did not crash. Someone else ended it.

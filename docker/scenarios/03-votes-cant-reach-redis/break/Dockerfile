@@ -1,8 +1,11 @@
 # Dockerfile for the Cats vs Dogs voting API (a copy of apps/api/Dockerfile).
 # Every line is explained in docker/04-first-dockerfile and docker/05-production-dockerfiles.
 
-# 1. Pin a specific, small base image (never rely on "latest").
+# 1. A small official base image (IMAGES.md explains why this tag floats).
 FROM python:3.12-alpine
+
+# Lets cleanup.sh find (and remove) this image later.
+LABEL z2h.scenario=d03
 
 # 2. Metadata, visible in `docker inspect`.
 LABEL org.opencontainers.image.title="z2h-showdown" \

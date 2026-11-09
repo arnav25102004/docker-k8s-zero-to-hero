@@ -5,6 +5,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 # can_save: save a test file through Jupyter (what the Save button does), then delete it again.
 can_save() {

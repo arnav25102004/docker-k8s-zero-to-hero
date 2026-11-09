@@ -52,6 +52,7 @@ test_first_pull_message() {
   local out f=0
   out=$(bash -c "source '$LIB'; ensure_image busybox:1.36 '2 MB'" 2>&1)
   check "says downloading" has "$out" 'Downloading busybox:1.36' || f=1
+  check "prints the pull command" has "$out" '\$ docker pull busybox:1.36' || f=1
   check "image exists" docker image inspect busybox:1.36 >/dev/null || f=1
   return $f
 }
@@ -80,6 +81,24 @@ test_any_cwd() {
   (cd /tmp && bash "$REPO/docker/scenarios/02-port-clash/break/break.sh") >/dev/null 2>&1
   check "d02-draw running" [ "$(container_state d02-draw)" = running ] || f=1
   bash "$REPO/docker/scenarios/02-port-clash/cleanup.sh" >/dev/null 2>&1
+  return $f
+}
+
+# Reproduces running the copy of break.sh that lives in work/ (D06 with learners'
+# habit "cd work && ./break.sh"): the guard must fire before cleanup deletes work/.
+test_work_guard() {
+  local scen f=0 out rc x
+  for x in "$REPO"/docker/scenarios/06-*/; do scen="${x%/}"; done
+  [ -d "$scen" ] || return 77
+  bash "$scen/break/break.sh" >/dev/null 2>&1
+  check "work/ exists after break.sh" [ -f "$scen/work/break.sh" ] || f=1
+  out=$(bash "$scen/work/break.sh" 2>&1); rc=$?
+  check "work/break.sh exits 1" rc_is "$rc" 1 || f=1
+  check "friendly message" has "$out" 'This is the copy in work/' || f=1
+  check "no confusing message" test -z "$(printf '%s' "$out" | grep 'no such folder')" || f=1
+  check "work/ still there" [ -d "$scen/work" ] || f=1
+  check "container still there" [ -n "$(container_state d06-trainer-1)" ] || f=1
+  bash "$scen/cleanup.sh" >/dev/null 2>&1
   return $f
 }
 
@@ -119,12 +138,16 @@ test_cleanup_by_name_prefix() {
   docker rm -f d98-manual zz-d98-keep >/dev/null 2>&1
   docker network create d98-net >/dev/null 2>&1
   docker volume create d98-vol >/dev/null 2>&1
+  docker network create d98_default >/dev/null 2>&1
+  docker volume create d98_data >/dev/null 2>&1
   docker run -d --name d98-manual --network d98-net busybox:1.36 sleep 300 >/dev/null 2>&1 || { echo "could not start test container"; return 1; }
   docker run -d --name zz-d98-keep busybox:1.36 sleep 300 >/dev/null 2>&1 || { echo "could not start keep container"; return 1; }
   bash -c "source '$LIB'; scenario_cleanup d98" >/dev/null 2>&1
   check "unlabeled d98-manual removed" assert_gone container d98-manual || f=1
   check "unlabeled d98-net removed" assert_gone network d98-net || f=1
   check "unlabeled d98-vol removed" assert_gone volume d98-vol || f=1
+  check "d98_default (compose style) removed" assert_gone network d98_default || f=1
+  check "d98_data (compose style) removed" assert_gone volume d98_data || f=1
   check "unrelated zz-d98-keep kept" assert_there container zz-d98-keep || f=1
   docker rm -f zz-d98-keep >/dev/null 2>&1
   return $f
@@ -205,7 +228,7 @@ test_cleanup_removes_work_and_orphan_project() {
 }
 
 for t in test_run_shown test_prepare_work test_cleanup_removes_work_and_orphan_project test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
-         test_any_cwd test_cleanup_idempotent test_cleanup_by_name_prefix \
+         test_any_cwd test_work_guard test_cleanup_idempotent test_cleanup_by_name_prefix \
          test_cleanup_removes_anonymous_volume test_cleanup_removes_unlabelled_image; do
   run_test "$t"
 done

@@ -4,6 +4,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
+refuse_if_in_work "$HERE"
 
 is_healthy() { [ "$(docker inspect -f '{{.State.Health.Status}}' d08-tools 2>/dev/null)" = "healthy" ]; }
 
