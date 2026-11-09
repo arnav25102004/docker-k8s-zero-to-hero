@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
-# D03 fix: same API, but REDIS_HOST is the Redis container's name on d03-net.
+# D03 fix: start the API again, this time telling it where Redis lives when the container starts.
+# The Dockerfile and the image stay exactly as they are; only the run line gains one flag.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
-API_IMAGE="d03-api:1.0"
-
 ready() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8103/readyz)" = "200" ]; }
 
 need_docker
-say "Recreating the API with REDIS_HOST=d03-redis (the Redis container's name on d03-net)"
-docker rm -f d03-api >/dev/null 2>&1
-docker run -d --name d03-api --label z2h.scenario=d03 --network d03-net -p 8103:8080 \
-  -e REDIS_HOST=d03-redis "$API_IMAGE" >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
+docker image inspect d03-api:1.0 >/dev/null 2>&1 || die "Run ./break.sh first: there is no d03-api:1.0 image yet."
+
+run_shown docker rm -f d03-api >/dev/null 2>&1 || true
+run_shown docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0 \
+  || die "docker run failed. Did break.sh run first?"
 
 wait_for "the API to be ready on port 8103" 30 ready \
   || die "The API didn't become ready. Check: docker logs d03-api"

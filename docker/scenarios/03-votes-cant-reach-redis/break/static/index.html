@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Showdown</title>
+<style>
+  :root { --accent: #ff5a5f; --bg: #0b0d12; --card: #151924; --line: #252b3a; --text: #f2f4f8; --muted: #8b93a7; --ok: #2fd47a; --bad: #ff4d4f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(1200px 600px at 50% -10%, #1b2133 0%, var(--bg) 60%); color: var(--text);
+         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; min-height: 100vh; overflow-x: hidden; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { text-align: center; margin: 8px 0 24px; }
+  h1 { font-size: clamp(34px, 7vw, 64px); margin: 0; letter-spacing: -0.03em; line-height: 1.05; }
+  h1 .vs { color: var(--accent); }
+  .pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .pill { font-size: 13px; padding: 5px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); }
+  .pill b { color: var(--text); }
+  .pill.warn { border-color: #6b4b10; color: #ffcb6b; }
+  .pill.good { border-color: #1d5c3c; color: #7ef0b2; }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 28px 0; }
+  .opt { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px 18px 18px; text-align: center; position: relative; overflow: hidden; }
+  .opt button { all: unset; cursor: pointer; display: block; width: 100%; }
+  .emoji { font-size: clamp(72px, 14vw, 120px); line-height: 1; transition: transform .15s; user-select: none; }
+  .opt button:hover .emoji { transform: scale(1.08) rotate(-4deg); }
+  .opt button:active .emoji { transform: scale(.92); }
+  .label { font-size: 22px; font-weight: 700; margin-top: 8px; }
+  .count { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .bar { height: 10px; background: #0e1119; border-radius: 99px; margin-top: 12px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+  .pct { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .opt.leader { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 10px 40px -10px var(--accent); }
+  .opt.leader::after { content: "👑"; position: absolute; top: 10px; right: 14px; font-size: 26px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+  .served { display: flex; align-items: center; gap: 12px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; box-shadow: 0 0 12px currentColor; }
+  .served code { font-size: 18px; font-weight: 700; word-break: break-all; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .wall { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; }
+  .pod { border-radius: 10px; padding: 8px 10px; font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: #0b0d12; transition: opacity .5s, transform .2s; }
+  .pod.hit { transform: scale(1.08); }
+  .pod.stale { opacity: .35; filter: grayscale(1); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+  .stat b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { border: 1px solid var(--line); background: #1c2130; color: var(--text); padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; }
+  .btn.danger { border-color: #6d1f22; background: #2a1215; color: #ff9a9c; }
+  .btn:hover { filter: brightness(1.2); }
+  .feed { margin: 0; padding: 0; list-style: none; max-height: 200px; overflow: auto; font-size: 14px; }
+  .feed li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .feed time { color: var(--muted); font-size: 12px; margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .float { position: fixed; pointer-events: none; font-size: 42px; z-index: 50; animation: rise 1.6s ease-out forwards; }
+  @keyframes rise { to { transform: translateY(-260px) rotate(var(--r)) scale(.6); opacity: 0; } }
+  .status { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: var(--ok); transition: background .3s; z-index: 60; }
+  .status.down { background: var(--bad); animation: blink .6s infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+  .banner { position: fixed; inset: 0; display: none; place-items: center; background: rgba(5,6,10,.88); z-index: 70; text-align: center; padding: 16px; }
+  .banner.show { display: grid; }
+  .banner .big { font-size: clamp(40px, 9vw, 88px); font-weight: 800; letter-spacing: -0.03em; }
+  .banner .small { color: var(--muted); font-size: 20px; margin-top: 10px; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 28px; }
+</style>
+</head>
+<body>
+<div class="status" id="status"></div>
+<main>
+  <header>
+    <h1 id="title">Cats <span class="vs">vs</span> Dogs</h1>
+    <div class="pills">
+      <span class="pill">version <b id="version">…</b></span>
+      <span class="pill" id="storage">storage …</span>
+      <span class="pill">total votes <b id="total">0</b></span>
+    </div>
+  </header>
+
+  <section class="options" id="options"></section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>🖥️ This request was served by</h2>
+      <div class="served"><span class="dot" id="servedDot"></span><code id="servedBy">…</code></div>
+      <div class="sub" id="via"></div>
+      <div class="actions">
+        <button class="btn danger" id="crash">💥 Crash this server</button>
+        <button class="btn" id="reset">🔄 Reset votes</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📈 Live health (your browser → app)</h2>
+      <div class="stats">
+        <div class="stat"><b class="ok" id="okCount">0</b><span>requests OK</span></div>
+        <div class="stat"><b class="bad" id="failCount">0</b><span>failed</span></div>
+        <div class="stat"><b id="latency">–</b><span>latency ms</span></div>
+      </div>
+      <div class="sub" id="health">Watching…</div>
+    </div>
+    <div class="card">
+      <h2>🧱 Pod wall: every server answering right now</h2>
+      <div class="wall" id="wall"></div>
+      <div class="sub">Scale up and new tiles appear. Kill one and it fades to grey.</div>
+    </div>
+    <div class="card">
+      <h2>📣 What just happened</h2>
+      <ul class="feed" id="feed"></ul>
+    </div>
+  </section>
+  <footer>z2h showdown · docker-k8s-zero-to-hero</footer>
+</main>
+<div class="banner" id="banner"><div><div class="big" id="bannerBig"></div><div class="small" id="bannerSmall"></div></div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { options: [], version: null, seen: new Set(), ok: 0, fail: 0, pods: new Map(), down: false, myVotes: 0 };
+
+function colorFor(name) {
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return `hsl(${h % 360} 85% 62%)`;
+}
+function feed(msg) {
+  const li = document.createElement('li');
+  li.innerHTML = `<time>${new Date().toLocaleTimeString()}</time>${msg}`;
+  $('feed').prepend(li);
+  while ($('feed').children.length > 40) $('feed').lastChild.remove();
+}
+function banner(big, small, ms = 3200) {
+  $('bannerBig').textContent = big; $('bannerSmall').textContent = small;
+  $('banner').classList.add('show');
+  setTimeout(() => $('banner').classList.remove('show'), ms);
+}
+function burst(emoji, x, y, n = 10) {
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('div');
+    s.className = 'float'; s.textContent = emoji;
+    s.style.left = (x + (Math.random() - .5) * 160) + 'px';
+    s.style.top = (y + (Math.random() - .5) * 40) + 'px';
+    s.style.setProperty('--r', ((Math.random() - .5) * 120) + 'deg');
+    s.style.animationDelay = (Math.random() * .25) + 's';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 2000);
+  }
+}
+
+async function call(path, opts) {
+  const t0 = performance.now();
+  try {
+    const r = await fetch(path, { cache: 'no-store', ...opts });
+    const ms = Math.round(performance.now() - t0);
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(body.error || r.status + ' ' + r.statusText), { status: r.status });
+    recordOk(ms, r.headers.get('X-Served-By') || body.served_by || body.hostname, r.headers.get('X-Frontend'));
+    return body;
+  } catch (e) { recordFail(e); throw e; }
+}
+
+function recordOk(ms, server, frontend) {
+  state.ok++; $('okCount').textContent = state.ok; $('latency').textContent = ms;
+  if (state.down) { state.down = false; $('status').classList.remove('down'); feed('✅ <b>Recovered.</b> The app is answering again.'); $('health').textContent = 'All good ✅'; }
+  if (!server) return;
+  $('servedBy').textContent = server; $('servedDot').style.color = $('servedDot').style.background = colorFor(server);
+  $('via').textContent = frontend ? `via frontend proxy ${frontend}` : 'direct connection (no proxy)';
+  if (!state.pods.has(server)) feed(`🆕 New server joined: <b style="color:${colorFor(server)}">${server}</b>`);
+  state.pods.set(server, { last: Date.now(), gone: false });
+  renderWall(server);
+}
+function recordFail(e) {
+  state.fail++; $('failCount').textContent = state.fail;
+  if (!state.down) { state.down = true; $('status').classList.add('down'); feed(`🔥 <b>Request failed:</b> ${e.message}`); }
+  $('health').textContent = `Failing: ${e.message}`;
+}
+function renderWall(hit) {
+  const now = Date.now(); const wall = $('wall'); wall.innerHTML = '';
+  for (const [name, p] of state.pods) {
+    const age = now - p.last;
+    if (age > 30000) { state.pods.delete(name); feed(`🪦 Server gone: <b>${name}</b>`); continue; }
+    const d = document.createElement('div');
+    d.className = 'pod' + (name === hit ? ' hit' : '') + (age > 6000 ? ' stale' : '');
+    d.style.background = colorFor(name); d.textContent = name;
+    wall.appendChild(d);
+  }
+}
+
+function renderOptions(info) {
+  document.documentElement.style.setProperty('--accent', info.theme || '#ff5a5f');
+  const opts = info.options;
+  const parts = opts.map(o => o.label);
+  $('title').innerHTML = info.title && info.title !== 'Cats vs Dogs' ? info.title :
+    parts.map(p => p).join(' <span class="vs">vs</span> ');
+  document.title = `${opts.map(o => o.emoji).join(' vs ')} ${info.title}`;
+  $('options').innerHTML = '';
+  for (const o of opts) {
+    const el = document.createElement('div'); el.className = 'opt'; el.id = 'opt-' + o.id;
+    el.innerHTML = `<button aria-label="Vote ${o.label}"><div class="emoji">${o.emoji}</div><div class="label">${o.label}</div></button>
+      <div class="count" id="c-${o.id}">0</div><div class="bar"><i id="b-${o.id}"></i></div><div class="pct" id="p-${o.id}">0%</div>`;
+    el.querySelector('button').onclick = ev => vote(o, ev);
+    $('options').appendChild(el);
+  }
+}
+function renderResults(r) {
+  $('total').textContent = r.total;
+  const max = Math.max(0, ...Object.values(r.results));
+  for (const o of state.options) {
+    const n = r.results[o.id] || 0, pct = r.total ? Math.round(100 * n / r.total) : 0;
+    if (!$('c-' + o.id)) continue;
+    $('c-' + o.id).textContent = n; $('b-' + o.id).style.width = pct + '%'; $('p-' + o.id).textContent = pct + '%';
+    $('opt-' + o.id).classList.toggle('leader', n > 0 && n === max);
+  }
+  const s = $('storage');
+  if (r.storage === 'redis') { s.className = 'pill good'; s.innerHTML = '💾 votes in <b>Redis</b> (shared, persistent)'; }
+  else { s.className = 'pill warn'; s.innerHTML = '⚠️ votes in <b>this container\'s memory</b>'; }
+}
+
+async function vote(o, ev) {
+  burst(o.emoji, ev.clientX, ev.clientY);
+  try {
+    const r = await call('/api/vote?option=' + encodeURIComponent(o.id), { method: 'POST' });
+    renderResults(r); state.myVotes++;
+    if (state.myVotes === 10) banner('🔥 10 votes!', 'Okay, we get it. You have a favourite.');
+  } catch (e) { feed(`😱 Your vote for ${o.emoji} failed: ${e.message}`); }
+}
+
+async function loadInfo() {
+  try {
+    const info = await call('/api/info');
+    const optKey = JSON.stringify(info.options);
+    if (state.version && info.version !== state.version) {
+      if (!state.seen.has(info.version)) banner('✨ One more thing…', `Version ${info.version} just rolled out.`, 4500);
+      feed(`🚀 Now talking to <b>version ${info.version}</b> (was ${state.version})`);
+    }
+    state.seen.add(info.version);
+    if (optKey !== JSON.stringify(state.options)) { state.options = info.options; renderOptions(info); }
+    state.version = info.version; $('version').textContent = info.version;
+  } catch (e) {}
+}
+async function poll() {
+  try { renderResults(await call('/api/results')); } catch (e) {}
+  renderWall();
+}
+
+$('crash').onclick = async () => {
+  const who = $('servedBy').textContent;
+  if (!confirm(`Really crash ${who}? 💥`)) return;
+  try { await call('/api/crash'); } catch (e) {}
+  banner('💥 Boom.', `${who} just crashed. Now watch what happens…`);
+  feed(`💥 You crashed <b>${who}</b>`);
+};
+$('reset').onclick = async () => { try { renderResults(await call('/api/reset', { method: 'POST' })); feed('🔄 Votes reset'); } catch (e) {} };
+
+loadInfo().then(poll);
+setInterval(poll, 1000);
+setInterval(loadInfo, 3000);
+</script>
+</body>
+</html>
