@@ -162,7 +162,7 @@ sleep 3; docker stats --no-stream d06-trainer-1
 ```
 ```
 CONTAINER ID   NAME            CPU %     MEM USAGE / LIMIT   MEM %     NET I/O         BLOCK I/O     PIDS
-a43bf8df9795   d06-trainer-1   3.25%     604.9MiB / 1GiB     59.08%    1.17kB / 126B   0B / 28.7kB   1
+472d3b40da3c   d06-trainer-1   3.30%     604.9MiB / 1GiB     59.08%    1.17kB / 126B   0B / 28.7kB   1
 ```
 (Your numbers will differ a little.) Already past the old 300 MiB limit and happily running. The training takes about 5 seconds, so if you are slow the container will have finished and `docker stats` shows zeros: that is fine, read the proof instead:
 ```bash
