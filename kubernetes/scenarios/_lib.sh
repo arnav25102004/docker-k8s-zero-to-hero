@@ -43,6 +43,11 @@ delete_ns() {
 # z2h.scenario=<kNN> taken from the k-NN- prefix.
 fresh_ns() {
   local ns id i
+  # Guard: K16's node taint left behind makes every other scenario's Pods go Pending.
+  # (K16's own break.sh runs its cleanup, which removes the taint, before it gets here.)
+  if kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null | grep -q '^z2h-vip$'; then
+    die "The nodes still carry the z2h-vip taint from K16. Run kubernetes/scenarios/16-game-server-vip-node/cleanup.sh (or: kubectl taint nodes --all z2h-vip-) and try again."
+  fi
   for ns in "$@"; do
     delete_ns "$ns"
     kubectl create namespace "$ns" >/dev/null || return 1
@@ -128,8 +133,11 @@ scenario_k8s_cleanup() {
 # schedulable_node_count: print how many nodes accept new Pods: no NoSchedule/NoExecute
 # taint (PreferNoSchedule does not count) and not cordoned (spec.unschedulable).
 schedulable_node_count() {
-  kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" U="}{.spec.unschedulable}{" "}{range .spec.taints[*]}{"|"}{.effect}{"|"}{end}{"\n"}{end}' 2>/dev/null |
-    grep -c -v -E ' U=true |\|NoSchedule\||\|NoExecute\|'
+  local out
+  # A failed kubectl (or an empty node list) is an error (return 1, print nothing), never "0".
+  out=$(kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" U="}{.spec.unschedulable}{" "}{range .spec.taints[*]}{"|"}{.effect}{"|"}{end}{"\n"}{end}' 2>/dev/null) || return 1
+  [ -n "$out" ] || return 1
+  printf '%s\n' "$out" | grep -c -v -E ' U=true |\|NoSchedule\||\|NoExecute\|'
   return 0
 }
 

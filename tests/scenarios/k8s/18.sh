@@ -8,14 +8,16 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && p
 
 broken() {
   local i want pending running events
-  want=$(( $(schedulable_node_count) + 1 ))
+  # Take the expected count from what break.sh chose (the Deployment), not a fresh node count.
+  want=$(kubectl get deployment whoami -n k-18-anti-affinity -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  case "$want" in ''|*[!0-9]*) want=0 ;; esac
   for i in $(seq 1 30); do
     pending=$(kubectl get pods -n k-18-anti-affinity -l app=whoami --no-headers 2>/dev/null | grep -c ' Pending ')
     [ "$pending" = "1" ] && break
     sleep 2
   done
   running=$(kubectl get pods -n k-18-anti-affinity -l app=whoami --no-headers 2>/dev/null | grep -c ' Running ')
-  assert_eq "$(kubectl get deployment whoami -n k-18-anti-affinity -o jsonpath='{.spec.replicas}' 2>&1)" "$want" "replicas = schedulable nodes + 1"
+  assert_eq "$want" "$(( $(schedulable_node_count 2>/dev/null || echo 0) + 1 ))" "replicas = schedulable nodes + 1"
   assert_eq "$pending" "1" "exactly 1 whoami Pod is Pending"
   assert_eq "$running" "$((want - 1))" "all the other whoami Pods are Running"
   events="$(kubectl get events -n k-18-anti-affinity 2>&1)"
@@ -24,7 +26,7 @@ broken() {
 
 fixed() {
   local want i code
-  want=$(( $(schedulable_node_count) + 1 ))
+  want=$(kubectl get deployment whoami -n k-18-anti-affinity -o jsonpath='{.spec.replicas}' 2>/dev/null)
   kubectl rollout status deployment/whoami -n k-18-anti-affinity --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "whoami Deployment rolled out"
   assert_eq "$(kubectl get deployment whoami -n k-18-anti-affinity -o jsonpath='{.status.readyReplicas}' 2>&1)" "$want" "all $want replicas are Ready"

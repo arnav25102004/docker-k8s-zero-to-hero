@@ -20,11 +20,19 @@ bash "$HERE/../cleanup.sh"
 port_free 9218 || die "Port 9218 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 
 # Replicas = nodes that accept new Pods + 1 (kind: 3 nodes, control-plane tainted -> 2 -> 3 replicas).
-# A just-created cluster can show a node as not accepting Pods for a few seconds: give it a moment.
-some_node_ready() { [ "$(schedulable_node_count)" -ge 1 ]; }
-wait_for "a node that accepts Pods" 60 some_node_ready >/dev/null 2>&1
-NODES=$(schedulable_node_count)
-[ "$NODES" -ge 1 ] || die "No node accepts new Pods right now (all tainted or cordoned). Check: kubectl get nodes. If you just ran K16, run its cleanup.sh first."
+# A just-created cluster has nodes that are still starting (they carry a node.kubernetes.io/ taint
+# until they are Ready). Wait until none does, then read the count once.
+nodes_settled() {
+  local t
+  t=$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null) || return 1
+  ! printf '%s\n' "$t" | grep -q '^node\.kubernetes\.io/' && [ "$(schedulable_node_count 2>/dev/null || echo 0)" -ge 1 ]
+}
+wait_for "the nodes to be ready" 60 nodes_settled
+if ! NODES=$(schedulable_node_count) || [ "$NODES" -lt 1 ]; then
+  warn "Node status right now:"
+  kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints[*].key,UNSCHEDULABLE:.spec.unschedulable 2>&1 || true
+  die "No node accepts new Pods right now (all tainted or cordoned, or the cluster did not answer). Check: kubectl get nodes. If you just ran K16, run its cleanup.sh first."
+fi
 REPLICAS=$((NODES + 1))
 
 fresh_ns "$NS" || die "Could not create the namespace $NS."

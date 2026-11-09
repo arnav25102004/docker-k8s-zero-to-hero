@@ -26,8 +26,10 @@ cmd_up() {
       fi
     } >"$cfg"
     mkdir -p "$HOME/.kube"
-    kind create cluster --name "$NAME" --kubeconfig "$KCFG" --config "$cfg" || { rm -f "$cfg"; return 1; }
+    kind create cluster --name "$NAME" --kubeconfig "$KCFG" --config "$cfg" --wait 120s || { rm -f "$cfg"; return 1; }
     rm -f "$cfg"
+    # --wait covers the control plane; make sure every worker is Ready (kindnet up) too.
+    KUBECONFIG="$KCFG" kubectl wait --for=condition=Ready node --all --timeout=120s || return 1
   fi
   echo
   echo "Use it with:"
