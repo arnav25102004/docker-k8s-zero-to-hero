@@ -5,6 +5,7 @@ metadata:
   name: visitor
   namespace: k-26-init-stuck
 spec:
+  # sh as PID 1 ignores SIGTERM; a short grace keeps cleanup and rollouts fast
   terminationGracePeriodSeconds: 2
   containers:
     - name: visitor

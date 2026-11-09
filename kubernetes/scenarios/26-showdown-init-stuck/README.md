@@ -9,7 +9,7 @@
 Output columns and wording can differ a little between kubectl, container runtimes and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
 ## 📖 The story
-It is the evening before the Christ University inter-department showdown, and Ravi has added a real database to the "Cats vs Dogs" poll: Redis, so votes survive restarts. He deploys both, sees `created` twice, and goes to get chai. Redis is green. The poll page never loads, and the vote count is stuck at zero because the app Pod never shows `Running`. The status column shows a word he has never seen before. Everyone assumes the app is broken. He opens its logs, and Kubernetes answers... with an error instead of logs.
+It is the evening before the Christ University inter-department showdown, and Ravi has added a real database to the "Cats vs Dogs" poll: Redis, so votes survive an app restart. He deploys both, sees `created` twice, and goes to get chai. Redis is green. The poll page never loads, and the vote count is stuck at zero because the app Pod never shows `Running`. The status column shows a word he has never seen before. Everyone assumes the app is broken. He opens its logs, and Kubernetes answers... with an error instead of logs.
 
 ## 🧠 The concept: why, what, how
 Some apps must not start until something else is ready: a database, a config service, a migration. Kubernetes gives a Pod **init containers** for exactly this. They are small helper containers that run **one at a time, in order, before the app container**. Each one must exit successfully (exit code 0) before the next starts, and the app containers only start after the last one finishes.
@@ -21,9 +21,9 @@ Some apps must not start until something else is ready: a database, a config ser
 Think of a restaurant kitchen: the head chef (the app) won't start cooking until the helper has checked that the gas is on. If the helper keeps checking the wrong meter, the chef just stands there, and asking the chef what went wrong gets you nothing. You have to ask the helper.
 
 ```
- init container 1 ──▶ exit 0? ──▶ init container 2 ──▶ exit 0? ──▶ app container starts
-        │                                                  
-        └── never exits ──▶ Pod stays Init:0/1, app never starts, app has no logs
+ init container 1 --> exit 0? --> init container 2 --> exit 0? --> app container starts
+        |
+        '-- never exits --> Pod stays Init:0/1, app never starts, app has no logs
 ```
 
 ## 🏢 Where you'll meet this at work
@@ -40,24 +40,24 @@ What the room should see: the script says Redis is running, but the app is not c
 kubectl logs visitor -n k-26-init-stuck --tail=3
 ```
 ```
-❌ 00:11:50 no answer from http://showdown/readyz
-❌ 00:11:53 no answer from http://showdown/readyz
-❌ 00:11:56 no answer from http://showdown/readyz
+❌ 00:17:33 no answer from http://showdown/readyz
+❌ 00:17:36 no answer from http://showdown/readyz
+❌ 00:17:39 no answer from http://showdown/readyz
 ```
 You can follow it live with `kubectl logs -f visitor -n k-26-init-stuck` (Ctrl+C to stop). We'll watch it again when we fix things.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
-**1. What state are the Pods in?**
+**1. What state are the Pods in?** Before guessing at causes, we need the one-line status of everything we deployed.
 ```bash
 kubectl get pods -n k-26-init-stuck
 ```
 ```
-NAME                        READY   STATUS     RESTARTS   AGE
-redis-7f87b86754-rwssf      1/1     Running    0          13s
-showdown-84b6556448-f4m9t   0/1     Init:0/1   0          13s
-visitor                     1/1     Running    0          13s
+NAME                       READY   STATUS     RESTARTS   AGE
+redis-7f87b86754-tj9vp     1/1     Running    0          12s
+showdown-9d66c75f5-jp8zk   0/1     Init:0/1   0          12s
+visitor                    1/1     Running    0          12s
 ```
 (Ages and Pod names will differ.) Redis is fine, and so is the visitor. The app Pod is `0/1`, with zero restarts and a status we haven't seen before: `Init:0/1`. Wait a minute and run it again: nothing changes. It isn't crashing. It just isn't getting anywhere.
 
@@ -71,24 +71,22 @@ kubectl logs -n k-26-init-stuck -l app=showdown
 ```
 ```
 Defaulted container "showdown" out of: showdown, wait-for-redis (init)
-Error from server (BadRequest): container "showdown" in pod "showdown-84b6556448-f4m9t" is waiting to start: PodInitializing
+Error from server (BadRequest): container "showdown" in pod "showdown-9d66c75f5-jp8zk" is waiting to start: PodInitializing
 ```
 (Exact wording differs a little between kubectl versions.) No logs, because the app container is "waiting to start". But look at the first line: Kubernetes tells us this Pod has **two** containers, `showdown` and `wait-for-redis (init)`, and that we were given the first one by default. So `kubectl logs` without `-c` asks the wrong container.
 
-**3. Which container is actually doing something?** `describe` lists every container with its state.
+**3. Which container is actually doing something?** Step 2 told us the Pod has an init container, so next we ask `describe` for the state of every container.
 ```bash
-kubectl describe pod -n k-26-init-stuck -l app=showdown | sed -n '/^Init Containers:/,/^Conditions:/p' | grep -E '^(Init )?Containers:|^  [a-z-]+:$|State:|Reason:'
+kubectl describe pod -n k-26-init-stuck -l app=showdown | grep -E '^(Init )?Containers:|State:|Reason:'
 ```
 ```
 Init Containers:
-  wait-for-redis:
     State:          Running
 Containers:
-  showdown:
     State:          Waiting
       Reason:       PodInitializing
 ```
-The init container `wait-for-redis` is **Running**, and the app `showdown` is **Waiting** for it. The Pod is stuck on the first step of its start-up, so the answer will be in that container's log.
+The first `State:` (under `Init Containers:`) is the init container: **Running**. The second one, under `Containers:`, is the app `showdown`: **Waiting** for it. The Pod is stuck on the first step of its start-up, so the answer will be in the init container's log.
 
 **4. What is the init container saying?** Now ask it, with `-c` and its name.
 ```bash
@@ -114,9 +112,9 @@ Address:	10.96.0.10:53
 
 ** server can't find redsi.k-26-init-stuck.svc.cluster.local: NXDOMAIN
 
-** server can't find redsi.svc.cluster.local: NXDOMAIN
-
 ** server can't find redsi.cluster.local: NXDOMAIN
+
+** server can't find redsi.svc.cluster.local: NXDOMAIN
 
 ** server can't find redsi.k-26-init-stuck.svc.cluster.local: NXDOMAIN
 
@@ -130,12 +128,12 @@ kubectl get svc -n k-26-init-stuck
 ```
 ```
 NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-redis      ClusterIP   10.96.213.254   <none>        6379/TCP   14s
-showdown   ClusterIP   10.96.122.89    <none>        80/TCP     14s
+redis      ClusterIP   10.96.62.154    <none>        6379/TCP   12s
+showdown   ClusterIP   10.96.247.145   <none>        80/TCP     12s
 ```
 The Service that exists is `redis`. One letter pair swapped.
 
-**6. Where does `redsi` come from?**
+**6. Where does `redsi` come from?** We know the name is wrong. Which object holds it? The Deployment's Pod template.
 ```bash
 kubectl get deploy showdown -n k-26-init-stuck -o yaml | grep -A8 'initContainers:'
 ```
@@ -144,18 +142,20 @@ kubectl get deploy showdown -n k-26-init-stuck -o yaml | grep -A8 'initContainer
       - command:
         - sh
         - -c
-        - until nslookup redsi | grep -q '^Name:'; do echo waiting for redsi; sleep
-          2; done
+        - until nc -z redsi 6379 2>/dev/null; do echo waiting for redsi; sleep 2;
+          done
         image: busybox:1.36
         imagePullPolicy: IfNotPresent
         name: wait-for-redis
 ```
-(`kubectl` wraps the long line.) The Deployment's init container runs a loop: "look up the name `redsi`; if it isn't found, say so and try again in 2 seconds". It was typed wrong, so it can never succeed.
+(`kubectl` wraps the long line.) The Deployment's init container runs a loop: "try to open a connection to `redsi` on port 6379 (Redis's port); if that fails, say so and try again in 2 seconds". The name was typed wrong, so it can never succeed.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The Pod has an init container, `wait-for-redis`, whose job is to hold the app back until Redis exists. Its loop looks up the name `redsi`, a typo of `redis`, so the lookup never finds anything and the loop never exits. Kubernetes only starts the app container after every init container has exited successfully, so the app never started: no logs, no restarts, just `Init:0/1`. Redis itself, the Service and the app code were all fine. (The `grep -q '^Name:'` part is only there because BusyBox's `nslookup` can report failure even for a name that resolved; the loop treats "the answer contains a `Name:` line" as success.)
+The Pod has an init container, `wait-for-redis`, whose job is to hold the app back until Redis accepts connections. Its loop tries to connect to `redsi` on port 6379, a typo of `redis`, so the connection never succeeds and the loop never exits. Kubernetes only starts the app container after every init container has exited successfully, so the app never started: no logs, no restarts, just `Init:0/1`. Redis itself, the Service and the app code were all fine.
+
+If an init container had *failed* (exited with an error), the Pod's `restartPolicy` would retry it, and you would see `Init:Error` and then `Init:CrashLoopBackOff`. This one never exits at all, so it sits quietly at `Init:0/1`.
 </details>
 
 ## 🔧 Fix it
@@ -167,7 +167,7 @@ Then, in the first terminal:
 ```bash
 cd ../fix && ./fix.sh
 ```
-Within a few seconds the log flips from ❌ to ✅ (Ctrl+C to stop it). The init container in the new Pod finds `redis` straight away, exits, and the app starts. What changed: one word.
+Within about 15 seconds the log flips from ❌ to ✅ (Ctrl+C to stop it). The init container in the new Pod reaches `redis` straight away, exits, and the app starts. What changed: one word.
 ```bash
 diff ../break/app.yaml app.yaml
 ```
@@ -176,18 +176,18 @@ diff ../break/app.yaml app.yaml
 < # K26 break: the Cats vs Dogs app, deployed.
 ---
 > # K26 fix: the same Deployment, corrected.
-24c24
-<             - until nslookup redsi | grep -q '^Name:'; do echo waiting for redsi; sleep 2; done
+25c25
+<             - until nc -z redsi 6379 2>/dev/null; do echo waiting for redsi; sleep 2; done
 ---
->             - until nslookup redis | grep -q '^Name:'; do echo waiting for redis; sleep 2; done
+>             - until nc -z redis 6379 2>/dev/null; do echo waiting for redis; sleep 2; done
 ```
 What you saw in the second terminal (shortened: the first lines of the log are cut off, and the ✅ lines keep coming every 2 seconds until you stop it):
 ```
-❌ 00:11:56 no answer from http://showdown/readyz
-❌ 00:11:59 no answer from http://showdown/readyz
-✅ 00:12:02 HTTP 200
-✅ 00:12:04 HTTP 200
-✅ 00:12:06 HTTP 200
+❌ 00:17:42 no answer from http://showdown/readyz
+❌ 00:17:45 no answer from http://showdown/readyz
+✅ 00:17:47 HTTP 200
+✅ 00:17:49 HTTP 200
+✅ 00:17:51 HTTP 200
 ```
 (The app's `REDIS_HOST` was already `redis`, so the app and its start-up check now both use the same name.)
 
@@ -203,30 +203,28 @@ kubectl get pods -n k-26-init-stuck
 ```
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
-redis-7f87b86754-rwssf      1/1     Running   0          26s
-showdown-7c5b88897b-wgtfh   1/1     Running   0          9s
-visitor                     1/1     Running   0          26s
+redis-7f87b86754-tj9vp      1/1     Running   0          25s
+showdown-857dfb5d55-k779h   1/1     Running   0          9s
+visitor                     1/1     Running   0          25s
 ```
 (Ages and Pod names will differ.) The app Pod is `Running`, `1/1` Ready. The visitor's log is green again (if you still see a ❌, wait a few seconds and run it again):
 ```bash
 kubectl logs visitor -n k-26-init-stuck --tail=3
 ```
 ```
-✅ 00:12:04 HTTP 200
-✅ 00:12:06 HTTP 200
-✅ 00:12:08 HTTP 200
+✅ 00:17:49 HTTP 200
+✅ 00:17:51 HTTP 200
+✅ 00:17:53 HTTP 200
 ```
 The init container did its job and finished, and the app took over:
 ```bash
-kubectl describe pod -n k-26-init-stuck -l app=showdown | sed -n '/^Init Containers:/,/^Conditions:/p' | grep -E '^(Init )?Containers:|^  [a-z-]+:$|State:|Reason:'
+kubectl describe pod -n k-26-init-stuck -l app=showdown | grep -E '^(Init )?Containers:|State:|Reason:'
 ```
 ```
 Init Containers:
-  wait-for-redis:
     State:          Terminated
       Reason:       Completed
 Containers:
-  showdown:
     State:          Running
 ```
 And now the app has logs, because it finally got to run (the first line is kubectl telling you which container it picked):
@@ -235,7 +233,7 @@ kubectl logs -n k-26-init-stuck -l app=showdown
 ```
 ```
 Defaulted container "showdown" out of: showdown, wait-for-redis (init)
-2026-11-09T00:12:01 [showdown-7c5b88897b-wgtfh] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis redis
+2026-11-09T00:17:46 [showdown-857dfb5d55-k779h] 🚀 Cats vs Dogs v1.0.0 (Cats vs Dogs) listening on :8080, votes stored in redis redis
 ```
 Now open it yourself. In a **second terminal** (leave it running):
 ```bash
@@ -257,13 +255,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9226
 curl -s 'localhost:9226/api/vote?option=cats'
 ```
 ```
-{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "showdown-7c5b88897b-wgtfh", "version": "1.0.0"}
+{"voted": "cats", "results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "showdown-857dfb5d55-k779h", "version": "1.0.0"}
 ```
 ```bash
 curl -s localhost:9226/api/results
 ```
 ```
-{"results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "showdown-7c5b88897b-wgtfh", "version": "1.0.0"}
+{"results": {"cats": 1, "dogs": 0}, "total": 1, "storage": "redis", "served_by": "showdown-857dfb5d55-k779h", "version": "1.0.0"}
 ```
 (If you vote in the browser first, your counts will be higher.) Or open http://localhost:9226 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
