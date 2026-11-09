@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# D02 fix: same IT-Tools, but published on host port 8202 (the container port stays 80).
+# D02 fix: the shortcut for the fixed second line in the README (host port 8202).
+# It prints every Docker command before it runs it, exactly as you would type it.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -10,9 +11,9 @@ TOOLS_IMAGE="corentinth/it-tools:2024.10.22-7ca5933"
 tools_up() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8202)" = "200" ]; }
 
 need_docker
-say "Recreating IT-Tools on host port 8202 (inside the container it is still port 80)"
-docker rm -f d02-tools >/dev/null 2>&1
-docker run -d --name d02-tools --label z2h.scenario=d02 -p 8202:80 "$TOOLS_IMAGE" >/dev/null \
+say "Remove the stuck IT-Tools container, then run line 2 again with a free host port"
+run_shown_quiet docker rm -f d02-tools
+run_shown docker run -d --name d02-tools -p 8202:80 "$TOOLS_IMAGE" \
   || die "docker run failed. Is Docker healthy?"
 
 wait_for "IT-Tools to answer on port 8202" 60 tools_up \
