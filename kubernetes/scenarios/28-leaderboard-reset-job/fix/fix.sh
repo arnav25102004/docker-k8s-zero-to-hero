@@ -10,7 +10,7 @@ NS="k-28-job"
 need_cluster
 say "Deleting the failed Job (its Pod template is immutable) and creating it again…"
 # Editing spec.template of an existing Job is refused by Kubernetes, so delete and re-create.
-kubectl delete job leaderboard-reset -n "$NS" --ignore-not-found >/dev/null || die "Could not delete the Job."
+kubectl delete job leaderboard-reset -n "$NS" --ignore-not-found --wait=true >/dev/null || die "Could not delete the Job."
 kubectl apply -f "$HERE/job.yaml" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
 
 say "Waiting for the Job to complete…"

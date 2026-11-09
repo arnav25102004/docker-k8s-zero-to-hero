@@ -1,4 +1,4 @@
-# K28: a real Redis that holds the leaderboard, behind a Service called "redis".
+# K28: a real Redis that holds the leaderboard, behind a Service.
 apiVersion: v1
 kind: Service
 metadata:

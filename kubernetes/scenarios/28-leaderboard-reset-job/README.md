@@ -17,7 +17,8 @@ A **Deployment** keeps something running forever. A **Job** is for work that sho
 - If the Pod fails, the Job starts a **new** Pod and tries again. It waits a little longer before each retry (10 seconds, then 20, and so on).
 - `backoffLimit` says how many retries are allowed. Ours is `2`, so the Job makes 3 attempts in total.
 - When the retries run out, the Job gives up: its condition becomes **Failed** with the reason **`BackoffLimitExceeded`**. Nothing tries again after that.
-- Because we set `restartPolicy: Never`, each attempt is its own Pod, and the failed Pods are **kept** (showing `Error`), so you can still read what each one said.
+- Because we set `restartPolicy: Never`, each attempt is its own Pod, and the failed Pods are **kept** (showing `Error`), so you can still read what each one said. (With `restartPolicy: OnFailure` it is different: the Job reuses one Pod, `RESTARTS` climbs, and `kubectl logs` shows only the latest try; earlier logs are lost unless you ask for `--previous`.)
+- The kept Pods live and die with the Job: delete the Job, or set `ttlSecondsAfterFinished` so Kubernetes deletes it later, and its Pods (and their logs) vanish too. Read them before that. Retry waits double each time but are capped at about 6 minutes.
 - A Job's Pod template can't be edited after the Job exists. To change what it runs, you delete the Job and create it again.
 - Think of a courier who rings your bell three times. If nobody answers, he leaves a slip and goes. He doesn't ring forever, and he doesn't come back unless you book him again.
 - Need it every night? That is a **CronJob**: it creates a fresh Job on a schedule (we don't create one here; our Job is the thing a CronJob would run).
@@ -47,13 +48,13 @@ kubectl get job,pods -n k-28-job
 ```
 ```
 NAME                          STATUS   COMPLETIONS   DURATION   AGE
-job.batch/leaderboard-reset   Failed   0/1           33s        33s
+job.batch/leaderboard-reset   Failed   0/1           38s        38s
 
 NAME                          READY   STATUS    RESTARTS   AGE
-pod/leaderboard-reset-57gxz   0/1     Error     0          23s
-pod/leaderboard-reset-txss4   0/1     Error     0          33s
-pod/leaderboard-reset-zw6jd   0/1     Error     0          3s
-pod/redis-7f87b86754-sj4dc    1/1     Running   0          34s
+pod/leaderboard-reset-bv9ht   0/1     Error     0          8s
+pod/leaderboard-reset-ct2vb   0/1     Error     0          28s
+pod/leaderboard-reset-rskpp   0/1     Error     0          38s
+pod/redis-7f87b86754-xcmtr    1/1     Running   0          39s
 ```
 (Names and ages will differ.) The Job is **Failed**, `0/1` completions. There are **three** Pods, all in `Error`: the first try plus the two retries, spaced about 10 and 20 seconds apart (the ages show it). Redis is fine. To look at only the Job's Pods, use its label:
 ```bash
@@ -61,9 +62,9 @@ kubectl get pods -n k-28-job -l job-name=leaderboard-reset
 ```
 ```
 NAME                      READY   STATUS   RESTARTS   AGE
-leaderboard-reset-57gxz   0/1     Error    0          23s
-leaderboard-reset-txss4   0/1     Error    0          33s
-leaderboard-reset-zw6jd   0/1     Error    0          3s
+leaderboard-reset-bv9ht   0/1     Error    0          13s
+leaderboard-reset-ct2vb   0/1     Error    0          33s
+leaderboard-reset-rskpp   0/1     Error    0          43s
 ```
 The failed Pods were not cleaned away. That is on purpose: they are the evidence.
 
@@ -76,10 +77,10 @@ Three Pods, three failures, the same program each time. Each Pod printed somethi
 kubectl logs job/leaderboard-reset -n k-28-job
 ```
 ```
-Found 3 pods, using pod/leaderboard-reset-txss4
+Found 3 pods, using pod/leaderboard-reset-rskpp
 resetting the leaderboard on leaderbord:6379
 Traceback (most recent call last):
-  File "/script/reset.py", line 16, in <module>
+  File "/script/reset.py", line 19, in <module>
     with socket.create_connection((host, 6379), timeout=5) as s:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.12/socket.py", line 841, in create_connection
@@ -100,10 +101,10 @@ kubectl describe job leaderboard-reset -n k-28-job | grep -A6 '^Events:'
 Events:
   Type     Reason                Age   From            Message
   ----     ------                ----  ----            -------
-  Normal   SuccessfulCreate      33s   job-controller  Created pod: leaderboard-reset-txss4
-  Normal   SuccessfulCreate      23s   job-controller  Created pod: leaderboard-reset-57gxz
-  Normal   SuccessfulCreate      3s    job-controller  Created pod: leaderboard-reset-zw6jd
-  Warning  BackoffLimitExceeded  0s    job-controller  Job has reached the specified backoff limit
+  Normal   SuccessfulCreate      53s   job-controller  Created pod: leaderboard-reset-rskpp
+  Normal   SuccessfulCreate      43s   job-controller  Created pod: leaderboard-reset-ct2vb
+  Normal   SuccessfulCreate      23s   job-controller  Created pod: leaderboard-reset-bv9ht
+  Warning  BackoffLimitExceeded  21s   job-controller  Job has reached the specified backoff limit
 ```
 Three Pods created, then `BackoffLimitExceeded`. That is only the *what*; the Pod logs from step 2 are the *why*.
 
@@ -121,8 +122,8 @@ kubectl get job leaderboard-reset -n k-28-job -o jsonpath='{.spec.template.spec.
 kubectl get svc -n k-28-job
 ```
 ```
-NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-redis   ClusterIP   10.96.158.133   <none>        6379/TCP   35s
+NAME    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+redis   ClusterIP   10.96.131.14   <none>        6379/TCP   65s
 ```
 The only Service is `redis`. Compare it with the value in step 4, letter by letter.
 
@@ -147,7 +148,7 @@ The old scores are all still there. The reset never reached Redis.
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The Job's `REDIS_HOST` was set to `leaderbord`, a misspelled word (it should be `leaderboard`, but even that would not work: no Service has that name). The Service is called `redis`, so the name `leaderbord` does not resolve and the script can't even open a connection. Every retry hits the same wall, because retrying the same wrong name can't help. After the third Pod failed, the Job reached its `backoffLimit` of 2 and became `Failed`. Redis and the cluster were fine the whole time.
+The Job's `REDIS_HOST` was set to `leaderbord`. The only Service in the namespace is called `redis`, and nothing is called `leaderbord`, so that name doesn't exist in DNS. The script can't even open a connection. Every retry hits the same wall, because retrying the same wrong name can't help. After the third Pod failed, the Job reached its `backoffLimit` of 2 and became `Failed`. Redis and the cluster were fine the whole time.
 </details>
 
 ## 🔧 Fix it
@@ -181,18 +182,13 @@ diff ../break/job.yaml job.yaml
 ```
 The host is now `redis`, the name of the Service. You can't simply `kubectl edit` this: a Job's Pod template is **immutable**, because Pods that already ran should not pretend they ran something else. So the fix is to delete the Job (its failed Pods go with it) and create it again.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both):
+By hand (this replaces `./fix.sh`: run `./fix.sh` or these, not both):
 ```bash
 kubectl delete job leaderboard-reset -n k-28-job
 kubectl apply -f job.yaml
 kubectl wait --for=condition=complete job/leaderboard-reset -n k-28-job --timeout=120s
 ```
-```
-job.batch "leaderboard-reset" deleted from k-28-job namespace
-job.batch/leaderboard-reset created
-job.batch/leaderboard-reset condition met
-```
-(The first line's wording depends on the kubectl version.)
+Kubernetes answers with "deleted", then "created", then "condition met" (the exact wording of the first line depends on your kubectl version).
 
 ## ✅ Verify it yourself
 ```bash
@@ -200,11 +196,11 @@ kubectl get job,pods -n k-28-job
 ```
 ```
 NAME                          STATUS     COMPLETIONS   DURATION   AGE
-job.batch/leaderboard-reset   Complete   1/1           4s         4s
+job.batch/leaderboard-reset   Complete   1/1           3s         13s
 
 NAME                          READY   STATUS      RESTARTS   AGE
-pod/leaderboard-reset-9bhj9   0/1     Completed   0          4s
-pod/redis-7f87b86754-sj4dc    1/1     Running     0          42s
+pod/leaderboard-reset-xd2m5   0/1     Completed   0          13s
+pod/redis-7f87b86754-xcmtr    1/1     Running     0          88s
 ```
 (Names and ages will differ.) The Job is **Complete**, `1/1`. One Pod, `Completed`; the three failed ones were deleted together with the old Job. The logs:
 ```bash
@@ -230,7 +226,7 @@ Lakshmi
 Arjun
 0
 ```
-(Players with equal scores come out in an order Redis chooses.) This scenario has no web page, so there is no port-forward to open.
+(Ties are sorted by name, reversed.) This scenario has no web page, so there is no port-forward to open.
 
 ## 🎯 Key takeaways
 - **A Job runs to completion.** It retries failed Pods with growing waits, up to `backoffLimit`, then stops with `Failed` / `BackoffLimitExceeded`.

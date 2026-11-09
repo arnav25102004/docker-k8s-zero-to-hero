@@ -20,7 +20,10 @@ data:
             b = str(a).encode()
             out += b"$%d\r\n%s\r\n" % (len(b), b)
         sock.sendall(out)
-        return sock.recv(64).decode().strip()
+        reply = sock.recv(64).decode().strip()
+        if reply.startswith("-"):  # RESP errors start with "-"
+            raise SystemExit(f"redis said: {reply}")
+        return reply
 
     with socket.create_connection((host, 6379), timeout=5) as s:
         command(s, "DEL", "scores")
