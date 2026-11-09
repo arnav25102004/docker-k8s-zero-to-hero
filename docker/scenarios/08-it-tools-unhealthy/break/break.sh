@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D08 break: copy break/ into work/ (cp -R break work), build the image, run it, and wait for Docker's verdict.
+# D08 break: copy break/ into work/, build the image, run it, and wait for Docker's verdict.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -16,9 +16,8 @@ port_free 8108 || die "Port 8108 is busy, so this scenario can't start. Free it 
 ensure_image "$TOOLS_IMAGE" "about 24 MB"
 
 cd "$HERE/.." || die "Could not enter the scenario folder"
-rm -rf work
 say "The night before registration opens. Building the tools page from work/Dockerfile (a fresh copy of break/):"
-run_shown cp -R break work || die "Could not copy break/ to work/"
+prepare_work "$HERE/../break"
 run_shown docker build -t d08-tools:1.0 work || die "The build failed. Read the error above."
 run_shown docker run -d --name d08-tools -p 8108:80 d08-tools:1.0 \
   || die "docker run failed. Is port 8108 free?"

@@ -9,8 +9,7 @@ is_healthy() { [ "$(docker inspect -f '{{.State.Health.Status}}' d08-tools 2>/de
 
 need_docker
 cd "$HERE/.." || die "Could not enter the scenario folder"
-rm -rf work
-run_shown cp -R fix work || die "Could not copy fix/ to work/"
+prepare_work "$HERE/../fix"
 run_shown docker build -t d08-tools:1.0 work || die "The build failed. Read the error above."
 run_shown docker rm -f d08-tools
 run_shown docker run -d --name d08-tools -p 8108:80 d08-tools:1.0 \

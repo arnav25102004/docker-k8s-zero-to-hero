@@ -26,9 +26,9 @@ Think of the **floor manager** of a hotel who knocks on a guest's door every few
 - **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([K06](../../../kubernetes/scenarios/06-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([K07](../../../kubernetes/scenarios/07-showdown-slow-start/README.md)).
 
 ## 💥 Break it
-You get a folder `break/` with one file, the `Dockerfile`. Make your own working copy, build it and run it, exactly like the team did. (If `work/` already exists from an earlier try, delete it first with `rm -rf work`.)
+You get a folder `break/` with the `Dockerfile` (and the `break.sh` shortcut). Make your own working copy, build it and run it, exactly like the team did. (`rm -rf work` first, so a leftover copy never gets in the way.)
 ```bash
-cp -R break work
+rm -rf work && cp -R break work
 docker build -t d08-tools:1.0 work
 docker run -d --name d08-tools -p 8108:80 d08-tools:1.0
 ```
