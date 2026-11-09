@@ -19,6 +19,8 @@ need_cluster
 bash "$HERE/../cleanup.sh"
 port_free 9218 || die "Port 9218 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 
+die_if_k16_taint
+
 # Replicas = nodes that accept new Pods + 1 (kind: 3 nodes, control-plane tainted -> 2 -> 3 replicas).
 # A just-created cluster has nodes that are still starting (they carry a node.kubernetes.io/ taint
 # until they are Ready). Wait until none does, then read the count once.

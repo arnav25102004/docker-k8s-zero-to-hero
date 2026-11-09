@@ -39,15 +39,20 @@ delete_ns() {
   return 0
 }
 
+# die_if_k16_taint: stop at once if K16's z2h-vip taint is still on a node (every other
+# scenario's Pods would sit Pending). Called by fresh_ns; K16's own break.sh runs its
+# cleanup (which removes the taint) before it gets to fresh_ns, so it is not blocked.
+die_if_k16_taint() {
+  if kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null | grep -q '^z2h-vip$'; then
+    die "The nodes still carry the z2h-vip taint from K16. Run kubernetes/scenarios/16-game-server-vip-node/cleanup.sh (or: kubectl taint nodes --all z2h-vip-) and try again."
+  fi
+}
+
 # fresh_ns NS...: delete (and wait for) then create each namespace, labelled
 # z2h.scenario=<kNN> taken from the k-NN- prefix.
 fresh_ns() {
   local ns id i
-  # Guard: K16's node taint left behind makes every other scenario's Pods go Pending.
-  # (K16's own break.sh runs its cleanup, which removes the taint, before it gets here.)
-  if kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null | grep -q '^z2h-vip$'; then
-    die "The nodes still carry the z2h-vip taint from K16. Run kubernetes/scenarios/16-game-server-vip-node/cleanup.sh (or: kubectl taint nodes --all z2h-vip-) and try again."
-  fi
+  die_if_k16_taint
   for ns in "$@"; do
     delete_ns "$ns"
     kubectl create namespace "$ns" >/dev/null || return 1
