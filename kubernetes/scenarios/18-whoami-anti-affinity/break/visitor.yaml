@@ -1,4 +1,4 @@
-# K18 break (2/2): a small visitor that calls the Service 20 times every round and reports how many
+# K18 break (2/2): a small visitor that calls the Service until it has seen every expected Pod (at most 60 tries per round) and reports how many
 # different Pods answered, against how many Pods the Deployment is supposed to have (ConfigMap visitor-config,
 # created by break.sh). The live signal on stage.
 apiVersion: v1
@@ -24,12 +24,14 @@ spec:
           while true; do
             seen=""
             i=0
-            while [ "$i" -lt 20 ]; do
+            while [ "$i" -lt 60 ]; do
               h=$(wget -q -T 2 -O - http://whoami 2>/dev/null | grep '^Hostname:' | cut -d' ' -f2)
               if [ -n "$h" ]; then
                 case " $seen " in *" $h "*) ;; *) seen="$seen $h" ;; esac
               fi
               i=$((i + 1))
+              # Stop early once every expected Pod has answered: a lucky-miss of one Pod is not a failure.
+              [ "$(echo $seen | wc -w)" -ge "$WANT" ] && break
             done
             n=$(echo $seen | wc -w)
             names=$(echo $seen | tr ' ' '\n' | sed 's/.*-//' | sort | paste -sd, -)

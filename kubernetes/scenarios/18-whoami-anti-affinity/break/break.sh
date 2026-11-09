@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K18 break: whoami with a hard rule on where its Pods may go, scaled to one Pod more than there are nodes.
+# K18 break: scales whoami up for the open house.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -8,7 +8,7 @@ source "$HERE/../../_lib.sh"
 NS="k-18-anti-affinity"
 
 visitor_up() { [ "$(kubectl get pod visitor -n "$NS" -o jsonpath='{.status.phase}' 2>/dev/null)" = "Running" ]; }
-# The intended failure: exactly one Pod waits (Pending), the others run, and the scheduler wrote an event.
+# The intended state: all but one Pod are Running, one is still waiting, and the scheduler wrote an event.
 one_waiting() {
   [ "$(kubectl get pods -n "$NS" -l app=whoami --no-headers 2>/dev/null | grep -c ' Pending ')" = "1" ] &&
     [ "$(kubectl get pods -n "$NS" -l app=whoami --no-headers 2>/dev/null | grep -c ' Running ')" = "$((REPLICAS - 1))" ] &&
@@ -19,9 +19,9 @@ need_cluster
 bash "$HERE/../cleanup.sh"
 port_free 9218 || die "Port 9218 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 
-# Replicas = nodes that accept new Pods + 1. (kind: the control-plane node is tainted, so 3 nodes -> 2 -> 3 replicas.)
+# Replicas = nodes that accept new Pods + 1 (kind: 3 nodes, control-plane tainted -> 2 -> 3 replicas).
 NODES=$(schedulable_node_count)
-[ "$NODES" -ge 1 ] || die "No node accepts new Pods right now (all tainted or cordoned). Check: kubectl get nodes"
+[ "$NODES" -ge 1 ] || die "No node accepts new Pods right now (all tainted or cordoned). Check: kubectl get nodes. If you just ran K16, run its cleanup.sh first."
 REPLICAS=$((NODES + 1))
 
 fresh_ns "$NS" || die "Could not create the namespace $NS."

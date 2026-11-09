@@ -15,7 +15,7 @@ It's the college open house, and Lakshmi's team is expecting a crowd on the camp
 Running several copies (**replicas**) of a Pod is how you survive a node dying: if all copies sit on one node and that node goes down, everything goes with it. So you tell the **scheduler** (the part of Kubernetes that picks a node for each new Pod) to keep copies apart. That is **pod anti-affinity**: "don't put me near Pods that look like me".
 
 - The **`topologyKey: kubernetes.io/hostname`** says what "near" means: "on the same node". (Use a zone label instead and it means "in the same zone".)
-- **`requiredDuringSchedulingIgnoredDuringExecution`** is a **hard rule**: no node without a sibling, no Pod. The Pod waits in `Pending`.
+- **`requiredDuringSchedulingIgnoredDuringExecution`** is a **hard rule**: no node free of siblings means no home for the Pod, which waits in `Pending`.
 - **`preferredDuringSchedulingIgnoredDuringExecution`** is a **wish** (with a `weight`): spread out as well as you can, but always find a home.
 - The long words end in `IgnoredDuringExecution`: the rule is only checked when a Pod is *placed*; Pods already running are never moved.
 
@@ -46,7 +46,7 @@ What the room should see: the script scales `whoami` for the open house and fini
 ```bash
 kubectl logs -f visitor -n k-18-anti-affinity
 ```
-The visitor calls the Service 20 times every second or so and counts how many *different* Pods answered, against how many there should be.
+The visitor calls the Service (until every expected Pod has answered, or 60 tries) and counts how many *different* Pods answered, against how many there should be.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. Note what is *not* happening: the website is not down. Some replicas are serving, so this is a capacity problem, not an outage.
@@ -58,15 +58,15 @@ kubectl get pods -n k-18-anti-affinity
 ```
 NAME                      READY   STATUS    RESTARTS   AGE
 visitor                   1/1     Running   0          2s
-whoami-85f467d95f-d2kb8   1/1     Running   0          2s
-whoami-85f467d95f-n4nwh   1/1     Running   0          2s
-whoami-85f467d95f-ssb4q   0/1     Pending   0          2s
+whoami-85f467d95f-gkzgh   1/1     Running   0          2s
+whoami-85f467d95f-lksdp   0/1     Pending   0          2s
+whoami-85f467d95f-tnsqz   1/1     Running   0          2s
 ```
-(Ages and Pod names will differ. On a 1-node cluster you will see 2 `whoami` Pods: 1 Running, 1 Pending.) Most Pods are fine; one is `Pending` with `0` restarts: it hasn't been given a node at all. The visitor in your second terminal says the same thing in its own words:
+(Ages and Pod names will differ. On a 1-node cluster you will see 2 `whoami` Pods: 1 Running, 1 Pending.) The `Running` Pods are fine; one `whoami` Pod is `Pending` with `0` restarts: it hasn't been given a node at all. The visitor in your second terminal says the same thing in its own words:
 ```
-❌ 20:04:18 only 2 of 3 Pods answered (d2kb8,n4nwh)
+❌ 00:03:11 only 2 of 3 Pods answered (gkzgh,tnsqz)
 ```
-(Shortened; the visitor prints a line about every second. It shows the last five characters of each Pod name.)
+(Shortened; the visitor prints a line every second or so. It keeps calling the Service until every expected Pod has answered, so ❌ here is real: the missing Pod never answers. It shows the last five characters of each Pod name.)
 
 <details><summary>💡 Hint</summary>
 Only the <em>last</em> Pod is stuck, and all of them are copies of the same Deployment, so the Pod itself is fine. Something about <em>where</em> it may run has run out. Who decides that, and where does it write its reasons? Look at the events.
@@ -78,7 +78,7 @@ kubectl get events -n k-18-anti-affinity --field-selector reason=FailedSchedulin
 ```
 ```
 LAST SEEN   TYPE      REASON             OBJECT                        MESSAGE
-14s         Warning   FailedScheduling   pod/whoami-85f467d95f-ssb4q   0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 node(s) didn't match pod anti-affinity rules. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+14s         Warning   FailedScheduling   pod/whoami-85f467d95f-lksdp   0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 node(s) didn't match pod anti-affinity rules. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
 ```
 (The exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match pod anti-affinity rules.`) The clue is **`didn't match pod anti-affinity rules`**: the nodes have room, but the Pod's own rule about neighbours rules them out. (The `control-plane` taint part is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it appears only on clusters with a separate control-plane node.)
 
@@ -89,16 +89,16 @@ kubectl get pods -n k-18-anti-affinity -o wide
 ```
 ```
 NAME                     STATUS   ROLES           AGE   VERSION
-z2h-test-control-plane   Ready    control-plane   61m   v1.33.1
-z2h-test-worker          Ready    <none>          61m   v1.33.1
-z2h-test-worker2         Ready    <none>          61m   v1.33.1
+z2h-test-control-plane   Ready    control-plane   5h    v1.33.1
+z2h-test-worker          Ready    <none>          5h    v1.33.1
+z2h-test-worker2         Ready    <none>          5h    v1.33.1
 NAME                      READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
-visitor                   1/1     Running   0          15s   10.244.2.124   z2h-test-worker    <none>           <none>
-whoami-85f467d95f-d2kb8   1/1     Running   0          15s   10.244.2.125   z2h-test-worker    <none>           <none>
-whoami-85f467d95f-n4nwh   1/1     Running   0          15s   10.244.1.108   z2h-test-worker2   <none>           <none>
-whoami-85f467d95f-ssb4q   0/1     Pending   0          15s   <none>         <none>             <none>           <none>
+visitor                   1/1     Running   0          14s   10.244.2.194   z2h-test-worker    <none>           <none>
+whoami-85f467d95f-gkzgh   1/1     Running   0          14s   10.244.1.177   z2h-test-worker2   <none>           <none>
+whoami-85f467d95f-lksdp   0/1     Pending   0          14s   <none>         <none>             <none>           <none>
+whoami-85f467d95f-tnsqz   1/1     Running   0          14s   10.244.2.193   z2h-test-worker    <none>           <none>
 ```
-(Your node names, IPs and node count will differ.) Two Pods run, **each on a different node**, and the third has nowhere left to go. The `visitor` is a different kind of Pod and is allowed to share a node.
+(Your node names, IPs and node count will differ; on a 1-node cluster the one Running Pod simply sits on the only node.) The Running Pods each sit on a different node, and the Pending one has nowhere left to go. The `visitor` is a different kind of Pod and is allowed to share a node.
 
 **4. What rule does the Deployment carry?** The Pod template shows what whoami insisted on.
 ```bash
@@ -160,17 +160,17 @@ diff ../break/app.yaml app.yaml
 ```
 The **hard rule becomes a preference**: "spread out if you can". Two details worth knowing:
 
-- **Why `Recreate`?** A hard rule also keeps *new* Pods away from the *old* Pods that still carry it. A normal rolling update would start a new Pod first, find every node blocked by an old Pod, and wait forever. `Recreate` stops the old Pods, then starts the new ones. For a moment nothing answers: you may see one `❌` in the visitor. (Once the rule is a preference, later updates can roll normally.)
+- **Why `Recreate`?** A hard rule also keeps *new* Pods away from the *old* Pods that still carry it. A normal rolling update would start a new Pod first, find every node blocked by an old Pod, and wait forever. `Recreate` stops the old Pods, then starts the new ones. For a few seconds nothing answers, and the visitor goes quiet or shows a `❌`. That is acceptable for a demo; in production you would avoid `Recreate` by freeing capacity (adding a node) or fixing the rule *before* scaling up. (Once the rule is a preference, later updates can roll normally.)
 - **The replica count stays.** The fix files have no `replicas:` line, so `kubectl apply` leaves the scale that `break.sh` set.
 
 Start the visitor in a second terminal **before** running the fix to watch the moment live. After the fix it ends like this (shortened):
 ```
-❌ 20:04:24 only 2 of 3 Pods answered (d2kb8,n4nwh)
-❌ 20:04:27 only 1 of 3 Pods answered (cfmcp)
-✅ 20:04:28 all 3 of 3 Pods answered (cfmcp,km6nq,q7g89)
-✅ 20:04:29 all 3 of 3 Pods answered (cfmcp,km6nq,q7g89)
+❌ 00:03:16 only 2 of 3 Pods answered (gkzgh,tnsqz)
+❌ 00:03:17 only 2 of 3 Pods answered (gkzgh,tnsqz)
+✅ 00:03:20 all 3 of 3 Pods answered (n8p9j,rcfm2,ttcqx)
+✅ 00:03:21 all 3 of 3 Pods answered (n8p9j,rcfm2,ttcqx)
 ```
-(The single `1 of 3` line is the brief `Recreate` gap; the Pod names are new because the Pods were replaced.)
+(The two `❌` lines are the old, still-broken state: 2 of 3 Pods. The pause before the first `✅` is the `Recreate` gap, a few seconds with no line while the old Pods are gone and the new ones start. The Pod names are new because the Pods were replaced. Depending on timing you may also see a `❌ only 1 of 3` or `0 of 3` line there.)
 
 By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
@@ -185,10 +185,10 @@ kubectl get pods -n k-18-anti-affinity -o wide
 ```
 ```
 NAME                      READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
-visitor                   1/1     Running   0          30s   10.244.2.124   z2h-test-worker    <none>           <none>
-whoami-55675954bf-cfmcp   1/1     Running   0          11s   10.244.2.126   z2h-test-worker    <none>           <none>
-whoami-55675954bf-km6nq   1/1     Running   0          11s   10.244.1.110   z2h-test-worker2   <none>           <none>
-whoami-55675954bf-q7g89   1/1     Running   0          11s   10.244.1.109   z2h-test-worker2   <none>           <none>
+visitor                   1/1     Running   0          29s   10.244.2.194   z2h-test-worker    <none>           <none>
+whoami-55675954bf-n8p9j   1/1     Running   0          11s   10.244.1.178   z2h-test-worker2   <none>           <none>
+whoami-55675954bf-rcfm2   1/1     Running   0          11s   10.244.2.196   z2h-test-worker    <none>           <none>
+whoami-55675954bf-ttcqx   1/1     Running   0          11s   10.244.2.195   z2h-test-worker    <none>           <none>
 ```
 (Ages, IPs and node names will differ. Two on one node is the point: spread as well as possible, none left out.) The rule in the Deployment is now a preference:
 ```bash
@@ -214,16 +214,16 @@ kubectl port-forward -n k-18-anti-affinity svc/whoami 9218:80
 curl -s localhost:9218 | head -n 4
 ```
 ```
-Hostname: whoami-55675954bf-cfmcp
+Hostname: whoami-55675954bf-n8p9j
 IP: 127.0.0.1
 IP: ::1
-IP: 10.244.2.126
+IP: 10.244.1.178
 ```
 The `Hostname:` line is the Pod that answered. Note that `port-forward` connects to **one** Pod and sticks with it, so refreshing never changes the name; to see all of them, look at the visitor (`kubectl logs visitor -n k-18-anti-affinity --tail=3`), which calls the Service from inside the cluster (stop the port-forward with Ctrl+C):
 ```
-✅ 20:04:36 all 3 of 3 Pods answered (cfmcp,km6nq,q7g89)
+✅ 00:03:30 all 3 of 3 Pods answered (n8p9j,rcfm2,ttcqx)
 ```
-(If you still see a ❌, wait a few seconds.)
+(If the first lines are still ❌, wait a few seconds.)
 
 ## 🎯 Key takeaways
 - A Deployment can look "up" while it is short of replicas: check `READY` (`2/3`) and look for `Pending` Pods, not only whether the page loads.
