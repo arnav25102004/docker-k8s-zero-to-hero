@@ -1,0 +1,51 @@
+# K27 break (2/3): the dashboard (Homer). Its settings file comes from the ConfigMap homer-config.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  namespace: k-27-config-key
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+        - name: homer
+          image: b4bz/homer:v25.10.1
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          volumeMounts:
+            # Homer reads its settings from /www/assets/config.yml. A single-file mount (subPath)
+            # leaves the rest of /www/assets (icons, fonts) in place.
+            - name: config
+              mountPath: /www/assets/config.yml
+              subPath: config.yml
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: homer-config
+            items:
+              - key: config.yml
+                path: config.yml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  namespace: k-27-config-key
+spec:
+  selector:
+    app: dashboard
+  ports:
+    - port: 80
+      targetPort: 8080
