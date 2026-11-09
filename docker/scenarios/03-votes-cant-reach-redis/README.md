@@ -52,7 +52,7 @@ fb0d9e31927f59b20c75cdd2f8a67229b19430e5b249c0d2882b62dcae38a93e
 ▶ $ docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
 ecef7fbef26f6e1a07fac4bd9f115e1532240994981a691e44b47a31b7489d52
 ▶ $ docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
-da73a6b7c5e6cb041828c762ca49aee9a2584e97514688475530497ca065ecd5
+da73a6b7c5e69c6f15cf7c56f97d4fe0f4fc7e155b2a488f721a01efe418bf9c
 ⏳ Waiting for the API to answer on port 8103 . ✔ ready
 ```
 
