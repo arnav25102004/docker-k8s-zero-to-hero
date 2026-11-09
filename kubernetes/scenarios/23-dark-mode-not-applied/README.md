@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · "Campus Today" notice page (a tiny Python page, `python:3.12-alpine`, about 19 MB) · ConfigMaps, `envFrom`, `rollout restart`
 
-⬇️ First run downloads about 19 MB (Python) plus a tiny visitor image (a few MB). A slow first download is normal: do it on good Wi-Fi, before the session.
+⬇️ First run downloads about 19 MB (Python) plus a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 

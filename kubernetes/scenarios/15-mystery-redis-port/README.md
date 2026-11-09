@@ -183,4 +183,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-That was the last scenario in this set: back to the [Kubernetes scenarios index](../README.md).
+[K16](../16-game-server-vip-node/README.md): The nodes are up. The game is ready. Kubernetes says: you're not on the list.

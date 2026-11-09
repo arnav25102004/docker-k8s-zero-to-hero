@@ -89,7 +89,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K16](kubernetes/16-pod-security/README.md) | securityContext, Pod Security | the API server says no |
 | [K17](kubernetes/17-scheduling/README.md) | affinity, taints, PDBs, drain | node maintenance with zero downtime |
 | [K18 🏆](kubernetes/18-capstone/README.md) | **capstone: production-grade deploy** | 🔥 the Gauntlet: chaos vs your platform |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **15 break-and-fix incidents** (K01–K15) | |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **30 break-and-fix incidents** (K01–K30) | |
 
 ## 🚀 Quick start
 ```bash
@@ -121,7 +121,7 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (15 scenarios)
+├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (30 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · load-image.sh
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`

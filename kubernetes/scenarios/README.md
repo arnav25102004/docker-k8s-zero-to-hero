@@ -1,8 +1,8 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-15 stage demos. Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+30 stage demos. Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K15 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md). Scenarios 16–30 come in a later batch.
+> **Scenarios vs labs.** Here **K01–K30 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
 
 ## The lineup
 
@@ -23,6 +23,21 @@
 | K13 | [Security hardened the network. Now nothing can find anything.](13-lockdown-blocks-dns/README.md) | Cats vs Dogs + Redis | *Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.* | `9213` | 82 MB |
 | K14 | [The bot has an ID card, but the door stays shut](14-leaderboard-bot-forbidden/README.md) | a "leaderboard bot" (terminal only) | *The bot has a valid ID card. The API still says: not allowed.* | - | 16 MB |
 | K15 | [The mystery variable](15-mystery-redis-port/README.md) | a Python score worker + Redis (terminal only) | *Nobody set `REDIS_PORT`. Kubernetes did.* | - | 82 MB |
+| K16 | [You're not on the list](16-game-server-vip-node/README.md) | Dosa Dash game | *The nodes are up. The game is ready. Kubernetes says: you're not on the list.* | `9216` | 25 MB |
+| K17 | [The trainer wants a GPU](17-ai-trainer-needs-gpu/README.md) | an "AI trainer" script (terminal only) | *The trainer is waiting for a GPU that this cluster doesn't have.* | - | 19 MB |
+| K18 | [One replica too many](18-whoami-anti-affinity/README.md) | whoami (tells you which Pod answered) | *One replica too many. "Never two on the same node" just met reality.* | `9218` | 10 MB |
+| K19 | [The deploy that created nothing](19-hackathon-quota/README.md) | Homer dashboard ("Hackathon team links") | *The deploy succeeded. Kubernetes created… nothing.* | `9219` | 11 MB |
+| K20 | [The limit nobody wrote](20-surprise-limitrange-oom/README.md) | Cats vs Dogs voting app | *"Nobody set a memory limit. The app still got killed for exceeding it."* | `9220` | 23 MB |
+| K21 | [The rule that turned the lights off](21-notice-board-runasnonroot/README.md) | Campus notice board | *Security turned on one rule. The notice board went dark.* | `9221` | 47 MB |
+| K22 | [Locked down and locked out](22-notice-board-readonly-fs/README.md) | Exam Week Board | *Locked down perfectly. Now it can't even start.* | `9222` | 26 MB |
+| K23 | [Dark mode is on. The site is still white.](23-dark-mode-not-applied/README.md) | "Campus Today" notice page | *Dark mode is ON in the config. The site is still blinding white.* | `9223` | 23 MB |
+| K24 | [The app that never ran](24-showdown-wrong-command/README.md) | Cats vs Dogs voting app | *No crash log. No error from the app. The app never even ran.* | `9224` | 23 MB |
+| K25 | [The autoscaler that shrugs](25-showdown-hpa-not-scaling/README.md) | Cats vs Dogs voting app + metrics-server | *Traffic is pouring in. The autoscaler shrugs: "unknown".* | `9225` | 45 MB |
+| K26 | [Stuck before it starts](26-showdown-init-stuck/README.md) | Cats vs Dogs + Redis | *Cats vs Dogs is waiting for its database. Forever.* | `9226` | 82 MB |
+| K27 | [The dashboard that never starts](27-dashboard-config-missing-key/README.md) | Homer dashboard ("Campus quick links") | *The dashboard is ready. Its config is right there. It still won't start.* | `9227` | 11 MB |
+| K28 | [The nightly reset that gave up](28-leaderboard-reset-job/README.md) | a reset Job + Redis (terminal only) | *The midnight reset ran. Three times. Then gave up.* | - | 78 MB |
+| K29 | [Half ready](29-log-sidecar-half-ready/README.md) | Hostel Notice Board | *Half ready. Fully confusing.* | `9229` | 26 MB |
+| K30 | [The Friday 5 PM outage (the finale)](30-friday-5pm-outage/README.md) | Cats vs Dogs + Redis | *Friday, 5 PM. Three things broke. Nobody knows that yet.* | `9230` | 82 MB |
 
 Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. Logins: Kanboard (K06, K10) uses the default `admin` / `admin`; the other apps need no login (Adminer in K09 only shows its login form, and there is no database behind it). All images and sizes are in [IMAGES.md](IMAGES.md).
 
@@ -30,13 +45,13 @@ Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each 
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
 2. **Break it**: `cd break && ./break.sh`
-3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it.
+3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13, K16, K18–K27, K29, K30) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it.
 4. **Fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
    ```bash
    kubectl port-forward -n <namespace> svc/<service> 92NN:<port>
    ```
-   The scenario README prints the exact line (for example K07: `kubectl port-forward -n k-07-slow-start svc/showdown 9207:80`). Then open `http://localhost:92NN` on a laptop. On a playground, add `--address 0.0.0.0` and open the URL for port `92NN`. Press **Ctrl+C** in that terminal to stop it. K08, K14 and K15 have no web page: you verify them in the terminal.
+   The scenario README prints the exact line (for example K07: `kubectl port-forward -n k-07-slow-start svc/showdown 9207:80`). Then open `http://localhost:92NN` on a laptop. On a playground, add `--address 0.0.0.0` and open the URL for port `92NN`. Press **Ctrl+C** in that terminal to stop it. K08, K14, K15, K17 and K28 have no web page: you verify them in the terminal.
 
    **Why the laptop command has no `--address 0.0.0.0`:** without it, `port-forward` listens on `localhost` only. With it, anyone on the same network (venue Wi-Fi) could open your app, and Kanboard's default login is `admin` / `admin`. A playground needs `--address 0.0.0.0` because its URL proxy reaches the app from outside the terminal. Keep `-n <namespace>` right after `port-forward`: `cleanup.sh` finds leftovers by that text.
 6. **Clean up**: `cd .. && ./cleanup.sh`
@@ -60,6 +75,9 @@ Things to know before you start:
 - **K10 needs a default StorageClass.** `kubectl get storageclass` must show one marked `(default)`. K10's fix is to stop asking for the missing `fast-ssd` class and use that default.
 - **K01, K02 and K10 download their app at fix time**, because the Pod never starts while it is broken (K01, K02: Excalidraw; K10: Kanboard). On a cold cluster the fix waits on that download (the first time it can take up to a minute or two): preload it or run the scenario once before class (see the checklist below).
 - **K13 needs a cluster that enforces NetworkPolicy**, and checks it first (a throwaway `k-13-probe` namespace, deleted straight after). If your cluster ignores policies, it stops with a clear message instead of showing a fake outage.
+- **K16 changes every node, not just a namespace.** It puts a taint (`z2h-vip`) on the nodes, so always run its `cleanup.sh` (it removes the taint again; `break.sh` also starts clean). Do not skip it, or the next scenario sees a tainted cluster.
+- **K25 installs metrics-server only if your cluster has none**, and removes it again afterwards only if it installed it. Run K25 on its own (not alongside other scenarios): adding or removing metrics-server briefly changes the cluster's API list.
+- **K30 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the others, when the class has seen each kind of fault on its own.
 - **Scenarios behave the same on 1 node and 3 nodes** (minikube and Docker Desktop are one node; the course's kind config is three).
 
 Scripts need only `bash`, `kubectl`, `curl` and ordinary Unix tools. No `jq`, no `helm`.
@@ -79,7 +97,7 @@ Stay calm. Nothing here touches anything outside the `k-NN-...` namespaces. In t
 ## Instructor preload checklist
 
 - [ ] **Check which cluster you are on:** `kubectl config current-context`. The preload loads images into the cluster of the **current** context, so make sure it is the demo cluster.
-- [ ] **The day before**, on good Wi-Fi: `./kubernetes/scenarios/preload.sh`. It pulls every image in [IMAGES.md](IMAGES.md) (about 240 MB download) with Docker, and prints ✅/❌ per image and a total. If the current context is `kind-<name>` it also runs `kind load docker-image` into that cluster, and for `minikube` it runs `minikube image load`. Other clusters (Docker Desktop, Killercoda, iximiuz) download images when a Pod first starts, so run each scenario once there instead.
+- [ ] **The day before**, on good Wi-Fi: `./kubernetes/scenarios/preload.sh`. It pulls every image in [IMAGES.md](IMAGES.md) (about 300 MB download) with Docker, and prints ✅/❌ per image and a total. If the current context is `kind-<name>` it also runs `kind load docker-image` into that cluster, and for `minikube` it runs `minikube image load`. Other clusters (Docker Desktop, Killercoda, iximiuz) download images when a Pod first starts, so run each scenario once there instead.
 - [ ] **Then run every scenario once** (break, fix, cleanup), so you have seen each output on your own machine.
 - [ ] On the morning: `kubectl get ns | grep '^k-'` prints nothing (or run `./labs.sh k8s clean`), and no leftover `kubectl port-forward` is running.
 
@@ -104,6 +122,21 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K13 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K14 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K15 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K16 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K17 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K18 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K19 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K20 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K21 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K22 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K23 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K24 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K25 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K26 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K27 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K28 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K29 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K30 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
