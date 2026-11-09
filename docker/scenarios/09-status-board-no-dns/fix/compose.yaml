@@ -13,6 +13,7 @@ services:
   board:
     build: .
     image: d09-board:1.0
+    pull_policy: build
     ports:
       - "8109:8000"
     depends_on:

@@ -19,7 +19,6 @@ ensure_image "$TOOLS_IMAGE" "about 24 MB"
 ensure_image "$PY_IMAGE" "about 19 MB"
 
 prepare_work "$HERE"
-rm -f "$HERE/../work/break.sh"
 cd "$HERE/.." || die "Could not enter the scenario folder"
 
 run_shown docker compose -f work/compose.yaml up -d \

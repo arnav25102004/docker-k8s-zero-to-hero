@@ -26,7 +26,7 @@ One more plus of Compose: the Excalidraw image reference is long (`latest@sha256
 ## 💥 Break it
 Stay in this scenario's folder (`docker/scenarios/09-status-board-no-dns`) for everything below. Copy the files you will work on into a scratch folder `work/`, then let Compose build the board and start the three services:
 ```bash
-cp -R break work && rm work/break.sh
+rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d
 ```
 Or use the one-line shortcut, which prints every Docker command before it runs it, exactly as above:
@@ -35,16 +35,14 @@ Or use the one-line shortcut, which prints every Docker command before it runs i
 ```
 ```
 ✅ Scenario d09 cleaned up
-▶ fresh copy of break/ in work/
+▶ $ rm -rf work && cp -R break work
 ▶ $ docker compose -f work/compose.yaml up -d
- Image d09-board:1.0 Pulling
- Image d09-board:1.0 pull access denied for d09-board, repository does not exist or may require 'docker login'
  Image d09-board:1.0 Building
 ... (shortened: Docker's build output) ...
  Container d09-board-1 Started
 ⏳ Waiting for the status board to report . ✔ ready
 ```
-(The "pull access denied" line is normal: Compose first looks for `d09-board:1.0` on Docker Hub, finds nothing, then builds it from `work/Dockerfile`.) `work/` is your own copy (git ignores it), so you can edit it freely; the shortcut recreates it fresh every time.
+`work/` is your own copy (git ignores it), so you can edit it freely; the shortcut recreates it fresh every time.
 
 Laptop: open http://localhost:8109. Playground: open the port 8109 URL. The board shows big red ❌ tiles for both apps.
 
@@ -110,6 +108,7 @@ services:
   board:
     build: .
     image: d09-board:1.0
+    pull_policy: build
     ports:
       - "8109:8000"
     network_mode: bridge
@@ -144,6 +143,7 @@ services:
         target: 8000
         published: "8109"
         protocol: tcp
+    pull_policy: build
   draw:
     image: excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
     network_mode: bridge
@@ -163,15 +163,15 @@ NETWORK ID     NAME      DRIVER    SCOPE
 4b29e5580d41   bridge    bridge    local
 c40222f2df6f   host      host      local
 b320b6c4e474   none      null      local
-d09-board-1 172.17.0.8/16
-d09-tools-1 172.17.0.7/16
-d09-draw-1 172.17.0.6/16
+d09-board-1 172.17.0.6/16
+d09-tools-1 172.17.0.4/16
+d09-draw-1 172.17.0.5/16
 ```
 (shortened: other networks on this machine omitted; yours may list more. The IPs will differ.) Docker's three built-in networks, and no `d09_default`. All three of our containers sit on the one called **`bridge`**: the default network.
 
 **7. Are the apps alive, then?** Skip the name, and call the IP address of `d09-tools-1` straight from the board. Use *your* IP from step 6:
 ```bash
-docker compose -f work/compose.yaml exec board python -c "import urllib.request as u;print(u.urlopen('http://172.17.0.7').status)"
+docker compose -f work/compose.yaml exec board python -c "import urllib.request as u;print(u.urlopen('http://172.17.0.4').status)"
 ```
 ```
 200
@@ -199,7 +199,7 @@ diff break/compose.yaml fix/compose.yaml
 <     network_mode: bridge
 13d11
 <     network_mode: bridge
-20d17
+21d18
 <     network_mode: bridge
 ```
 By hand: open `work/compose.yaml` in any editor (VS Code, nano, Notepad) and delete the three `network_mode: bridge` lines. Or, on macOS/Linux/Git Bash: `sed -i.bak '/network_mode/d' work/compose.yaml && rm work/compose.yaml.bak`. Then run `up -d` again. Compose notices the containers no longer match the file, **recreates** them, and puts them on a new project network:
@@ -207,6 +207,8 @@ By hand: open `work/compose.yaml` in any editor (VS Code, nano, Notepad) and del
 docker compose -f work/compose.yaml up -d
 ```
 ```
+ Image d09-board:1.0 Building
+ Image d09-board:1.0 Built
  Network d09_default Creating
  Network d09_default Created
  Container d09-draw-1 Recreate
@@ -222,7 +224,7 @@ docker compose -f work/compose.yaml up -d
  Container d09-board-1 Starting
  Container d09-board-1 Started
 ```
-(shortened: Compose may print some lines twice.) Or run `./fix/fix.sh`, which does the same: it drops the fixed files into a fresh `work/`, then prints and runs that exact `docker compose -f work/compose.yaml up -d`.
+(shortened: Compose may print some lines twice, and the build output is left out.) Or run `./fix/fix.sh`, which does the same: it drops the fixed files into a fresh `work/`, then prints and runs that exact `docker compose -f work/compose.yaml up -d`.
 ```bash
 ./fix/fix.sh
 ```
@@ -243,7 +245,7 @@ docker compose -f work/compose.yaml exec board getent hosts draw
 docker compose -f work/compose.yaml exec board grep nameserver /etc/resolv.conf
 ```
 ```
-172.22.0.3        draw  draw
+172.19.0.3        draw  draw
 nameserver 127.0.0.11
 ```
 (Your IP may differ.) The name became an address. `127.0.0.11` is Docker's built-in phone book. Now who is on the new network?
@@ -251,9 +253,9 @@ nameserver 127.0.0.11
 docker network inspect d09_default -f '{{range .Containers}}{{.Name}} {{.IPv4Address}}{{println}}{{end}}'
 ```
 ```
-d09-tools-1 172.22.0.2/16
-d09-board-1 172.22.0.4/16
-d09-draw-1 172.22.0.3/16
+d09-board-1 172.19.0.4/16
+d09-tools-1 172.19.0.2/16
+d09-draw-1 172.19.0.3/16
 ```
 And `docker compose -f work/compose.yaml config` now has what was missing before: a `networks:` section.
 ```
