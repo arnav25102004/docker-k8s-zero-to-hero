@@ -29,15 +29,15 @@ Think of a hostel with room keys. A room keyed to one person opens only for that
 ## 💥 Break it
 By hand: copy the `break/` folder to `work/` (this is the folder you will edit), then start it.
 ```bash
-cp -R break work
+rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d
 ```
-(If `work/` already exists, run `./cleanup.sh` first.) Or the one-line shortcut, which prints exactly these commands (plus a cleanup first):
+(`rm -rf work` clears any old copy, so this is safe to repeat.) Or the one-line shortcut, which prints exactly these commands (after a cleanup):
 ```bash
 ./break/break.sh
 ```
 ```
-▶ fresh copy of break/ in work/
+▶ $ rm -rf work && cp -R break work
 ▶ $ docker compose -f work/compose.yaml up -d
  Container d07-jupyter-1 Started
  Container d07-backup-1 Started
@@ -61,8 +61,8 @@ docker compose -f work/compose.yaml ps -a
 ```
 ```
 NAME            IMAGE                                      COMMAND                  SERVICE   CREATED          STATUS                      PORTS
-d07-backup-1    busybox:1.36                               "sh -c 'mkdir -p /da…"   backup    15 seconds ago   Exited (0) 14 seconds ago   
-d07-jupyter-1   quay.io/jupyter/base-notebook:2026-11-02   "tini -g -- start.sh…"   jupyter   15 seconds ago   Up 14 seconds (healthy)     0.0.0.0:8107->8888/tcp, [::]:8107->8888/tcp
+d07-backup-1    busybox:1.36                               "sh -c 'mkdir -p /da…"   backup    14 seconds ago   Exited (0) 14 seconds ago   
+d07-jupyter-1   quay.io/jupyter/base-notebook:2026-11-02   "tini -g -- start.sh…"   jupyter   14 seconds ago   Up 14 seconds (healthy)     0.0.0.0:8107->8888/tcp, [::]:8107->8888/tcp
 ```
 Jupyter is up and healthy. `backup` shows **Exited (0)**: that is expected. It is a one-shot job that does its work and stops, and 0 means success. Nothing crashed. The question is not "is it running" but "what is each one allowed to do".
 
@@ -117,11 +117,11 @@ docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments
 ```
 ```
 total 4
-drwxr-sr-x 2 0 100 4096 Nov  9 10:07 assignments
+drwxr-sr-x 2 0 100 4096 Nov  9 10:10 assignments
 ```
 ```
 total 4
--rw-r--r-- 1 0 100 22 Nov  9 10:07 backup-note.txt
+-rw-r--r-- 1 0 100 22 Nov  9 10:10 backup-note.txt
 ```
 Owner **0** on both: not 1000. Mode `drwxr-sr-x` means only the owner may write into the folder. Prove it with the same action Save performs:
 ```bash
@@ -137,8 +137,8 @@ docker compose -f work/compose.yaml run --rm backup id
 ```
 ```
  Container d07-jupyter-1 Running 
- Container d07-backup-run-d8f88afca45e Creating 
- Container d07-backup-run-d8f88afca45e Created 
+ Container d07-backup-run-1ed78b5273da Creating 
+ Container d07-backup-run-1ed78b5273da Created 
 uid=0(root) gid=0(root) groups=0(root),10(wheel)
 ```
 (The container name after `backup-run-` is random; yours will differ.) The backup job is **uid 0**. Same number as the owner of `assignments`.
@@ -199,12 +199,12 @@ docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments
 ```
 ```
 total 4
-drwxr-sr-x 2 1000 100 4096 Nov  9 10:08 assignments
+drwxr-sr-x 2 1000 100 4096 Nov  9 10:11 assignments
 ```
 ```
 total 4
--rw-r--r-- 1 1000 100 22 Nov  9 10:08 backup-note.txt
--rw-r--r-- 1 1000 100  0 Nov  9 10:08 test.ipynb
+-rw-r--r-- 1 1000 100 22 Nov  9 10:11 backup-note.txt
+-rw-r--r-- 1 1000 100  0 Nov  9 10:11 test.ipynb
 ```
 Owner `1000 100`: the same numbers `id` showed. (If you did step 1, `Untitled.ipynb` is listed too.) Run `docker compose -f work/compose.yaml up -d` again whenever you like: the job now runs as 1000:100 each time, and the folder stays yours.
 
