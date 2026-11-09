@@ -8,7 +8,7 @@
 
 Output columns and wording can differ a little between kubectl versions, container runtimes and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> **Installs something cluster-wide.** To measure CPU, Kubernetes needs *metrics-server*. If your cluster already has one (Docker Desktop and some playgrounds do), `break.sh` installs nothing and `cleanup.sh` never removes it. If not, `break.sh` installs it into `kube-system` (every object is labelled `z2h.scenario=k25-installed`) and `cleanup.sh` removes exactly that. Run this scenario alone, not alongside other scenarios.
+> **Installs something cluster-wide.** To measure CPU, Kubernetes needs *metrics-server*. If your cluster already has one (say the minikube `metrics-server` addon is enabled, or your playground provides it), `break.sh` installs nothing and `cleanup.sh` never removes it. If not, `break.sh` installs it into `kube-system` (every object is labelled `z2h.scenario=k25-installed`) and `cleanup.sh` removes exactly that. Run this scenario alone, not alongside other scenarios.
 
 ## 📖 The story
 Meera's team launches the campus-fest voting poll at noon, and the whole college opens it at once. Lakshmi set up an autoscaler the night before: "if the app gets busy, add more copies". Now the load is real, the one app Pod is flat out, and Ravi checks the autoscaler. It has not added a single copy, and instead of a number it says `<unknown>`. The metrics are there. The traffic is there. Why does the autoscaler shrug?
@@ -32,7 +32,11 @@ What the room should see: the script makes sure metrics-server is available (ins
 ```bash
 kubectl get hpa -n k-25-hpa -w
 ```
-You will see the same line again and again, and `REPLICAS` stays at 1.
+```
+NAME       REFERENCE             TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          69s
+```
+(Your `AGE` will differ.) `-w` prints the current line once, and after that **only when the autoscaler's record changes**. While it is stuck, that can mean nothing new for a minute or two, so a quiet watch is not a frozen one. Leave it running; it comes back to life in the Fix step.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
@@ -43,8 +47,8 @@ kubectl get pods -n k-25-hpa
 ```
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
-load                        1/1     Running   0          34s
-showdown-54fcdcc496-k5s7h   1/1     Running   0          34s
+load                        1/1     Running   0          81s
+showdown-54fcdcc496-skf64   1/1     Running   0          81s
 ```
 (Ages and Pod names will differ.) Everything is Running and Ready. There is nothing broken at the Pod level.
 
@@ -54,7 +58,7 @@ kubectl get hpa -n k-25-hpa
 ```
 ```
 NAME       REFERENCE             TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          38s
+showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          92s
 ```
 (The exact `TARGETS` format differs a little between kubectl versions; older ones print `<unknown>/50%`.) The target is 50%, but the current value is `<unknown>`, so the autoscaler cannot decide anything and stays at 1 replica.
 
@@ -69,9 +73,9 @@ kubectl top pods -n k-25-hpa
 ```
 NAME                        CPU(cores)   MEMORY(bytes)   
 load                        2m           0Mi             
-showdown-54fcdcc496-k5s7h   924m         12Mi            
+showdown-54fcdcc496-skf64   972m         12Mi            
 ```
-(Your numbers will differ. If you get "Metrics not available yet", wait a minute and try again.) The measuring works: the app is using about 924m, close to a whole CPU core. So the raw number exists. Something stops the autoscaler from using it.
+(Your numbers will differ. If you get "Metrics not available yet", wait a minute and try again.) The measuring works: the app is using about 972m, close to a whole CPU core. So the raw number exists. Something stops the autoscaler from using it.
 
 **4. What reason does the autoscaler give?** It records why it is stuck, in its conditions and events.
 ```bash
@@ -82,16 +86,18 @@ Conditions:
   Type           Status  Reason                   Message
   ----           ------  ------                   -------
   AbleToScale    True    SucceededGetScale        the HPA controller was able to get the target's current scale
-  ScalingActive  False   FailedGetResourceMetric  the HPA was unable to compute the replica count: failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-k5s7h
+  ScalingActive  False   FailedGetResourceMetric  the HPA was unable to compute the replica count: failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-skf64
 Events:
-  Type     Reason                        Age   From                       Message
-  ----     ------                        ----  ----                       -------
-  Warning  FailedGetResourceMetric       27s   horizontal-pod-autoscaler  failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
-  Warning  FailedComputeMetricsReplicas  27s   horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
-  Warning  FailedGetResourceMetric       12s   horizontal-pod-autoscaler  failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-k5s7h
-  Warning  FailedComputeMetricsReplicas  12s   horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-k5s7h
+  Type     Reason                        Age                From                       Message
+  ----     ------                        ----               ----                       -------
+  Warning  FailedGetResourceMetric       101s               horizontal-pod-autoscaler  failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+  Warning  FailedComputeMetricsReplicas  101s               horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+  Warning  FailedGetResourceMetric       86s                horizontal-pod-autoscaler  failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+  Warning  FailedComputeMetricsReplicas  86s                horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+  Warning  FailedGetResourceMetric       11s (x5 over 71s)  horizontal-pod-autoscaler  failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-skf64
+  Warning  FailedComputeMetricsReplicas  11s (x5 over 71s)  horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: missing request for cpu in container showdown of Pod showdown-54fcdcc496-skf64
 ```
-(Wording can differ a little between Kubernetes versions. The older "no metrics returned" lines are the first seconds, before the first readings arrived; ignore them.) Read the newest message: **missing request for cpu in container showdown**. The autoscaler wants a CPU *request* and the container has none.
+(Wording can differ a little between Kubernetes versions. The older "no metrics returned" and "did not receive metrics" lines are the first seconds, before the first readings arrived; ignore them.) Read the newest message: **missing request for cpu in container showdown**. The autoscaler wants a CPU *request* and the container has none.
 
 **5. Is that true in the Deployment?** Check what we actually wrote.
 ```bash
@@ -120,13 +126,18 @@ cd ../fix && ./fix.sh
 `fix.sh` applies the change, waits for the new Pod, then waits (up to 240 seconds) until the autoscaler shows a real number and has added replicas. Expect roughly 1 to 3 minutes: the new Pod's first CPU readings take about a minute, and the autoscaler looks every ~15 seconds. In the watch you will see `<unknown>` turn into a percentage, then `REPLICAS` jump:
 ```
 NAME       REFERENCE             TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          58s
-showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          75s
-showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          90s
-showdown   Deployment/showdown   cpu: 189%/50%        1         4         1          105s
-showdown   Deployment/showdown   cpu: 198%/50%        1         4         4          2m
+showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          69s
+showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          3m
+showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          3m15s
+showdown   Deployment/showdown   cpu: 189%/50%        1         4         1          3m30s
+showdown   Deployment/showdown   cpu: 190%/50%        1         4         4          3m45s
+showdown   Deployment/showdown   cpu: 90%/50%         1         4         4          4m
 ```
-(Press Ctrl+C to stop. Your numbers and timing will differ.) Here is exactly what is different from the broken file:
+(The first line is the one from the Break step; the gap to the next is the quiet minutes before the fix. Your numbers and timing will differ.)
+
+Look at the `189%/50%` line. The autoscaler's rule is **desired replicas = ceil(current replicas × actual ÷ target)**, here ceil(1 × 189 ÷ 50) = ceil(3.78) = 4, which is also the `maxReplicas` cap. One more check about 15 seconds later and `REPLICAS` is 4. Once the load is spread over four copies, the average drops (here to 90%), still above 50%, but the cap stops it from asking for more.
+
+Here is exactly what is different from the broken file:
 ```bash
 diff ../break/app.yaml app.yaml
 ```
@@ -142,7 +153,7 @@ diff ../break/app.yaml app.yaml
 >             limits:
 >               cpu: 200m
 ```
-(Run it from the `fix` folder; the first lines are only the comment, the real change is the five new lines.) The **request** (100m) is what the HPA divides by. The **limit** (200m) caps how much CPU one copy may take, so a single busy Pod cannot eat a whole node; that is why the percentage reads close to 200%.
+(Run it from the `fix` folder; the first lines are only the comment, the real change is the five new lines.) The **request** (100m) is what the HPA divides by. The **limit** (200m) caps how much CPU one copy may use, so one busy copy can never read more than 200m ÷ 100m = 200%, which is why the first reading was about 190%. A CPU limit *throttles* (the container is slowed down); it never kills the container, unlike a memory limit. If a copy stays `Pending` on a small cluster, the node is out of CPU room: that is the request being honoured, not a bug.
 
 By hand (this replaces `./fix.sh`, so you don't need to run both):
 ```bash
@@ -156,20 +167,20 @@ Then watch the autoscaler as above until `TARGETS` shows a number.
 kubectl get hpa -n k-25-hpa
 ```
 ```
-NAME       REFERENCE             TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
-showdown   Deployment/showdown   cpu: 198%/50%   1         4         4          2m7s
+NAME       REFERENCE             TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+showdown   Deployment/showdown   cpu: 90%/50%   1         4         4          4m13s
 ```
-(Your percentage and replica count will differ: anything from 2 to 4 replicas is right. `TARGETS` should be a number, not `<unknown>`.) The autoscaler measures, decides and scales.
+(Your percentage and replica count will differ: anything from 2 to 4 replicas is right. `TARGETS` should be a number, not `<unknown>`. The percentage updates only every ~15 s, so it lags `kubectl top`.) The autoscaler measures, decides and scales.
 ```bash
 kubectl get pods -n k-25-hpa
 ```
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
-load                        1/1     Running   0          2m12s
-showdown-649647567d-bdgs2   1/1     Running   0          70s
-showdown-649647567d-l2ck6   1/1     Running   0          27s
-showdown-649647567d-qsbz2   1/1     Running   0          27s
-showdown-649647567d-rcrqv   1/1     Running   0          27s
+load                        1/1     Running   0          4m24s
+showdown-649647567d-b5gcw   1/1     Running   0          98s
+showdown-649647567d-g5hj4   1/1     Running   0          54s
+showdown-649647567d-n9v9t   1/1     Running   0          54s
+showdown-649647567d-rm864   1/1     Running   0          54s
 ```
 (Ages and Pod names will differ. On a very small laptop cluster a 4th copy can sit `Pending` for a moment while it looks for room.) Brand-new Pod names, plus extra copies. Now the spec that is running:
 ```bash
@@ -185,12 +196,12 @@ kubectl top pods -n k-25-hpa
 ```
 NAME                        CPU(cores)   MEMORY(bytes)   
 load                        2m           0Mi             
-showdown-649647567d-bdgs2   123m         12Mi            
-showdown-649647567d-l2ck6   72m          12Mi            
-showdown-649647567d-qsbz2   2m           12Mi            
-showdown-649647567d-rcrqv   115m         12Mi            
+showdown-649647567d-b5gcw   49m          12Mi            
+showdown-649647567d-g5hj4   124m         12Mi            
+showdown-649647567d-n9v9t   89m          12Mi            
+showdown-649647567d-rm864   138m         12Mi            
 ```
-Now open it yourself. In a **second terminal** (leave it running):
+Now open it yourself. First press Ctrl+C in the terminal that runs the `-w` watch, then use that **second terminal** (leave it running):
 ```bash
 kubectl port-forward -n k-25-hpa svc/showdown 9225:80
 ```
@@ -204,9 +215,9 @@ Back in the first terminal:
 curl -s localhost:9225/healthz
 ```
 ```
-{"status": "alive", "served_by": "showdown-649647567d-bdgs2"}
+{"status": "alive", "served_by": "showdown-649647567d-b5gcw"}
 ```
-Or open http://localhost:9225 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward (and the `-w` watch).
+Or open http://localhost:9225 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
 Good to know: when the load stops, the HPA waits about 5 minutes before removing copies, so the replica count does not drop right away.
 
@@ -220,7 +231,7 @@ Good to know: when the load stops, the HPA waits about 5 minutes before removing
 > Autoscaling percentages are percentages of what you requested. No request, no scaling.
 
 ## 🧹 Clean up
-Press Ctrl+C in any terminal still running the watch or the port-forward, then:
+Press Ctrl+C in any terminal still running the port-forward, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
