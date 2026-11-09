@@ -24,7 +24,7 @@ Think of a hostel mess with one plate per student: the rule is fine, until someo
 ## 💥 Break it
 `break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use):
 ```bash
-cp -R break work
+rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d --build
 ```
 Or the one-line shortcut, which does the same and prints every command it runs:
@@ -34,7 +34,7 @@ Or the one-line shortcut, which does the same and prints every command it runs:
 Real output of `./break/break.sh` (shortened: the build log and some repeated lines are left out):
 ```
 ✅ Scenario d06 cleaned up
-▶ fresh copy of break/ in work/
+▶ $ rm -rf work && cp -R break work
 ▶ $ docker compose -f work/compose.yaml up -d --build
  Image d06-trainer:1.0 Building 
  Image d06-trainer:1.0 Built 
