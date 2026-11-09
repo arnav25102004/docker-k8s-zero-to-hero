@@ -114,6 +114,8 @@ prepare_work() {
   local src scen
   src="$(cd "$1" 2>/dev/null && pwd)" || die "prepare_work: no such folder: $1"
   scen="$(dirname "$src")"
+  # work/ holds a copy of the scripts too; running that copy must not delete its own folder.
+  [ "$(basename "$src")" != "work" ] || die "This is the copy in work/. Run ./break/break.sh or ./fix/fix.sh from the scenario folder instead."
   [ -n "$scen" ] && [ "$scen" != "/" ] || die "prepare_work: bad folder: $1"
   rm -rf "${scen:?}/work"
   mkdir -p "$scen/work"
