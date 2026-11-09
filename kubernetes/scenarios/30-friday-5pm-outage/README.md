@@ -9,7 +9,7 @@
 Output columns and wording can differ a little between kubectl, container runtimes and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
 ## 📖 The story
-It's the last Friday before the Christ University fest, and the Cats vs Dogs grand final goes live on the big screen at 7 PM. At 4:50 PM three teammates each merge one small "tidy-up" to the poll's Kubernetes files. Each change is a line or two. Each one looks obviously safe. Nobody runs them together. At 5:00 PM Lakshmi deploys the lot, closes her laptop and heads for the bus. At 5:02 her phone buzzes: the poll page doesn't load. Priya, on call this week, opens a terminal and calls the team back to the room.
+It's the last Friday before the Christ University fest, and the Cats vs Dogs grand final goes live on the big screen at 7 PM. At 4:50 PM three teammates each merge one small "tidy-up" to the poll's Kubernetes files. Each change is a line or two. Each one looks obviously safe. Nobody runs them together. At 5:00 PM the team deploys the lot, closes their laptops and heads for the bus. At 5:02 her phone buzzes: the poll page doesn't load. Priya, on call this week, opens a terminal and calls the team back to the room.
 
 Three things broke. Nobody knows that yet.
 
@@ -225,7 +225,7 @@ Found 2 pods, using pod/showdown-6748c7c6b8-24wbh
 2026-11-09T00:42:20 [showdown-6748c7c6b8-24wbh] vote for dogs
 2026-11-09T00:42:20 [showdown-6748c7c6b8-24wbh] ::ffff:10.244.2.82 "GET /api/vote?option=dogs HTTP/1.1" 200 -
 ```
-(Shortened: more `vote for dogs` lines follow, one per visitor round that lands on this Pod.) `kubectl logs deploy/...` picks one of the two Pods for you. The startup line is the symptom: **votes stored in MEMORY (this container only)**.
+(Shortened: more `vote for dogs` lines follow, one per visitor round that lands on this Pod.) `kubectl logs deploy/...` picks one of the two Pods for you. The startup line is the symptom: **votes stored in MEMORY (this container only)**. (Working on Track C while the front door is still broken? You'll see no `vote for dogs` lines yet, and later `dogs: 0` on both Pods. That's expected: the startup line and the cat test below still work.)
 
 <details><summary>💡 Hint for Track C</summary>
 The whole point of adding Redis was that both replicas share one set of votes. "This container only" means each Pod keeps its own private tally. How does the app decide between memory and Redis? Something has to tell it where Redis is. Is anything telling it?
@@ -308,7 +308,7 @@ kubectl logs visitor -n k-30-friday --tail=4
 ⚠️ became ✅: `storage: redis`, and the two reads agree. The odd `10 then 1` round happened mid-rollout: one read reached an old Pod that was still counting in memory, the other a new one. The old in-memory votes are gone for good with the old Pods, because they were never saved anywhere. That was the bug. Three down. 🎉
 
 **What if the room fixed things in a different order?** Any order ends at ✅. The only difference is what the visitor shows along the way:
-- **Track C before Track A:** the first new app Pod starts but stays `0/1`, because its readiness check can't reach Redis yet. The Deployment keeps the old Pods serving and `rollout status` just waits. Nothing gets worse. As soon as Track A lands, the rollout finishes by itself.
+- **Track C before Track A:** the first new app Pod starts but stays `0/1`, because its readiness check can't reach Redis yet. The Deployment keeps the old Pods serving and `rollout status` just waits. Nothing gets worse. As soon as Track A lands, the rollout finishes by itself. (If that takes more than 10 minutes, `rollout status` gives up with a "progress deadline" error. The rollout still finishes once Redis is up: just run `rollout status` again.)
 - **Track B last:** the visitor stays ❌ until the Service is fixed, then jumps straight to ✅.
 
 ## 🩺 Root cause
@@ -326,7 +326,7 @@ Track B hid Track C: while nobody could reach the app, nobody could see that it 
 </details>
 
 ## 🔧 Fix it
-The three by-hand fixes above together replace `./fix.sh`. You don't need both, but `fix.sh` is safe to run any time. It applies the same three fixes **one at a time, in the same order**, and waits after each. Each fix is applied whatever its current state, so it works whether you've fixed zero, one, two or all three tracks by hand. It's the safety net when a demo goes sideways. We ran it right after Track C, with everything already fixed:
+The three by-hand fixes above together replace `./fix.sh`. You don't need both, but `fix.sh` is safe to run any time. It applies the same three fixes **one at a time, in the same order**, and waits wherever a fix needs Pods to roll. Each fix is applied whatever its current state, so it works whether you've fixed zero, one, two or all three tracks by hand. It's the safety net when a demo goes sideways. We ran it right after Track C, with everything already fixed:
 ```bash
 cd ../fix && ./fix.sh
 ```
