@@ -19,7 +19,7 @@ broken() {
   body="$(cat "$f")"; rm -f "$f"
   assert_eq "$code" "403" "saving through Jupyter is refused (HTTP 403)"
   assert_contains "$body" "Permission denied" "the refusal says Permission denied"
-  assert_contains "$(docker exec d07-jupyter-1 ls -ln /home/jovyan/work)" " 0 " "assignments is owned by uid 0"
+  assert_eq "$(docker exec d07-jupyter-1 stat -c %u /home/jovyan/work/assignments)" "0" "assignments is owned by uid 0"
 }
 
 fixed() {

@@ -18,8 +18,7 @@ Think of a hostel with room keys. A room keyed to one person opens only for that
 
 - A **volume** keeps files outside the container, so they survive restarts and replacements. The files keep their owner numbers.
 - Linux does not compare names, it compares numbers: "is the process's UID the owner's UID?"
-- A **compose file** can set which user a service runs as with `user:`. If it doesn't, the image decides.
-- Two services can mount the same volume. They share the *files*, not the *identity*.
+- Permission bits say what each group of people may do: the owner, the owner's group, and everyone else, each with read (`r`), write (`w`) and execute (`x`). `ls -l` prints them, and `ls -ln` prints the owner as a number.
 
 ## 🏢 Where you'll meet this at work
 - **A nightly job and an app sharing one volume**: the classic "it worked yesterday" ticket (developer, SRE).
@@ -61,8 +60,8 @@ docker compose -f work/compose.yaml ps -a
 ```
 ```
 NAME            IMAGE                                      COMMAND                  SERVICE   CREATED          STATUS                      PORTS
-d07-backup-1    busybox:1.36                               "sh -c 'mkdir -p /da…"   backup    14 seconds ago   Exited (0) 14 seconds ago   
-d07-jupyter-1   quay.io/jupyter/base-notebook:2026-11-02   "tini -g -- start.sh…"   jupyter   14 seconds ago   Up 14 seconds (healthy)     0.0.0.0:8107->8888/tcp, [::]:8107->8888/tcp
+d07-backup-1    busybox:1.36                               "sh -c 'mkdir -p /da…"   backup    15 seconds ago   Exited (0) 14 seconds ago   
+d07-jupyter-1   quay.io/jupyter/base-notebook:2026-11-02   "tini -g -- start.sh…"   jupyter   15 seconds ago   Up 14 seconds (healthy)     0.0.0.0:8107->8888/tcp, [::]:8107->8888/tcp
 ```
 Jupyter is up and healthy. `backup` shows **Exited (0)**: that is expected. It is a one-shot job that does its work and stops, and 0 means success. Nothing crashed. The question is not "is it running" but "what is each one allowed to do".
 
@@ -93,13 +92,14 @@ services:
     command: sh -c "mkdir -p /data/assignments && echo 'nightly backup folder' > /data/assignments/backup-note.txt"
     volumes:
       - notebooks:/data
+    # Start jupyter first: it sets up the shared volume before this job writes to it.
     depends_on:
       - jupyter
 
 volumes:
   notebooks:
 ```
-Both services mount the **same volume**, `notebooks`. Look for a `user:` line under either service. (The `backup` job writes the `assignments` folder, as you can read in its `command`.)
+Both services mount the **same volume**, `notebooks`. Look for a `user:` line under either service. (`depends_on` only makes Compose start `jupyter` first, so the volume is set up before the job writes to it.) (The `backup` job writes the `assignments` folder, as you can read in its `command`.)
 
 **3. Who is Jupyter running as?** Now ask the running container, not the file.
 ```bash
@@ -117,11 +117,11 @@ docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments
 ```
 ```
 total 4
-drwxr-sr-x 2 0 100 4096 Nov  9 10:10 assignments
+drwxr-sr-x 2 0 100 4096 Nov  9 10:19 assignments
 ```
 ```
 total 4
--rw-r--r-- 1 0 100 22 Nov  9 10:10 backup-note.txt
+-rw-r--r-- 1 0 100 22 Nov  9 10:19 backup-note.txt
 ```
 Owner **0** on both: not 1000. Mode `drwxr-sr-x` means only the owner may write into the folder. Prove it with the same action Save performs:
 ```bash
@@ -137,8 +137,8 @@ docker compose -f work/compose.yaml run --rm backup id
 ```
 ```
  Container d07-jupyter-1 Running 
- Container d07-backup-run-1ed78b5273da Creating 
- Container d07-backup-run-1ed78b5273da Created 
+ Container d07-backup-run-0f63c6976fa3 Creating 
+ Container d07-backup-run-0f63c6976fa3 Created 
 uid=0(root) gid=0(root) groups=0(root),10(wheel)
 ```
 (The container name after `backup-run-` is random; yours will differ.) The backup job is **uid 0**. Same number as the owner of `assignments`.
@@ -146,7 +146,7 @@ uid=0(root) gid=0(root) groups=0(root),10(wheel)
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The `backup` service has no `user:` line, so it runs as the image's default user, which for `busybox` is **root (uid 0)**. It created `assignments` in the shared volume, so root owns the folder, with mode `755`: everyone can read, only root can write. Jupyter runs as **uid 1000** (`jovyan`), so it can look but not save. The folder lives in a volume, so the wrong owner survives restarts, and a restart of Jupyter changes nothing.
+The `backup` service has no `user:` line, so it runs as the image's default user, which for `busybox` is **root (uid 0)**. It created `assignments` in the shared volume, so root owns the folder, with mode `755` plus a setgid bit, which `ls` shows as `drwxr-sr-x`: everyone can read, only root can write. (The `s` is the setgid bit: it makes new files in the folder inherit group 100 from the parent folder, which is why the group column says 100 while the owner says 0.) Jupyter runs as **uid 1000** (`jovyan`), so it can look but not save. The folder lives in a volume, so the wrong owner survives restarts, and a restart of Jupyter changes nothing.
 </details>
 
 ## 🔧 Fix it
@@ -162,7 +162,12 @@ diff break/compose.yaml fix/compose.yaml
 ```bash
 docker compose -f work/compose.yaml run --rm --user root backup chown -R 1000:100 /data
 ```
-Then edit `work/compose.yaml`: under `backup:`, right below `image: busybox:1.36`, add the line `user: "1000:100"` (same indentation as `image:`). Check that you match the fixed file, and apply it:
+```
+ Container d07-jupyter-1 Running 
+ Container d07-backup-run-4aee0a59029a Creating 
+ Container d07-backup-run-4aee0a59029a Created 
+```
+(Only these Compose lines: `chown` itself prints nothing when it works. The name after `backup-run-` is random.) Then edit `work/compose.yaml`: under `backup:`, right below `image: busybox:1.36`, add the line `user: "1000:100"` (same indentation as `image:`). Check that you match the fixed file, and apply it:
 ```bash
 diff fix/compose.yaml work/compose.yaml && echo same-as-fix
 docker compose -f work/compose.yaml up -d
@@ -199,12 +204,12 @@ docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments
 ```
 ```
 total 4
-drwxr-sr-x 2 1000 100 4096 Nov  9 10:11 assignments
+drwxr-sr-x 2 1000 100 4096 Nov  9 10:20 assignments
 ```
 ```
 total 4
--rw-r--r-- 1 1000 100 22 Nov  9 10:11 backup-note.txt
--rw-r--r-- 1 1000 100  0 Nov  9 10:11 test.ipynb
+-rw-r--r-- 1 1000 100 22 Nov  9 10:20 backup-note.txt
+-rw-r--r-- 1 1000 100  0 Nov  9 10:20 test.ipynb
 ```
 Owner `1000 100`: the same numbers `id` showed. (If you did step 1, `Untitled.ipynb` is listed too.) Run `docker compose -f work/compose.yaml up -d` again whenever you like: the job now runs as 1000:100 each time, and the folder stays yours.
 

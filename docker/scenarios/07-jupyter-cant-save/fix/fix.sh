@@ -6,11 +6,17 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
+# can_save: save a test file through Jupyter (what the Save button does), then delete it again.
 can_save() {
-  [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -X PUT \
+  local code
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -X PUT \
     -H 'Authorization: token change-me-123' -H 'Content-Type: application/json' \
     -d '{"type":"file","format":"text","content":"hello"}' \
-    http://localhost:8107/api/contents/work/assignments/fix-check.txt)" = "201" ]
+    http://localhost:8107/api/contents/work/assignments/fix-check.txt)"
+  [ "$code" = "201" ] || return 1
+  curl -s -o /dev/null --max-time 3 -X DELETE -H 'Authorization: token change-me-123' \
+    http://localhost:8107/api/contents/work/assignments/fix-check.txt
+  return 0
 }
 
 need_docker

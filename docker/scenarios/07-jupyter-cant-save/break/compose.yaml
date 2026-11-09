@@ -16,6 +16,7 @@ services:
     command: sh -c "mkdir -p /data/assignments && echo 'nightly backup folder' > /data/assignments/backup-note.txt"
     volumes:
       - notebooks:/data
+    # Start jupyter first: it sets up the shared volume before this job writes to it.
     depends_on:
       - jupyter
 
