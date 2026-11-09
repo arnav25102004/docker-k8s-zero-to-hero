@@ -26,21 +26,19 @@ Think of a train ticket: the station (registry), the train (repository) and the 
 - **Kubernetes `ErrImagePull` / `ImagePullBackOff`**: same cause, different name, on a cluster (SRE).
 
 ## 💥 Break it
-You get a folder with a `Dockerfile` and `hello.html`. Make your own working copy and build it, exactly like Ravi did:
+Every command in this README runs from the scenario folder (the one holding `break/`, `fix/` and this file). You get a folder with a `Dockerfile` and `hello.html`. Make your own working copy and build it, exactly like Ravi did:
 ```bash
-mkdir -p work
-cp break/Dockerfile break/hello.html work/
-cd work
-docker build -t d05-tools:1.0 .
+cp -R break work
+docker build -t d05-tools:1.0 work
 ```
-Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs:
+Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs (then come back to the scenario folder with `cd ..`):
 ```bash
 cd break && ./break.sh
 ```
 (Git Bash on Windows: the scripts set `MSYS_NO_PATHCONV=1` for you; if you type Docker commands with paths yourself, set it first.) `docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
 
 ## 🔍 Investigate
-Guess first, then run these **in order**. If you used `break.sh`, you are in `break/`; go up with `cd ..` so `work/` is in front of you.
+Guess first, then run these **in order**. Run them from the scenario folder (after `break.sh`, that means `cd ..` first).
 
 **1. Read the error. All of it.**
 It is already on your screen from the build. This is the part that matters (shortened; the exact wording varies by Docker version and engine, and the last `View build details` line only appears on Docker Desktop):
@@ -72,7 +70,7 @@ docker image ls d05-tools
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 IMAGE   ID             DISK USAGE   CONTENT SIZE   EXTRA
 ```
-Only header rows. No container, and no `d05-tools` image: the build stopped at the very first line, so no later line (`LABEL`, `COPY`) ever ran.
+Only header rows (the `image ls` columns differ by Docker version; older ones show `REPOSITORY TAG IMAGE ID CREATED SIZE`). No container, and no `d05-tools` image: the build stopped at the very first line, so no later line (`LABEL`, `COPY`) ever ran.
 
 **3. Ask the registry directly: does this tag exist?** Use the tag from the error, with no build around it.
 ```bash
@@ -129,8 +127,7 @@ diff break/Dockerfile fix/Dockerfile
 By hand: open `work/Dockerfile` in your editor and put the correct tag in, **copy-pasted** from the Docker Hub list (not retyped). Check the line, then build and run:
 ```bash
 grep -n FROM work/Dockerfile
-cd work
-docker build -t d05-tools:1.0 .
+docker build -t d05-tools:1.0 work
 docker rm -f d05-tools
 docker run -d --name d05-tools -p 8105:80 d05-tools:1.0
 ```
@@ -141,7 +138,7 @@ docker run -d --name d05-tools -p 8105:80 d05-tools:1.0
 
 Or run `./fix.sh`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
 ```bash
-cd ../fix && ./fix.sh
+cd fix && ./fix.sh && cd ..
 ```
 
 ## ✅ Verify it yourself
@@ -180,9 +177,9 @@ Our two labels sit next to one the base image already had. A Dockerfile that sta
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
-(Run it from the scenario folder. It removes the container, the `d05-tools` image and `work/`.)
+(It removes the container, the `d05-tools` image and `work/`.)
 
 ## Next →
 [D06](../06-jupyter-oom-killed/README.md): Jupyter is training your AI model, then dies without a word. Docker killed it for using too much memory.

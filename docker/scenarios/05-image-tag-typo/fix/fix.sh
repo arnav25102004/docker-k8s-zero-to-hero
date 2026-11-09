@@ -10,8 +10,8 @@ tools_up() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://loc
 need_docker
 prepare_work "$HERE"
 rm -f "$HERE/../work/break.sh" "$HERE/../work/fix.sh"
-cd "$HERE/../work" || die "Could not enter work/"
-run_shown docker build -t d05-tools:1.0 . || die "The build failed. Read the error above."
+cd "$HERE/.." || die "Could not enter the scenario folder"
+run_shown docker build -t d05-tools:1.0 work || die "The build failed. Read the error above."
 run_shown docker rm -f d05-tools
 run_shown docker run -d --name d05-tools -p 8105:80 d05-tools:1.0 \
   || die "docker run failed. Is port 8105 free?"

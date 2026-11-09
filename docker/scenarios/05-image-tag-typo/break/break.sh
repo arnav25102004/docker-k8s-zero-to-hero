@@ -15,9 +15,9 @@ ensure_image "$REAL_IMAGE" "about 24 MB"
 
 prepare_work "$HERE"
 rm -f "$HERE/../work/break.sh" "$HERE/../work/fix.sh"
-cd "$HERE/../work" || die "Could not enter work/"
+cd "$HERE/.." || die "Could not enter the scenario folder"
 say "Friday night, 11:40 pm. Building the team's image from work/Dockerfile:"
-run_shown docker build -t d05-tools:1.0 .
+run_shown docker build -t d05-tools:1.0 work
 rc=$?
 printf 'docker build finished with exit code %s\n' "$rc"
 
