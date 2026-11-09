@@ -16,23 +16,22 @@ Think of a breakfast cafe: the kitchen (the app) can cook anything, but it only 
 
 - One variable at a time: `docker run -e NAME=value`.
 - Many at once: put them in a file of `NAME=value` lines and pass `--env-file app.env`. Docker reads the file **when the container is created** and copies the lines into the container's environment.
-- The app then reads what it needs (here `PASSWORD`) when it starts.
-- A missing setting often doesn't crash the app: many apps quietly fall back to a **default**. code-server then makes up its own password and stores it in a file inside the container. That is why nobody sees an error.
+- The app reads its settings from its environment when it starts.
 
 ## 🏢 Where you'll meet this at work
-- **A `.env` file that doesn't match what the app expects**: the app starts, then talks to the wrong (or no) database (developer, SRE).
+- **A `.env` file that never changed what the app sees**: the app starts, then talks to the wrong (or no) database (developer, SRE).
 - **A config file edited, but the service never recreated**: the old settings keep running (platform team).
 - **Kubernetes Secrets or ConfigMaps not mounted**: the pod runs, but the setting never arrived (SRE, platform team).
 
 ## 💥 Break it
-Work from this scenario's folder (`docker/scenarios/04-vscode-wrong-password`). The settings file `break/app.env` is yours to read. First make your own working copy, then start VS Code with it:
+Work from this scenario's folder (`docker/scenarios/04-vscode-wrong-password`). The settings file `break/app.env` is yours to read. First make your own working copy (if you are doing this again, run `./cleanup.sh` first), then start VS Code with it:
 ```bash
-mkdir -p work && cp break/app.env work/app.env
+rm -rf work && cp -R break work
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
 (Git Bash on Windows: prefix with `MSYS_NO_PATHCONV=1` if a path gets mangled.)
 
-Shortcut: `./break/break.sh` does the same and prints every Docker command it runs. It always starts from a fresh `work/`.
+Shortcut: `./break/break.sh` does the same and prints every command it runs. It always starts from a fresh `work/` (which also holds a copy of the script; ignore it).
 
 VS Code starts and asks for a password. Laptop: open http://localhost:8104. Playground: open the port 8104 URL. Type `change-me-123`. The page stays on the login screen with a red **Incorrect password**. (Try it once or twice only: code-server slows down a browser after a few wrong attempts.)
 
@@ -66,7 +65,7 @@ docker logs d04-vscode
 [...] info      - Using password from /home/coder/.config/code-server/config.yaml
 [...] info    - Not serving HTTPS
 [...] info  Session server listening on /home/coder/.local/share/code-server/code-server-ipc.sock
-Failed login attempt {"remoteAddress":"172.17.0.1","userAgent":"curl/8.7.1","timestamp":1794218575}
+Failed login attempt {"remoteAddress":"172.17.0.1","userAgent":"curl/8.7.1","timestamp":1794219032}
 ```
 (Timestamps shortened to `[...]`. Your last line has a different timestamp.) Look at "Using password from": a **file**, not `$PASSWORD`. And "Wrote default config file" means code-server had to create its own settings.
 
@@ -100,7 +99,7 @@ docker exec d04-vscode cat /home/coder/.config/code-server/config.yaml
 ```
 bind-addr: 127.0.0.1:8080
 auth: password
-password: fd85be37a7271b02cb55bb0b
+password: 21d9e5a0275b3df0e766ca02
 cert: false
 ```
 A random password VS Code made up for itself. (Yours will be a different string.) Nothing here is `change-me-123`.
@@ -108,7 +107,7 @@ A random password VS Code made up for itself. (Yours will be a different string.
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The key in `app.env` is spelled `PASSWROD`, not `PASSWORD`. Docker passed it along without complaint (it has no idea which names an app wants), but code-server only looks for `PASSWORD`. Not finding it, it generated a random password into `config.yaml` and used that. VS Code was not lying: it was checking a password nobody knew.
+The key in `app.env` is spelled `PASSWROD`, not `PASSWORD`. Docker passed it along without complaint (it has no idea which names an app wants), but code-server only looks for `PASSWORD`. Many apps don't crash when a setting is missing: they quietly fall back to a **default**. Not finding `PASSWORD`, code-server made up a random password, saved it in `config.yaml` inside the container, and used that. That is why nobody saw an error. VS Code was not lying: it was checking a password nobody knew.
 </details>
 
 ## 🔧 Fix it
@@ -133,18 +132,21 @@ PASSWORD=change-me-123
 The file is fixed, but the container was created from the old one. Does a restart pick it up?
 ```bash
 docker restart d04-vscode
-docker exec d04-vscode printenv PASSWORD
 ```
 ```
 d04-vscode
 ```
-Still nothing (exit code 1). Docker reads `--env-file` **once, when the container is created**. A restart keeps the same environment. So remove the container and create a new one:
+(`docker restart` just echoes the container name.) Now ask again:
+```bash
+docker exec d04-vscode printenv PASSWORD
+```
+(Still prints nothing, exit code 1.) Docker reads `--env-file` **once, when the container is created**. A restart keeps the same environment. So remove the container and create a new one:
 ```bash
 docker rm -f d04-vscode
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
 
-Or run `./fix/fix.sh`, which does the same: it copies `fix/app.env` into a fresh `work/`, removes the container and runs it again, printing each command.
+Or run `./fix/fix.sh`, which does the same: it copies `fix/` into a fresh `work/`, removes the container and runs it again, printing each command.
 
 ## ✅ Verify it yourself
 Open http://localhost:8104 (playground: the port 8104 URL) and log in with `change-me-123`. VS Code opens. Then:
@@ -174,7 +176,7 @@ docker exec d04-vscode cat /home/coder/.config/code-server/config.yaml
 ```
 bind-addr: 127.0.0.1:8080
 auth: password
-password: ad389d093cae73e35cc76fb6
+password: 90c5afc6a55d38b3ebd3c138
 cert: false
 ```
 code-server writes that file on first start no matter what. Now that `PASSWORD` is set, it is simply ignored (the log line above tells you which one wins).
