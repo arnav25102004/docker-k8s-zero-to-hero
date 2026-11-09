@@ -45,7 +45,7 @@ docker: Error response from daemon: failed to set up container networking: drive
 ```
 (shortened; the exact wording can differ a little between Docker versions.) Laptop: http://localhost:8102 shows Excalidraw. Playground: open the port 8102 URL. IT-Tools has no address at all.
 
-**Shortcut:** `cd break && ./break.sh` types the same two lines for you. It prints each one as `▶ $ docker run …` before running it, so you can compare with the lines above.
+**Shortcut:** `./break/break.sh` types the same two lines for you. It prints each one as `▶ $ docker run …` before running it, so you can compare with the lines above.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. Every step compares what you *typed* (the two lines above) with what Docker *did*.
@@ -118,7 +118,7 @@ docker run -d --name d02-tools -p 8202:80 corentinth/it-tools:2024.10.22-7ca5933
 ```
 Or run the shortcut, which does the same and prints both commands first:
 ```bash
-cd ../fix && ./fix.sh
+./fix/fix.sh
 ```
 
 ## ✅ Verify it yourself

@@ -218,4 +218,4 @@ curl -s localhost:8103/api/results
 (This also removes the `work/` folder and the `d03-api:1.0` image.)
 
 ## Next →
-[D04](../04-vscode-wrong-password/README.md): VS Code says your right password is wrong.
+[D04](../04-vscode-wrong-password/README.md): the settings file has the right password, but VS Code says "Incorrect password".

@@ -15,6 +15,7 @@ services:
   board:
     build: .
     image: d09-board:1.0
+    # pull_policy: build = always build this image here; never try to pull d09-board:1.0 from a registry.
     pull_policy: build
     ports:
       - "8109:8000"

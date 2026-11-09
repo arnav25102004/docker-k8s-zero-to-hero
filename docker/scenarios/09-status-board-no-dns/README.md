@@ -108,6 +108,7 @@ services:
   board:
     build: .
     image: d09-board:1.0
+    # pull_policy: build = always build this image here; never try to pull d09-board:1.0 from a registry.
     pull_policy: build
     ports:
       - "8109:8000"
@@ -116,7 +117,7 @@ services:
       - draw
       - tools
 ```
-Each service has a line `network_mode: bridge`. Keep that in mind.
+Each service has a line `network_mode: bridge`. Keep that in mind. (`pull_policy: build` is unrelated: it only says "build `d09-board:1.0` here, never pull it from a registry".)
 
 **5. What did Compose understand?** `config` prints the file after Compose has read it.
 ```bash
@@ -199,7 +200,7 @@ diff break/compose.yaml fix/compose.yaml
 <     network_mode: bridge
 13d11
 <     network_mode: bridge
-21d18
+22d19
 <     network_mode: bridge
 ```
 By hand: open `work/compose.yaml` in any editor (VS Code, nano, Notepad) and delete the three `network_mode: bridge` lines. Or, on macOS/Linux/Git Bash: `sed -i.bak '/network_mode/d' work/compose.yaml && rm work/compose.yaml.bak`. Then run `up -d` again. Compose notices the containers no longer match the file, **recreates** them, and puts them on a new project network:

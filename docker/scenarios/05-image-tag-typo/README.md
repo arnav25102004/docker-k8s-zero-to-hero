@@ -31,9 +31,9 @@ Every command in this README runs from the scenario folder (the one holding `bre
 cp -R break work
 docker build -t d05-tools:1.0 work
 ```
-Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs (then come back to the scenario folder with `cd ..`):
+Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs (you stay in the scenario folder):
 ```bash
-cd break && ./break.sh
+./break/break.sh
 ```
 (Git Bash on Windows: the scripts set `MSYS_NO_PATHCONV=1` for you; if you type Docker commands with paths yourself, set it first.) `docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
 
@@ -138,7 +138,7 @@ docker run -d --name d05-tools -p 8105:80 d05-tools:1.0
 
 Or run `./fix.sh`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
 ```bash
-cd fix && ./fix.sh && cd ..
+./fix/fix.sh
 ```
 
 ## ✅ Verify it yourself
@@ -182,4 +182,4 @@ Our two labels sit next to one the base image already had. A Dockerfile that sta
 (It removes the container, the `d05-tools` image and `work/`.)
 
 ## Next →
-[D06](../06-jupyter-oom-killed/README.md): Jupyter is training your AI model, then dies without a word. Docker killed it for using too much memory.
+[D06](../06-jupyter-oom-killed/README.md): your AI model is training, then vanishes without a word. Docker killed it for using too much memory.

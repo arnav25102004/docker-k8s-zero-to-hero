@@ -11,9 +11,9 @@
 | D01 | [Jupyter blinks… and it's gone](01-jupyter-vanishes/README.md) | Jupyter | *You click run, Jupyter blinks… and it's gone.* | 343 MB |
 | D02 | [Two great apps, one door](02-port-clash/README.md) | Excalidraw + IT-Tools | *Two great apps. One door. Only one gets in.* | 68 MB |
 | D03 | [The votes that vanish](03-votes-cant-reach-redis/README.md) | Cats vs Dogs API + Redis | *The voting booth is open, but every vote vanishes into thin air.* | 36 MB |
-| D04 | [The password that isn't](04-vscode-wrong-password/README.md) | VS Code in the browser | *You type the right password. VS Code says it's wrong. Who's lying?* | 380 MB |
+| D04 | [The password that isn't](04-vscode-wrong-password/README.md) | VS Code in the browser | *The settings file says `change-me-123`. VS Code says "Incorrect password". Who's lying?* | 380 MB |
 | D05 | [One character](05-image-tag-typo/README.md) | IT-Tools | *One letter. That's all it takes to break a deploy.* | 24 MB |
-| D06 | [No error, no goodbye](06-jupyter-oom-killed/README.md) | Jupyter | *Your AI model was three epochs into training. Then it vanished. No error. No goodbye.* | 343 MB (same image as D01) |
+| D06 | [No error, no goodbye](06-jupyter-oom-killed/README.md) | a small Python "AI trainer" (Compose) | *Your AI model was a few epochs into training. Then it vanished. No error. No goodbye.* | 19 MB |
 | D07 | ["Permission denied"](07-jupyter-cant-save/README.md) | Jupyter | *Two hours of notebook work. You press Save. "Permission denied."* | 343 MB (as D01) + 2 MB |
 | D08 | [Healthy app, sick label](08-it-tools-unhealthy/README.md) | IT-Tools | *The app works perfectly. Docker swears it's sick.* | 24 MB |
 | D09 | [The status board says everything is down](09-status-board-no-dns/README.md) | Excalidraw + IT-Tools + a status board | *The status board says everything is down. Everything is up.* | 87 MB |
@@ -28,14 +28,16 @@ Scenario `NN` uses host port `81NN` (a second app, if any, uses `82NN`). The log
 
 ## How a session runs
 
-1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
-2. **Break it**: `cd break && ./break.sh`
-3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job.
-4. **Fix it**: `cd ../fix && ./fix.sh`
-5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you.
-6. **Clean up**: `cd .. && ./cleanup.sh`
+Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`).
 
-Every `break.sh` cleans up first, so you can run it again and again. Every script works from any folder.
+1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
+2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`). The one-line shortcut is `./break/break.sh`. It prints every Docker command it runs, exactly as you would type it.
+3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job.
+4. **Fix it**: `diff break/X fix/X` shows what changed. The class edits the files in `work/` and runs the build/run commands again. `./fix/fix.sh` is the safety net: it does the same and prints its commands too.
+5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you.
+6. **Clean up**: `./cleanup.sh` resets everything, including `work/`.
+
+`work/` is your own copy: edit it freely, the `break/` and `fix/` folders never change. Every `break.sh` cleans up first, so you can run it again and again.
 
 ## Platform notes
 
@@ -48,13 +50,15 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 
 Scripts need only `bash`, `docker`, `curl` and ordinary Unix tools. No `jq`.
 
+From D06 on you need Docker Compose v2: check with `docker compose version`.
+
 ## 🆘 PANIC CARD (when something goes wrong on stage)
 
 Stay calm. Nothing here can hurt the laptop. In this order:
 
-1. **Reset the scenario:** `./cleanup.sh` (from the scenario folder). It is safe at any time, even if nothing is running.
+1. **Reset the scenario:** `./cleanup.sh` (from the scenario folder; it also deletes `work/`). It is safe at any time, even if nothing is running.
 2. **Look at what is running and where:** `docker ps --format '{{.Names}}  {{.Ports}}'`. A port clash names the holder.
-3. **Run it again:** `./break.sh` again. It starts clean every time.
+3. **Run it again:** `./break/break.sh` again. It starts clean every time.
 4. **Still odd? Reset everything:** `./labs.sh docker clean` from the repo root. It runs every scenario's `cleanup.sh`.
 
 Docker not running? Start Docker Desktop, wait for the whale to settle, then step 3.
