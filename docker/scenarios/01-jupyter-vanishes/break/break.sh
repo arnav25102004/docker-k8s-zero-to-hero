@@ -15,7 +15,6 @@ port_free 8101 || die "Port 8101 is busy, so this scenario can't start. Free it 
 ensure_image "$IMAGE" "about 343 MB"
 
 prepare_work "$HERE"
-rm -f "$HERE/../work/break.sh"
 cd "$HERE/.." || die "Could not enter the scenario folder"
 
 run_shown docker build -t d01-jupyter:1.0 work \

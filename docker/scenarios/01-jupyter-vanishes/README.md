@@ -13,7 +13,7 @@ A container is not a little computer that stays on. It is **one process** wrappe
 
 Two files-and-commands ideas sit underneath:
 - A **Dockerfile** is the recipe for an image. `docker build` reads it once and bakes the image. The `CMD` line is written into the image as "what to run when a container starts".
-- `docker run` makes a container from that image and starts the `CMD`. So a mistake in `CMD` is baked in at **build** time but only shows up at **run** time.
+- `docker run` makes a container from that image and starts the `CMD`. So `CMD` is written into the image at **build** time and started at **run** time.
 
 The cook leaves with a number, the **exit code**:
 - `0`: finished normally ("I'm done")
@@ -27,19 +27,19 @@ The cook leaves with a number, the **exit code**:
 - **CI pipelines:** a job "passes" in 0.1 seconds because the container exited, and nobody read the log (DevOps).
 
 ## 💥 Break it
-You can do it by hand. Stay in this scenario's folder (`docker/scenarios/01-jupyter-vanishes`) for everything below. Copy the files you will work on into a scratch folder `work/`, build the image from it, and run it:
+You can do it by hand. Stay in this scenario's folder (`docker/scenarios/01-jupyter-vanishes`) for everything below. Make a fresh copy of the files you will work on in a scratch folder `work/`, build the image from it, and run it:
 ```bash
-cp -R break work && rm work/break.sh
+rm -rf work && cp -R break work
 docker build -t d01-jupyter:1.0 work
 docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
 ```
-Or use the one-line shortcut, which prints every Docker command before it runs it, exactly as above:
+Or use the one-line shortcut, which prints each command before it runs it, exactly as above:
 ```bash
 ./break/break.sh
 ```
 ```
 ✅ Scenario d01 cleaned up
-▶ fresh copy of break/ in work/
+▶ $ rm -rf work && cp -R break work
 ▶ $ docker build -t d01-jupyter:1.0 work
 ... (shortened: Docker's build output) ...
 ▶ $ docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
@@ -71,7 +71,7 @@ docker ps -a --filter name=d01-jupyter
 ```
 ```
 CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS                       PORTS     NAMES
-d18ecb53c434   d01-jupyter:1.0   "tini -g -- start.sh…"   5 seconds ago   Exited (127) 4 seconds ago             d01-jupyter
+884cd7194760   d01-jupyter:1.0   "tini -g -- start.sh…"   5 seconds ago   Exited (127) 4 seconds ago             d01-jupyter
 ```
 It existed, it ran for a moment, and it left. Read the status: `Exited (127)`. Remember the exit-code list.
 
@@ -142,13 +142,13 @@ diff break/Dockerfile fix/Dockerfile
 ---
 > CMD ["start-notebook.py", "--IdentityProvider.token=change-me-123"]
 ```
-By hand: open `work/Dockerfile` in any editor (VS Code, nano, Notepad) and add the missing `o` in `CMD`. Or, on macOS/Linux/Git Bash, `sed -i.bak "s/notebok/notebook/" work/Dockerfile && rm work/Dockerfile.bak`. Editing the file changes nothing by itself: the old image still has the typo baked in, and the old container still exists. So: rebuild the image, remove the dead container (its name is taken), run again.
+By hand: open `work/Dockerfile` in any editor (VS Code, nano, Notepad) and add the missing `o` in `CMD`. Or, on macOS/Linux/Git Bash, `sed -i.bak "s/notebok/notebook/" work/Dockerfile && rm work/Dockerfile.bak`. Editing the file changes nothing by itself: the old image still has the typo baked in, and the old container still exists. So: rebuild the image, remove the dead container (its name is taken; `-f` also covers a container that is still running), run again.
 ```bash
 docker build -t d01-jupyter:1.0 work
-docker rm d01-jupyter
+docker rm -f d01-jupyter
 docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
 ```
-Or run `./fix.sh`, which does the same: it drops the fixed Dockerfile into a fresh `work/`, then prints and runs those exact three commands (the build, the `docker rm`, the run).
+Or run `./fix/fix.sh`, which does the same: it drops the fixed Dockerfile into a fresh `work/`, then prints and runs those exact commands (the build, `docker rm -f`, the run).
 ```bash
 ./fix/fix.sh
 ```
@@ -160,14 +160,14 @@ docker ps --filter name=d01-jupyter
 ```
 ```
 CONTAINER ID   IMAGE             COMMAND                  CREATED          STATUS                    PORTS                                         NAMES
-9a24d4cba2a7   d01-jupyter:1.0   "tini -g -- start.sh…"   12 seconds ago   Up 12 seconds (healthy)   0.0.0.0:8101->8888/tcp, [::]:8101->8888/tcp   d01-jupyter
+407dc5e41b79   d01-jupyter:1.0   "tini -g -- start.sh…"   12 seconds ago   Up 12 seconds (healthy)   0.0.0.0:8101->8888/tcp, [::]:8101->8888/tcp   d01-jupyter
 ```
 (`(healthy)` appears after a few seconds; the base image has a health check.) Open http://localhost:8101/lab?token=change-me-123 (playground: the port 8101 URL + `/lab?token=change-me-123`). JupyterLab opens, and `welcome.ipynb`, the notebook we `COPY`ed in, is in the file list.
 ```bash
 curl -s "http://localhost:8101/api/status?token=change-me-123"
 ```
 ```
-{"connections": 0, "kernels": 0, "last_activity": "2026-11-09T09:18:36.031392Z", "started": "2026-11-09T09:18:36.031392Z"}
+{"connections": 0, "kernels": 0, "last_activity": "2026-11-09T10:10:42.488913Z", "started": "2026-11-09T10:10:42.488913Z"}
 ```
 
 ## 🎯 Key takeaways

@@ -12,7 +12,6 @@ jupyter_up() {
 
 need_docker
 prepare_work "$HERE"
-rm -f "$HERE/../work/fix.sh"
 cd "$HERE/.." || die "Could not enter the scenario folder"
 
 run_shown docker build -t d01-jupyter:1.0 work \
