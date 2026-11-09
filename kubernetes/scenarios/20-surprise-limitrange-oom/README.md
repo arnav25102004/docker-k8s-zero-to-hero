@@ -254,4 +254,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K21](../21-notice-board-runasnonroot/README.md): The notice board refuses to start, and the error mentions "root".
+[K21](../21-notice-board-runasnonroot/README.md): Security turned on one rule. The notice board went dark.

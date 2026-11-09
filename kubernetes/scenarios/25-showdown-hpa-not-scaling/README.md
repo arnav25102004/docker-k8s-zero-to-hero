@@ -238,4 +238,4 @@ cd .. && ./cleanup.sh
 This deletes the namespace and, only if this scenario installed it, metrics-server. If you press Ctrl+C in the middle of `break.sh`, just run `cleanup.sh`: it is safe at any point.
 
 ## Next →
-[K26](../26-showdown-init-stuck/README.md): *Cats vs Dogs is waiting for its database. Forever.*
+[K26](../26-showdown-init-stuck/README.md): Cats vs Dogs is waiting for its database. Forever.

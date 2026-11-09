@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · `traefik/whoami` (about 6 MB, tells you which Pod answered) · pod anti-affinity (required vs preferred), replicas, the scheduler
 
-⬇️ The whoami image is tiny (about 6 MB). A slow first download is normal on a cold cluster: presenters, preload it (`kubernetes/scenarios/preload.sh`) or run the scenario once before class.
+⬇️ The whoami image is tiny (about 6 MB), plus the tiny 4 MB visitor image. A slow first download is normal on a cold cluster: presenters, preload it (`kubernetes/scenarios/preload.sh`) or run the scenario once before class.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 

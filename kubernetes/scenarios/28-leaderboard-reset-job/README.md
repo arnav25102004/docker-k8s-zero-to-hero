@@ -4,7 +4,7 @@
 
 ⏱ 10 min · beginner · a one-off reset Job (`python:3.12-alpine`, about 19 MB) plus a real Redis (`redis:7.4.12-alpine`, about 59 MB on disk) · Job, `backoffLimit`, `BackoffLimitExceeded`, failed Pods keep their logs, CronJob
 
-⬇️ First run downloads Python and Redis. A slow first download is normal: do it on good Wi-Fi, before the session.
+⬇️ First run downloads Python (about 19 MB) and Redis (about 59 MB on disk). A slow first download is normal: do it on good Wi-Fi, before the session.
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). For example, older kubectl versions have no `STATUS` column for Jobs. The ideas never change.
 

@@ -229,4 +229,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K24](../24-showdown-wrong-command/README.md): *No crash log. No error from the app. The app never even ran.*
+[K24](../24-showdown-wrong-command/README.md): No crash log. No error from the app. The app never even ran.

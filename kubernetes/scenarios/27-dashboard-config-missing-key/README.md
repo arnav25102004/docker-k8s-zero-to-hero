@@ -206,4 +206,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K28](../28-leaderboard-reset-job/README.md): *The midnight reset ran. Three times. Then gave up.*
+[K28](../28-leaderboard-reset-job/README.md): The midnight reset ran. Three times. Then gave up.
