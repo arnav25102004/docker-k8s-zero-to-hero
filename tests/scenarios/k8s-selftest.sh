@@ -23,13 +23,13 @@ TMPD="$(mktemp -d)"
 cleanup_all() {
   [ -n "$PF_PID" ] && kill "$PF_PID" >/dev/null 2>&1
   pkill -f "port-forward -n k-98-selftest" >/dev/null 2>&1
-  for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest k-95-selftest; do
+  for n in k-99-selftest k-98-selftest k-97-selftest k-96-selftest k-95-selftest k-94-selftest; do
     kubectl delete namespace "$n" --ignore-not-found --wait=false >/dev/null 2>&1
   done
   # Revert cluster-level test changes too (taints, labels, metrics-server, dummies).
   ( # shellcheck source=/dev/null
     source "$LIB" >/dev/null 2>&1
-    untaint_all z2h-selftest; untaint_all z2h-x
+    untaint_all z2h-selftest; untaint_all z2h-x; untaint_all z2h-vip
     kubectl label nodes --all z2h-lbl- >/dev/null 2>&1
     remove_metrics_server_if_ours k99
     kubectl delete configmap z2h-selftest-dummy -n kube-system --ignore-not-found >/dev/null 2>&1
@@ -279,6 +279,19 @@ test_schedulable_node_count() {
   return $f
 }
 
+test_fresh_ns_refuses_leftover_k16_taint() {
+  local f=0 out rc
+  kubectl taint nodes --all z2h-vip=true:NoSchedule --overwrite >/dev/null 2>&1
+  out=$(bash -c "source '$LIB'; fresh_ns k-94-selftest" 2>&1); rc=$?
+  check "fresh_ns dies with a leftover z2h-vip taint" [ "$rc" -ne 0 ] || f=1
+  check "message names K16's cleanup.sh" has "$out" "16-game-server-vip-node/cleanup.sh" || f=1
+  check "no namespace was created" no_ns k-94-selftest || f=1
+  bash -c "source '$LIB'; untaint_all z2h-vip" >/dev/null 2>&1
+  bash -c "source '$LIB'; fresh_ns k-94-selftest" >/dev/null 2>&1; check "fresh_ns works again after untaint" rc_is "$?" 0 || f=1
+  bash -c "source '$LIB'; delete_ns k-94-selftest" >/dev/null 2>&1
+  return $f
+}
+
 ms_available() { [ "$(kubectl get apiservice v1beta1.metrics.k8s.io -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' 2>/dev/null)" = "True" ]; }
 ms_absent() { ! kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1; }
 
@@ -349,7 +362,7 @@ for t in test_no_cluster_message test_refuses_foreign_context test_lib_sourcing_
          test_cleanup_waits_for_namespace test_cleanup_stops_port_forward \
          test_showdown_configmap test_pod_reason test_fresh_ns_has_default_sa \
          test_run_cycle_k8s_happy_path test_run_cycle_k8s_failing_assert \
-         test_untaint_all_is_idempotent test_schedulable_node_count \
+         test_untaint_all_is_idempotent test_schedulable_node_count test_fresh_ns_refuses_leftover_k16_taint \
          test_metrics_server_kept_if_preexisting test_metrics_server_never_adopts_foreign \
          test_nothing_left_detects_taint; do
   run_test "$t"
