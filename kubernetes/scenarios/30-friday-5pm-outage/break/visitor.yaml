@@ -1,0 +1,38 @@
+# The visitor: a dog fan who votes 🐶 every 2 seconds, then reads the vote total twice.
+# One line per round, the live signal on stage:
+#   ✅  the app answers and everything looks right
+#   ⚠️  the app answers, but not everything is right yet
+#   ❌  the app does not answer
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-30-friday
+spec:
+  # sh as PID 1 ignores SIGTERM; a short grace keeps cleanup fast
+  terminationGracePeriodSeconds: 2
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          total() { wget -q -T 2 -O - http://showdown/api/results 2>/dev/null | grep -o '"total": [0-9]*' | grep -o '[0-9]*$'; }
+          while true; do
+            t=$(date +%T)
+            if body=$(wget -q -T 2 -O - 'http://showdown/api/vote?option=dogs' 2>/tmp/err); then
+              storage=$(echo "$body" | grep -o '"storage": "[a-z]*"' | cut -d '"' -f 4)
+              a=$(total); b=$(total)
+              mark="⚠️ "; [ "$storage" = "redis" ] && mark="✅"
+              echo "$mark $t HTTP 200 · storage: ${storage:-?} · total votes, read twice: ${a:-?} then ${b:-?}"
+            else
+              code=$(grep -o 'HTTP/1.[01] [0-9]*' /tmp/err | cut -d ' ' -f 2)
+              if [ -n "$code" ]; then
+                echo "❌ $t HTTP $code from http://showdown"
+              else
+                echo "❌ $t no answer from http://showdown"
+              fi
+            fi
+            sleep 2
+          done

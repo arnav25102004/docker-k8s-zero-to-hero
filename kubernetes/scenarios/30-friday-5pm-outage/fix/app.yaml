@@ -1,0 +1,48 @@
+# K30: the Cats vs Dogs app, two replicas behind the Service "showdown".
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-30-friday
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      terminationGracePeriodSeconds: 2
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          env:
+            - name: TITLE
+              value: "Friday Finals: Cats vs Dogs"
+            - name: APP_VERSION
+              value: "3.0.0"
+            - name: REDIS_HOST
+              value: "redis"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 2
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html

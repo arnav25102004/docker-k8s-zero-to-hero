@@ -1,0 +1,36 @@
+# K30: the database. A Service named "redis" in front of one Redis Pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: k-30-friday
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: k-30-friday
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4.12-alpnie
+          ports:
+            - containerPort: 6379
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            periodSeconds: 2
