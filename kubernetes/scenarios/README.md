@@ -45,7 +45,7 @@ Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each 
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
 2. **Break it**: `cd break && ./break.sh`
-3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13, K16, K18–K27, K29, K30) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it.
+3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13, K16, K18–K24, K26, K27, K29, K30) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (K25 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
 4. **Fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
    ```bash
@@ -71,7 +71,7 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 
 Things to know before you start:
 
-- **Check your cluster first.** `kubectl config current-context` shows which cluster you are about to break. The scenarios only create things in their own `k-NN-...` namespaces, but break the right cluster on purpose.
+- **Check your cluster first.** `kubectl config current-context` shows which cluster you are about to break. The scenarios create things in their own `k-NN-...` namespaces, with two exceptions: K16 (a taint on the nodes) and K25 (metrics-server, only if missing). Their `cleanup.sh` reverts exactly that. Break the right cluster on purpose.
 - **K10 needs a default StorageClass.** `kubectl get storageclass` must show one marked `(default)`. K10's fix is to stop asking for the missing `fast-ssd` class and use that default.
 - **K01, K02 and K10 download their app at fix time**, because the Pod never starts while it is broken (K01, K02: Excalidraw; K10: Kanboard). On a cold cluster the fix waits on that download (the first time it can take up to a minute or two): preload it or run the scenario once before class (see the checklist below).
 - **K13 needs a cluster that enforces NetworkPolicy**, and checks it first (a throwaway `k-13-probe` namespace, deleted straight after). If your cluster ignores policies, it stops with a clear message instead of showing a fake outage.
@@ -84,13 +84,14 @@ Scripts need only `bash`, `kubectl`, `curl` and ordinary Unix tools. No `jq`, no
 
 ## 🆘 PANIC CARD (when something goes wrong on stage)
 
-Stay calm. Nothing here touches anything outside the `k-NN-...` namespaces. In this order:
+Stay calm. Everything lives in the `k-NN-...` namespaces, except K16's node taint and K25's metrics-server (see above). In this order:
 
 1. **Reset the scenario:** `./cleanup.sh` (from the scenario folder). It is safe at any time, even if nothing is running, and it waits until the namespace is really gone.
 2. **Look at what is left:** `kubectl get ns | grep '^k-'`. Anything listed is a scenario namespace; delete one with `kubectl delete ns <name>`.
 3. **Port already in use?** An old port-forward is still running: `pkill -f "port-forward -n k-"` (or press Ctrl+C in its terminal).
 4. **Run it again:** `./break.sh` again. It starts clean every time.
-5. **Still odd? Reset everything:** `./labs.sh k8s clean` from the repo root. It runs every scenario's `cleanup.sh` against your current cluster.
+5. **Pods stuck in Pending in every scenario?** Look for a leftover K16 taint: `kubectl describe nodes | grep -A2 Taints`. If you see `z2h-vip`, run `kubernetes/scenarios/16-game-server-vip-node/cleanup.sh` (or `kubectl taint nodes --all z2h-vip-`).
+6. **Still odd? Reset everything:** `./labs.sh k8s clean` from the repo root. It runs every scenario's `cleanup.sh` against your current cluster.
 
 `The connection to the server ... was refused` or `no cluster`? Start Docker Desktop / minikube / kind, check `kubectl config current-context`, then step 4.
 
