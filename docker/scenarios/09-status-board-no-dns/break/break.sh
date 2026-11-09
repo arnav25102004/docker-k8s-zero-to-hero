@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D09 break: Excalidraw, IT-Tools and a status board all run on the default bridge network, where names don't resolve.
+# D09 break: copy the files to work/, then start the three services with Compose. Every Docker command is printed first.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -9,7 +9,7 @@ DRAW_IMAGE="excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463
 TOOLS_IMAGE="corentinth/it-tools:2024.10.22-7ca5933"
 PY_IMAGE="python:3.12-alpine"
 
-board_says_down() { docker logs --tail 5 d09-board 2>&1 | grep -q "❌ d09-draw"; }
+board_says_down() { docker logs --tail 5 d09-board-1 2>&1 | grep -q "❌ draw"; }
 
 need_docker
 bash "$HERE/../cleanup.sh"
@@ -18,19 +18,16 @@ ensure_image "$DRAW_IMAGE" "about 44 MB"
 ensure_image "$TOOLS_IMAGE" "about 24 MB"
 ensure_image "$PY_IMAGE" "about 19 MB"
 
-say "Starting Excalidraw and IT-Tools (no network given, so: the default bridge)…"
-docker run -d --name d09-draw --label z2h.scenario=d09 "$DRAW_IMAGE" >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
-docker run -d --name d09-tools --label z2h.scenario=d09 "$TOOLS_IMAGE" >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
-say "Starting the campus status board on port 8109…"
-docker run -d --name d09-board --label z2h.scenario=d09 -p 8109:8000 \
-  -v "$HERE/board.py:/board.py:ro" "$PY_IMAGE" python -u /board.py >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
+prepare_work "$HERE"
+rm -f "$HERE/../work/break.sh"
+cd "$HERE/.." || die "Could not enter the scenario folder"
+
+run_shown docker compose -f work/compose.yaml up -d \
+  || die "docker compose up failed. Read the message above, then try again."
 
 wait_for "the status board to report" 30 board_says_down \
   || die "The board didn't start reporting. Run cleanup.sh and try again."
 
 show_next \
-  "Open http://localhost:8109: the board shows big red ❌ tiles. The apps are running, though." \
-  "docker ps"
+  "Open http://localhost:8109 (playground: the port 8109 URL): the board shows big red ❌ tiles. The apps are running, though." \
+  "docker compose -f work/compose.yaml ps"

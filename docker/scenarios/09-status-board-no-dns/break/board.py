@@ -2,7 +2,7 @@
 import threading, time, urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-APPS = ["d09-draw", "d09-tools"]
+APPS = ["draw", "tools"]
 status = {name: (None, "starting…") for name in APPS}
 
 def check(name):
