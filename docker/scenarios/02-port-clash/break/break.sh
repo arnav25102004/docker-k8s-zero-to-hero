@@ -34,4 +34,4 @@ wait_for "IT-Tools to be created" 15 tools_created \
 
 show_next \
   "Excalidraw works at http://localhost:8102, but the error above says IT-Tools could not start." \
-  "docker ps -a"
+  "docker ps -a --filter name=d02-"

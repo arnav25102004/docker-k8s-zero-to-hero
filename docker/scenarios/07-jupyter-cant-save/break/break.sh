@@ -22,7 +22,7 @@ run_shown docker compose -f work/compose.yaml up -d \
   || die "docker compose up failed. Try it yourself:  docker compose -f work/compose.yaml up"
 
 wait_for "Jupyter to start" 90 jupyter_up \
-  || die "Jupyter didn't start in time. Run ../cleanup.sh and try again."
+  || die "Jupyter didn't start in time. Run ./cleanup.sh and try again."
 wait_for "the backup job to finish" 30 backup_done \
   || die "The backup job didn't finish. Check: docker compose -f work/compose.yaml logs backup"
 

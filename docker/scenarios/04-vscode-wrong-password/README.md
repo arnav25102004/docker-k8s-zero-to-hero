@@ -24,8 +24,9 @@ Think of a breakfast cafe: the kitchen (the app) can cook anything, but it only 
 - **Kubernetes Secrets or ConfigMaps not mounted**: the pod runs, but the setting never arrived (SRE, platform team).
 
 ## 💥 Break it
-Work from this scenario's folder (`docker/scenarios/04-vscode-wrong-password`). The settings file `break/app.env` is yours to read. First make your own working copy (if you are doing this again, run `./cleanup.sh` first), then start VS Code with it:
+Work from this scenario's folder (`docker/scenarios/04-vscode-wrong-password`). The settings file `break/app.env` is yours to read. First make your own working copy (`./cleanup.sh` first is safe at any time and makes a repeat run start clean), then start VS Code with it:
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
@@ -198,4 +199,4 @@ code-server writes that file on first start no matter what. Now that `PASSWORD` 
 Removes the container and the `work/` folder.
 
 ## Next →
-[D05](../05-image-tag-typo/README.md): An image tag with a one-character typo, and a container that never starts.
+[D05](../05-image-tag-typo/README.md): *One letter. That's all it takes to break a deploy.*

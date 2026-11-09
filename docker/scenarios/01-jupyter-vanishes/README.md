@@ -27,8 +27,9 @@ The cook leaves with a number, the **exit code**:
 - **CI pipelines:** a job "passes" in 0.1 seconds because the container exited, and nobody read the log (DevOps).
 
 ## 💥 Break it
-You can do it by hand. Stay in this scenario's folder (`docker/scenarios/01-jupyter-vanishes`) for everything below. Make a fresh copy of the files you will work on in a scratch folder `work/`, build the image from it, and run it:
+You can do it by hand. Stay in this scenario's folder (`docker/scenarios/01-jupyter-vanishes`) for everything below. Make a fresh copy of the files you will work on in a scratch folder `work/`, build the image from it, and run it. (`./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker build -t d01-jupyter:1.0 work
 docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
@@ -47,7 +48,7 @@ Or use the one-line shortcut, which prints each command before it runs it, exact
 ```
 `work/` is your own copy (git ignores it), so you can edit it freely; the shortcut recreates it fresh every time.
 
-Laptop: try http://localhost:8101. Playground: open the port 8101 URL. Either way, nothing answers. The room sees a clean build and a run that printed a container ID, and no error anywhere.
+Laptop: try http://localhost:8101. Playground: open the port 8101 URL. Either way, nothing answers. The room sees a clean build and a run that started without an error, and no error anywhere afterwards.
 
 ## 🔍 Investigate
 Guess first, then run these **in order**.
@@ -103,7 +104,7 @@ docker inspect -f '{{json .Config.Cmd}}' d01-jupyter
 ```
 ["start-notebok.py","--IdentityProvider.token=change-me-123"]
 ```
-Compare that spelling with the one in the error. Look closely at the word.
+Compare that spelling with the one in the error. Look closely at the word. (The base image has its own `ENTRYPOINT` (`tini … start.sh`); your `CMD` is handed to it as arguments, which is why `start.sh` is the one reporting the error.)
 
 **6. What did I write?** Now our view: the file we built from. The `CMD` line is the one that produced that list.
 ```bash
@@ -187,4 +188,4 @@ curl -s "http://localhost:8101/api/status?token=change-me-123"
 This removes the container, the `d01-jupyter:1.0` image and your `work/` folder.
 
 ## Next →
-[D02](../02-port-clash/README.md): a port that is already taken.
+[D02](../02-port-clash/README.md): *Two great apps. One door. Only one gets in.*

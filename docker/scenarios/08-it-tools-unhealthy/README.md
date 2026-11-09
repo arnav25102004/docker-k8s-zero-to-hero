@@ -26,8 +26,9 @@ Think of the **floor manager** of a hotel who knocks on a guest's door every few
 - **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([K06](../../../kubernetes/scenarios/06-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([K07](../../../kubernetes/scenarios/07-showdown-slow-start/README.md)).
 
 ## 💥 Break it
-You get a folder `break/` with the `Dockerfile` (and the `break.sh` shortcut). Make your own working copy, build it and run it, exactly like the team did. (`rm -rf work` first, so a leftover copy never gets in the way.)
+You get a folder `break/` with the `Dockerfile` (and the `break.sh` shortcut). Make your own working copy, build it and run it, exactly like the team did. (`rm -rf work` first, so a leftover copy never gets in the way; `./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker build -t d08-tools:1.0 work
 docker run -d --name d08-tools -p 8108:80 d08-tools:1.0
@@ -91,7 +92,7 @@ LABEL z2h.scenario=d08
 HEALTHCHECK --interval=3s --timeout=2s --retries=2 \
   CMD wget -qO- http://127.0.0.1:8080/ || exit 1
 ```
-The check calls `http://127.0.0.1:8080/` with `wget` (the probe tool IT-Tools' Alpine image ships with). It runs every 3 seconds, and 2 failures in a row means unhealthy. That is why the verdict takes about `interval × retries` = 6 seconds, plus the time the first check waits.
+The check calls `http://127.0.0.1:8080/` with `wget` (the probe tool IT-Tools' Alpine image ships with). It runs every 3 seconds, and 2 failures in a row means unhealthy. That is why the verdict takes about 6 seconds: the first check runs one interval after the start and the second one interval later.
 
 **5. Test the test.** Run the very same command by hand, inside the container, on the port in the check and then on port 80 (the port Docker publishes as 8108):
 ```bash
@@ -178,4 +179,4 @@ HTTP/1.1 200 OK
 (It removes the container, the `d08-tools` image and `work/`.)
 
 ## Next →
-[D09](../09-status-board-no-dns/README.md): The status board says everything is down. Everything is up.
+[D09](../09-status-board-no-dns/README.md): *The status board says everything is down. Everything is up.*

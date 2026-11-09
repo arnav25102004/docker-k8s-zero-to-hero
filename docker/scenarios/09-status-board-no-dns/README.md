@@ -24,8 +24,9 @@ One more plus of Compose: the Excalidraw image reference is long (`latest@sha256
 - **A hard-coded IP in a config file** that worked yesterday and is wrong after a restart (everyone).
 
 ## 💥 Break it
-Stay in this scenario's folder (`docker/scenarios/09-status-board-no-dns`) for everything below. Copy the files you will work on into a scratch folder `work/`, then let Compose build the board and start the three services:
+Stay in this scenario's folder (`docker/scenarios/09-status-board-no-dns`) for everything below. Copy the files you will work on into a scratch folder `work/`, then let Compose build the board and start the three services (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d
 ```
@@ -286,4 +287,4 @@ networks:
 This removes the three containers, the network `d09_default`, the `d09-board:1.0` image and your `work/` folder.
 
 ## Next →
-[D10](../10-qr-app-build-fails/README.md): Build your own QR code app. The file is right there. Docker says it doesn't exist.
+[D10](../10-qr-app-build-fails/README.md): *The file is RIGHT THERE. Docker says it doesn't exist.*

@@ -26,9 +26,10 @@ Think of a train ticket: the station (registry), the train (repository) and the 
 - **Kubernetes `ErrImagePull` / `ImagePullBackOff`**: same cause, different name, on a cluster (SRE).
 
 ## 💥 Break it
-Every command in this README runs from the scenario folder (the one holding `break/`, `fix/` and this file). You get a folder with a `Dockerfile` and `hello.html`. Make your own working copy and build it, exactly like Ravi did:
+Every command in this README runs from the scenario folder (the one holding `break/`, `fix/` and this file). You get a folder with a `Dockerfile` and `hello.html`. Make your own working copy and build it, exactly like Ravi did (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
-cp -R break work
+./cleanup.sh
+rm -rf work && cp -R break work
 docker build -t d05-tools:1.0 work
 ```
 Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs (you stay in the scenario folder):
@@ -38,7 +39,7 @@ Or the one-line shortcut, which makes `work/` for you and prints every Docker co
 (Git Bash on Windows: the scripts set `MSYS_NO_PATHCONV=1` for you; if you type Docker commands with paths yourself, set it first.) `docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
 
 ## 🔍 Investigate
-Guess first, then run these **in order**. Run them from the scenario folder (after `break.sh`, that means `cd ..` first).
+Guess first, then run these **in order**. Run them from the scenario folder, the same place you ran `./break/break.sh`.
 
 **1. Read the error. All of it.**
 It is already on your screen from the build. This is the part that matters (shortened; the exact wording varies by Docker version and engine, and the last `View build details` line only appears on Docker Desktop):
@@ -136,7 +137,7 @@ docker run -d --name d05-tools -p 8105:80 d05-tools:1.0
 ```
 (The build output is a few dozen lines ending in `naming to docker.io/library/d05-tools:1.0 done`. `docker rm -f` prints nothing when there is no container yet; it just makes the run safe to repeat.)
 
-Or run `./fix.sh`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
+Or run `./fix/fix.sh`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
 ```bash
 ./fix/fix.sh
 ```
@@ -182,4 +183,4 @@ Our two labels sit next to one the base image already had. A Dockerfile that sta
 (It removes the container, the `d05-tools` image and `work/`.)
 
 ## Next →
-[D06](../06-jupyter-oom-killed/README.md): your AI model is training, then vanishes without a word. Docker killed it for using too much memory.
+[D06](../06-jupyter-oom-killed/README.md): *Your AI model was a few epochs into training. Then it vanished. No error. No goodbye.*

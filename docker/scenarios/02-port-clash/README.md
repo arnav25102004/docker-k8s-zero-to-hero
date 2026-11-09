@@ -31,6 +31,10 @@ browser ──▶ localhost:8102 ──(-p 8102:80)──▶ container, port 80
 Type these two lines yourself, one after the other. The first starts Excalidraw. The second starts IT-Tools. (The Excalidraw image name is long on purpose: it is pinned to one exact version, so copy and paste it from here.)
 
 ```bash
+./cleanup.sh
+```
+(Safe at any time; it makes a repeat run start clean.)
+```bash
 docker run -d --name d02-draw -p 8102:80 excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
 ```
 ```bash
@@ -150,8 +154,8 @@ HTTP/1.1 200 OK
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+./cleanup.sh
 ```
 
 ## Next →
-[D03](../03-votes-cant-reach-redis/README.md): Cats vs Dogs voting app that can't reach Redis.
+[D03](../03-votes-cant-reach-redis/README.md): *The voting booth is open, but every vote vanishes into thin air.*

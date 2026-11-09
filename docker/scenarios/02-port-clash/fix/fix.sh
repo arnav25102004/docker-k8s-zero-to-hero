@@ -20,5 +20,5 @@ wait_for "IT-Tools to answer on port 8202" 60 tools_up \
   || die "IT-Tools didn't come up in time. Check: docker logs d02-tools"
 
 show_next "✅ Fixed. Now verify it yourself:" \
-  "docker ps --format '{{.Names}}  {{.Ports}}'" \
+  "docker ps --filter name=d02- --format '{{.Names}}  {{.Ports}}'" \
   "Then open http://localhost:8102 and http://localhost:8202"

@@ -20,8 +20,9 @@ It's exam week at Christ University and your final-year project is a "model" tha
 - **Data jobs on big files**: a nightly batch loads a file that grew this month (data engineer).
 
 ## 💥 Break it
-`break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose -f work/compose.yaml up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use; `build: .` inside it is relative to the compose file's own folder, `work/`, not to the folder you type from):
+`break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose -f work/compose.yaml up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use; `build: .` inside it is relative to the compose file's own folder, `work/`, not to the folder you type from). `./cleanup.sh` first is safe at any time and makes a repeat run start clean:
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d --build
 ```
@@ -210,4 +211,4 @@ Not killed, and a clean exit code **0**. (The outputs above come from one real r
 (It removes the container, network and image `d06-*`, and deletes `work/`.)
 
 ## Next →
-[D07](../07-jupyter-cant-save/README.md): Jupyter can't save your notebook: "permission denied". The container is running, but it isn't allowed to write.
+[D07](../07-jupyter-cant-save/README.md): *Two hours of notebook work. You press Save. "Permission denied."*

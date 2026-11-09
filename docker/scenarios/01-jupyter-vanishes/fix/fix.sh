@@ -25,5 +25,5 @@ wait_for "Jupyter to answer on port 8101" 90 jupyter_up \
   || die "Jupyter didn't come up in time. Check: docker logs d01-jupyter"
 
 show_next "✅ Fixed. Now verify it yourself:" \
-  "docker ps" \
+  "docker ps --filter name=d01-jupyter" \
   "Then open http://localhost:8101/lab?token=change-me-123"

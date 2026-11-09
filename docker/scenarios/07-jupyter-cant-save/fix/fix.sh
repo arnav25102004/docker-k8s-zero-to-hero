@@ -22,7 +22,7 @@ can_save() {
 
 need_docker
 docker volume inspect d07_notebooks >/dev/null 2>&1 \
-  || die "The volume d07_notebooks isn't there. Run ../break/break.sh first."
+  || die "The volume d07_notebooks isn't there. Run ./break/break.sh first."
 
 prepare_work "$HERE"
 cd "$HERE/.." || die "Could not enter the scenario folder."

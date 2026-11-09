@@ -4,7 +4,7 @@
 
 ⏱ 12 min · beginner · Jupyter image (`quay.io/jupyter/base-notebook:2026-11-02`) and `busybox:1.36`, in a `compose.yaml` · volumes, users and file owners, `user:`, `chown`
 
-⬇️ First run downloads about 343 MB (the same Jupyter image as D01 and D06, so it may already be on your laptop) plus a 2 MB helper image (`busybox:1.36`). Do it before the session anyway.
+⬇️ First run downloads about 343 MB (the same Jupyter image as D01, so it may already be on your laptop) plus a 2 MB helper image (`busybox:1.36`). Do it before the session anyway.
 
 All commands below run from this scenario's folder (`docker/scenarios/07-jupyter-cant-save`). On Git Bash for Windows, `MSYS_NO_PATHCONV=1` is already set by the scripts; if you type `docker` commands with `/paths` yourself, run `export MSYS_NO_PATHCONV=1` first.
 
@@ -26,8 +26,9 @@ Think of a hostel with room keys. A room keyed to one person opens only for that
 - **Kubernetes pods** that mount the same persistent volume: the same "Permission denied" with a different YAML (SRE, platform team).
 
 ## 💥 Break it
-By hand: copy the `break/` folder to `work/` (this is the folder you will edit), then start it.
+By hand: copy the `break/` folder to `work/` (this is the folder you will edit), then start it. (`./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d
 ```
@@ -110,7 +111,7 @@ uid=1000(jovyan) gid=100(users) groups=100(users)
 ```
 UID **1000**, GID **100**. This is `jovyan`, the normal user the Jupyter image is built to run as, on purpose: it is safer than root. This is the user doing the saving.
 
-**4. Who owns the folders?** (`-n` shows numbers instead of names, which is what Linux really compares.)
+**4. Who owns the folders?** (`-n` shows numbers instead of names, which is what Linux really compares. `work` here is Jupyter's folder *inside* the container, `/home/jovyan/work`, the volume. It is not your `work/` folder on the host.)
 ```bash
 docker compose -f work/compose.yaml exec jupyter ls -ln work
 docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments
@@ -228,4 +229,4 @@ Owner `1000 100`: the same numbers `id` showed. (If you did step 1, `Untitled.ip
 ```
 
 ## Next →
-[D08](../08-it-tools-unhealthy/README.md): it-tools is running and answers every request, but Docker says it's **unhealthy**. The app works; who is lying?
+[D08](../08-it-tools-unhealthy/README.md): *The app works perfectly. Docker swears it's sick.*

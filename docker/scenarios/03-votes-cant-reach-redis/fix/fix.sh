@@ -11,7 +11,7 @@ ready() { [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localh
 
 need_docker
 cd "$HERE/.." || die "Could not enter the scenario folder."
-docker image inspect d03-api:1.0 >/dev/null 2>&1 || die "Run ./break.sh first: there is no d03-api:1.0 image yet."
+docker image inspect d03-api:1.0 >/dev/null 2>&1 || die "Run ./break/break.sh first: there is no d03-api:1.0 image yet."
 
 run_shown_quiet docker rm -f d03-api || true
 run_shown docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0 \

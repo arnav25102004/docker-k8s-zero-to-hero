@@ -21,4 +21,4 @@ wait_for "IT-Tools to answer on port 8105" 60 tools_up \
 
 show_next "✅ Fixed. Now verify it yourself:" \
   "Open http://localhost:8105 (playground: the port 8105 URL), and http://localhost:8105/hello.html" \
-  "docker ps"
+  "docker ps --filter name=d05-tools"

@@ -31,7 +31,7 @@ Scenario `NN` uses host port `81NN` (a second app, if any, uses `82NN`). The log
 Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`).
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
-2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`). The one-line shortcut is `./break/break.sh`. It prints every Docker command it runs, exactly as you would type it.
+2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`; D06 adds `--build`). The one-line shortcut is `./break/break.sh`. It prints every Docker command it runs, exactly as you would type it.
 3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job.
 4. **Fix it**: `diff break/X fix/X` shows what changed. The class edits the files in `work/` and runs the build/run commands again. `./fix/fix.sh` is the safety net: it does the same and prints its commands too.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you.
@@ -67,7 +67,7 @@ Docker not running? Start Docker Desktop, wait for the whale to settle, then ste
 
 - [ ] **The day before**, on good Wi-Fi: `./docker/scenarios/preload.sh`. It pulls every image in [IMAGES.md](IMAGES.md) (about 970 MB) and prints ✅/❌ per image and a total.
 - [ ] **Then run every scenario once** (break, fix, cleanup), so you have seen each output on your own machine.
-- [ ] On the morning: `docker ps -a --filter label=z2h.scenario` is empty (or run `./labs.sh docker clean`).
+- [ ] On the morning: `docker ps -a --format '{{.Names}}' | grep -E '^d[01][0-9][-_]'` prints nothing (or run `./labs.sh docker clean`; hand-typed containers carry no label, so a label filter would miss them).
 
 ## Playground dry-run checklist
 

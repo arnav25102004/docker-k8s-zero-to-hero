@@ -163,4 +163,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[D12](../12-high-score-lost-on-stop/README.md): High score lost on stop. You beat the high score. The server restarts. Your name is gone.
+[D12](../12-high-score-lost-on-stop/README.md): *You beat the high score. The server restarts. Your name is gone.*

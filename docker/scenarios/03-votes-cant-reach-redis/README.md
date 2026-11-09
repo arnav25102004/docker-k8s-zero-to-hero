@@ -27,8 +27,9 @@ Every container gets its **own private network**, like its own flat in an apartm
 - **"Works on my machine"** during a Friday deploy, when the only difference is where the dependency lives (SRE).
 
 ## 💥 Break it
-Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder:
+Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
+./cleanup.sh
 rm -rf work && cp -R break work
 docker build -t d03-api:1.0 work
 docker network create d03-net
@@ -41,7 +42,7 @@ Or use the one-line shortcut, which prints (`▶ $`) every command it runs, the 
 ```
 (Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` first, so paths are not rewritten.) The room should see: open http://localhost:8103 (playground: the port 8103 URL), press a vote button, and the status bar blinks and the feed shows "Request failed: [Errno 111] Connection refused".
 
-The real run, from `./break.sh` (shortened; the build prints more lines the first time because nothing is cached):
+The real run, from `./break/break.sh` (shortened; the build prints more lines the first time because nothing is cached):
 ```
 ✅ Scenario d03 cleaned up
 ▶ $ rm -rf work && cp -R break work
@@ -218,4 +219,4 @@ curl -s localhost:8103/api/results
 (This also removes the `work/` folder and the `d03-api:1.0` image.)
 
 ## Next →
-[D04](../04-vscode-wrong-password/README.md): the settings file has the right password, but VS Code says "Incorrect password".
+[D04](../04-vscode-wrong-password/README.md): *The settings file says `change-me-123`. VS Code says "Incorrect password". Who's lying?*

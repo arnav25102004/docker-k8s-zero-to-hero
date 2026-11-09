@@ -28,4 +28,4 @@ wait_for "the container to stop" 30 has_exited \
 
 show_next \
   "You clicked run, Jupyter blinked… and it's gone. Try opening http://localhost:8101: nothing answers." \
-  "docker ps"
+  "docker ps --filter name=d01-jupyter"

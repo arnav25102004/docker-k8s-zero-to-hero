@@ -200,4 +200,4 @@ cd .. && ./cleanup.sh
 This also removes every `d14-weather` image tag.
 
 ## Next →
-[D15](../15-compose-start-order/README.md): Compose start order. Everything starts. Nothing works. Run it again… and it works?!
+[D15](../15-compose-start-order/README.md): *"Everything starts. Nothing works. Run it again… and it works?!"*
