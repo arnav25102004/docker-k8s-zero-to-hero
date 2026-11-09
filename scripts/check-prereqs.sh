@@ -35,6 +35,7 @@ IMAGES=(
 
 head1 "🧰 Tools"
 if command -v docker >/dev/null; then ok "docker CLI $(docker version --format '{{.Client.Version}}' 2>/dev/null)"; else bad "docker CLI not found → 00-setup"; fi
+if docker compose version >/dev/null 2>&1; then ok "docker compose $(docker compose version --short 2>/dev/null)"; else bad "docker compose not found (the Compose v2 plugin: update Docker Desktop, or install docker-compose-plugin) → 00-setup"; fi
 if command -v kubectl >/dev/null; then ok "kubectl $(kubectl version --client -o json 2>/dev/null | grep -m1 gitVersion | cut -d'"' -f4)"; else bad "kubectl not found → 00-setup"; fi
 command -v git  >/dev/null && ok "git"  || note "git not found (only needed to clone the repo)"
 command -v curl >/dev/null && ok "curl" || bad "curl not found"

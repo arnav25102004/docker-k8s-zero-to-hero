@@ -76,11 +76,67 @@ wait_for() {
   return 1
 }
 
-# scenario_cleanup ID (e.g. d06): remove everything labelled z2h.scenario=ID.
+# Directory holding this library (docker/scenarios), resolved once at source time.
+_Z2H_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# _show_cmd CMD [ARGS...]: print "▶ $ CMD ARGS" the way a learner would type it.
+# Words made only of safe characters stay bare; anything else is quoted with
+# printf %q, so the printed line can be copy-pasted.
+_show_cmd() {
+  local line="" a
+  for a in "$@"; do
+    case "$a" in
+      ''|*[!A-Za-z0-9_@%+=:,./-]*) a=$(printf '%q' "$a") ;;
+    esac
+    line="$line $a"
+  done
+  say "\$${line}"
+}
+
+# run_shown CMD [ARGS...]: print the command in the say style, then run it with
+# its output visible. Returns the command's exit status.
+run_shown() {
+  _show_cmd "$@"
+  "$@"
+}
+
+# run_shown_quiet CMD [ARGS...]: like run_shown, but hides stdout (stderr stays).
+run_shown_quiet() {
+  _show_cmd "$@"
+  "$@" >/dev/null
+}
+
+# prepare_work SRC_DIR: recreate <scenario>/work/ as a fresh copy of SRC_DIR.
+# The scenario dir is the PARENT of SRC_DIR (SRC_DIR is <scenario>/break or
+# <scenario>/fix), so work/ always sits next to break/ and fix/. Safe when
+# work/ is missing; replaces an edited work/.
+prepare_work() {
+  local src scen
+  src="$(cd "$1" 2>/dev/null && pwd)" || die "prepare_work: no such folder: $1"
+  scen="$(dirname "$src")"
+  [ -n "$scen" ] && [ "$scen" != "/" ] || die "prepare_work: bad folder: $1"
+  rm -rf "${scen:?}/work"
+  mkdir -p "$scen/work"
+  cp -R "$src/." "$scen/work/"
+  say "fresh copy of $(basename "$src")/ in work/"
+}
+
+# scenario_cleanup ID [SCENARIO_DIR] (ID e.g. d06): remove everything labelled
+# z2h.scenario=ID, plus <scenario>/work/. SCENARIO_DIR defaults to
+# docker/scenarios/<NN>-* for ID dNN. The compose project is taken down by name
+# (-p ID), never by file, so an edited or deleted work/compose.yaml cannot block it.
 # Silent, idempotent, never fails.
 scenario_cleanup() {
-  local id="$1" x
+  local id="$1" x scen="${2:-}"
   local label="z2h.scenario=$id"
+  if [ -z "$scen" ]; then
+    for x in "$_Z2H_LIB_DIR/${id#d}"-*/; do
+      [ -d "$x" ] && scen="${x%/}"
+    done
+  fi
+  if [ -n "$scen" ] && [ -d "$scen/work" ]; then
+    rm -rf "${scen:?}/work"
+  fi
   # compose first: "down -v" also removes the anonymous volumes of its containers.
   docker compose -p "$id" down -v --remove-orphans >/dev/null 2>&1
   # rm -fv: also remove the anonymous volumes (postgres, redis ... declare VOLUME).

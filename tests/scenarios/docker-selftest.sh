@@ -156,7 +156,55 @@ test_cleanup_removes_unlabelled_image() {
   return $f
 }
 
-for t in test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
+test_run_shown() {
+  local out rc f=0
+  out=$(bash -c "source '$LIB'; run_shown echo 'a b' c" 2>&1); rc=$?
+  check "exit 0" rc_is "$rc" 0 || f=1
+  check "prints typed command, quoted" has "$out" 'echo a\\ b c' || f=1
+  check "shows output" has "$out" '^a b c$' || f=1
+  out=$(bash -c "source '$LIB'; run_shown sh -c 'exit 7'" 2>&1); rc=$?
+  check "propagates exit 7" rc_is "$rc" 7 || f=1
+  out=$(bash -c "source '$LIB'; run_shown_quiet sh -c 'echo hidden; echo err >&2; exit 3'" 2>&1); rc=$?
+  check "quiet propagates exit 3" rc_is "$rc" 3 || f=1
+  check "quiet prints command" has "$out" '\$ sh -c' || f=1
+  check "quiet hides stdout" test -z "$(printf '%s' "$out" | grep '^hidden$')" || f=1
+  check "quiet keeps stderr" has "$out" '^err$' || f=1
+  return $f
+}
+
+test_prepare_work() {
+  local tmp out f=0
+  tmp=$(mktemp -d) || return 1
+  mkdir -p "$tmp/break"
+  echo original > "$tmp/break/f.txt"
+  out=$(bash -c "source '$LIB'; prepare_work '$tmp/break'" 2>&1)
+  check "prints message" has "$out" 'fresh copy of break/ in work/' || f=1
+  check "created when missing" [ "$(cat "$tmp/work/f.txt")" = original ] || f=1
+  echo edited > "$tmp/work/f.txt"; echo extra > "$tmp/work/extra.txt"
+  bash -c "source '$LIB'; prepare_work '$tmp/break'" >/dev/null 2>&1
+  check "edit replaced" [ "$(cat "$tmp/work/f.txt")" = original ] || f=1
+  check "extra file gone" [ ! -e "$tmp/work/extra.txt" ] || f=1
+  rm -rf "${tmp:?}"
+  return $f
+}
+
+test_cleanup_removes_work_and_orphan_project() {
+  local tmp f=0
+  tmp=$(mktemp -d) || return 1
+  mkdir -p "$tmp/work"
+  printf 'services:\n  web:\n    image: busybox:1.36\n    command: sleep 300\n' > "$tmp/work/compose.yaml"
+  (cd "$tmp/work" && docker compose -p d95 up -d >/dev/null 2>&1) || { echo "compose up failed"; rm -rf "${tmp:?}"; return 1; }
+  check "project is up" [ -n "$(docker ps -q --filter label=com.docker.compose.project=d95)" ] || f=1
+  rm -f "$tmp/work/compose.yaml"
+  bash -c "source '$LIB'; scenario_cleanup d95 '$tmp'" >/dev/null 2>&1
+  check "work/ removed" [ ! -e "$tmp/work" ] || f=1
+  check "compose containers gone" [ -z "$(docker ps -aq --filter label=com.docker.compose.project=d95)" ] || f=1
+  check "compose network gone" [ -z "$(docker network ls -q --filter label=com.docker.compose.project=d95)" ] || f=1
+  rm -rf "${tmp:?}"
+  return $f
+}
+
+for t in test_run_shown test_prepare_work test_cleanup_removes_work_and_orphan_project test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
          test_any_cwd test_cleanup_idempotent test_cleanup_by_name_prefix \
          test_cleanup_removes_anonymous_volume test_cleanup_removes_unlabelled_image; do
   run_test "$t"
