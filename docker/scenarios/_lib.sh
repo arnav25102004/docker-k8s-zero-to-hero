@@ -118,7 +118,8 @@ prepare_work() {
   rm -rf "${scen:?}/work"
   mkdir -p "$scen/work"
   cp -R "$src/." "$scen/work/"
-  say "fresh copy of $(basename "$src")/ in work/"
+  # Print the command a learner types from the scenario folder (same effect).
+  say "\$ rm -rf work && cp -R $(basename "$src") work"
 }
 
 # scenario_cleanup ID [SCENARIO_DIR] (ID e.g. d06): remove everything labelled

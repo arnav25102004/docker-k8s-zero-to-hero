@@ -178,7 +178,7 @@ test_prepare_work() {
   mkdir -p "$tmp/break"
   echo original > "$tmp/break/f.txt"
   out=$(bash -c "source '$LIB'; prepare_work '$tmp/break'" 2>&1)
-  check "prints message" has "$out" 'fresh copy of break/ in work/' || f=1
+  check "prints message" has "$out" 'rm -rf work && cp -R break work' || f=1
   check "created when missing" [ "$(cat "$tmp/work/f.txt")" = original ] || f=1
   echo edited > "$tmp/work/f.txt"; echo extra > "$tmp/work/extra.txt"
   bash -c "source '$LIB'; prepare_work '$tmp/break'" >/dev/null 2>&1
