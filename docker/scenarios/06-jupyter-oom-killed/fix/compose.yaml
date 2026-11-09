@@ -1,0 +1,9 @@
+# One service: build the trainer from ./Dockerfile and run it.
+name: d06
+
+services:
+  trainer:
+    build: .
+    image: d06-trainer:1.0
+    mem_limit: 1g
+    restart: "no"
