@@ -264,6 +264,7 @@ kubectl logs notice-578487d68c-7qj2z -n k-29-sidecar -c log-shipper | grep curl
 ## 🎯 Key takeaways
 - **`READY 1/2` counts containers.** The Pod is Ready only when all of them are, and a Service sends traffic only to Ready Pods.
 - **"The web server is fine but the site is down" can be a helper's fault.** One unready sidecar takes the whole Pod out of the Service.
+- **A failing readiness check never restarts anything.** It only takes the Pod out of the Service. Restarts come from a crash or a failing liveness probe, which is why `RESTARTS` stayed at 0 here.
 - **Every container has its own logs.** `kubectl logs <pod>` may quietly show just one (or refuse, on older kubectl). Use `-c <name>`, or `--all-containers --prefix` for everyone.
 - **`tail -F` waits instead of failing.** A container can be `Running`, restart zero times and still be stuck; the readiness check is what tells you.
 
