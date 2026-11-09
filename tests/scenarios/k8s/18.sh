@@ -23,10 +23,16 @@ broken() {
 }
 
 fixed() {
-  local want
+  local want i code
   want=$(( $(schedulable_node_count) + 1 ))
   kubectl rollout status deployment/whoami -n k-18-anti-affinity --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "whoami Deployment rolled out"
   assert_eq "$(kubectl get deployment whoami -n k-18-anti-affinity -o jsonpath='{.status.readyReplicas}' 2>&1)" "$want" "all $want replicas are Ready"
-  assert_eq "$(in_cluster_http k-18-anti-affinity http://whoami)" "200" "whoami answers 200 inside the cluster"
+  code=000
+  for i in 1 2 3; do
+    code="$(in_cluster_http k-18-anti-affinity http://whoami)"
+    [ "$code" = "200" ] && break
+    sleep 3
+  done
+  assert_eq "$code" "200" "whoami answers 200 inside the cluster"
 }

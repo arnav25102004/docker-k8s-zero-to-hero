@@ -11,7 +11,12 @@ broken() {
     sleep 2
   done
   assert_contains "$out" "Pending" "the trainer Pod is Pending"
-  out="$(kubectl describe pod -n k-17-needs-gpu -l app=trainer 2>&1)"
+  # The scheduler writes the FailedScheduling event a moment after the Pod shows Pending.
+  for i in $(seq 1 30); do
+    out="$(kubectl describe pod -n k-17-needs-gpu -l app=trainer 2>&1)"
+    case "$out" in *"didn't match Pod's node affinity/selector"*) break ;; esac
+    sleep 2
+  done
   assert_contains "$out" "didn't match Pod's node affinity/selector" "events say the Pod's node affinity/selector didn't match"
 }
 

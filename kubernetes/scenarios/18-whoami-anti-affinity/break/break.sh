@@ -20,6 +20,9 @@ bash "$HERE/../cleanup.sh"
 port_free 9218 || die "Port 9218 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 
 # Replicas = nodes that accept new Pods + 1 (kind: 3 nodes, control-plane tainted -> 2 -> 3 replicas).
+# A just-created cluster can show a node as not accepting Pods for a few seconds: give it a moment.
+some_node_ready() { [ "$(schedulable_node_count)" -ge 1 ]; }
+wait_for "a node that accepts Pods" 60 some_node_ready >/dev/null 2>&1
 NODES=$(schedulable_node_count)
 [ "$NODES" -ge 1 ] || die "No node accepts new Pods right now (all tainted or cordoned). Check: kubectl get nodes. If you just ran K16, run its cleanup.sh first."
 REPLICAS=$((NODES + 1))
