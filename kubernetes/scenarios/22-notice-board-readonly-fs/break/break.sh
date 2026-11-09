@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K22 break: deploy the Campus notice board with the security team's new policy.
+# K22 break: deploy the Exam Week Board with the security team's new policy.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -16,7 +16,7 @@ bash "$HERE/../cleanup.sh"
 port_free 9222 || die "Port 9222 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 fresh_ns "$NS" || die "Could not create the namespace $NS."
 
-say "Deploying the Campus notice board (2 Pods), its Service and a visitor…"
+say "Deploying the Exam Week Board (2 Pods), its Service and a visitor…"
 kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
 
 wait_for "the visitor to start" 180 visitor_up \

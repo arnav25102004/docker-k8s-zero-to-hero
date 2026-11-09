@@ -1,4 +1,4 @@
-# K22 break (1/3): the Campus notice board page, as a ConfigMap that nginx serves. Nothing is wrong here.
+# K22 break (1/3): the Exam Week Board page, as a ConfigMap that nginx serves. Nothing is wrong here.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,9 +11,9 @@ data:
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Campus notice board</title>
+    <title>Exam Week Board</title>
     <style>
-      :root { --cork:#c89b64; --paper:#fffbe8; --ink:#2b2118; --pin:#d33b3b; }
+      :root { --cork:#7fa3c7; --paper:#fdfdf3; --ink:#1d2b3a; --pin:#e0a020; }
       * { box-sizing: border-box; }
       body { margin:0; padding:20px; background:var(--cork); color:var(--ink); font:20px/1.4 system-ui,sans-serif; }
       h1 { text-align:center; margin:0 0 4px; font-size:38px; }
@@ -37,23 +37,23 @@ data:
     </style>
     </head>
     <body>
-    <h1>📌 Campus notice board</h1>
-    <p class="sub">Everything the notice board outside the canteen would tell you. All names and events are made up.</p>
+    <h1>📅 Exam Week Board</h1>
+    <p class="sub">Halls, timetables and help for the week ahead. All names and events are made up.</p>
     <nav id="tabs"></nav>
     <div id="grid"></div>
     <footer>Served from a ConfigMap. No internet needed. <span id="clock"></span></footer>
     <script>
     var notices = [
-      { cat:'fest', tilt:-1.5, title:'🎉 Spandan Fest', body:'<p>Three days of music, robots and dosas.</p><ul><li>Fri 12 Dec: opening and quiz night</li><li>Sat 13 Dec: hack-a-thon and band battle</li><li>Sun 14 Dec: robot soccer final</li></ul>' },
-      { cat:'canteen', tilt:1.2, title:'🍛 Canteen menu, Thursday', body:'<ul><li>Masala dosa, 40 rupees</li><li>Lemon rice with pickle</li><li>Filter coffee (unlimited refills for exam week)</li><li>Mystery curry (ask Ganesh-anna, he knows)</li></ul>' },
-      { cat:'lost', tilt:-0.8, title:'🔍 Lost and found', body:'<ul><li>One blue umbrella, very polite</li><li>A calculator that is only right on Tuesdays</li><li>Left earbud, no right earbud (it is lonely)</li></ul><p>Collect from the library desk.</p>', found:true },
-      { cat:'fest', tilt:1.6, title:'🏏 Inter-department cricket', body:'<p>Sunday 7 am at the ground. Both teams, one umpire, zero patience for sleeping in.</p>' },
-      { cat:'canteen', tilt:-1.1, title:'☕ Chai o\'clock', body:'<p>The 4:30 chai is now 4:20. Nobody knows why. Everybody is happy.</p>' },
-      { cat:'lost', tilt:0.9, title:'🎒 Found: a heavy backpack', body:'<p>It holds 3 textbooks and a very old sandwich. Please claim before the sandwich claims the desk.</p>', found:true },
-      { cat:'study', tilt:-1.3, title:'📚 Library hours', body:'<p>Open till 9 pm during exam week. Silence is free. Snacks are not.</p>' },
-      { cat:'study', tilt:1.4, title:'💻 Wi-Fi password change', body:'<p>The campus Wi-Fi password rotates on the 1st. Ask the IT desk, not the group chat.</p>' }
+      { cat:'exams', tilt:-1.4, title:'📝 Exam timetable', body:'<ul><li>Mon: Data Structures, 10 am</li><li>Wed: Maths II, 2 pm</li><li>Fri: Networks, 10 am</li></ul><p>Reach the hall 20 minutes early.</p>' },
+      { cat:'exams', tilt:1.3, title:'🪪 Bring your ID card', body:'<p>No ID card, no hall ticket check. The front desk has a few temporary ones, and a very long queue.</p>' },
+      { cat:'rooms', tilt:-0.9, title:'🏛️ Hall allocation', body:'<ul><li>Roll numbers 1 to 60: Hall A</li><li>Roll numbers 61 to 120: Hall B</li><li>Backlog papers: Seminar room</li></ul>' },
+      { cat:'rooms', tilt:1.6, title:'🔌 Night study room', body:'<p>Room 12 stays open till midnight in exam week. Sockets are first come, first served.</p>' },
+      { cat:'help', tilt:-1.2, title:'🙋 Doubt-clearing sessions', body:'<ul><li>Tue 5 pm: Maths II with Prof. Rao</li><li>Thu 5 pm: Networks with Prof. Iyer</li></ul><p>Bring your questions, not your phone.</p>' },
+      { cat:'help', tilt:0.8, title:'🧠 Calm corner', body:'<p>Free tea, a quiet sofa and a sign that says "you will be fine". Counsellor drop-in from 3 to 5 pm.</p>' },
+      { cat:'swap', tilt:-1.0, title:'📚 Book swap', body:'<p>Last year\'s notes for sale or swap. Leave a note under this one. Highlighters are not included.</p>' },
+      { cat:'swap', tilt:1.4, title:'🔢 Found: a scientific calculator', body:'<p>Silver, with a sticker of a sleepy cat. Collect from the library desk.</p>', found:true }
     ];
-    var cats = [['all','All'],['fest','Fest'],['canteen','Canteen'],['lost','Lost and found'],['study','Study']];
+    var cats = [['all','All'],['exams','Exams'],['rooms','Rooms'],['help','Help'],['swap','Swap']];
     var cur = 'all';
     function render() {
       var tabs = document.getElementById('tabs'); tabs.innerHTML = '';

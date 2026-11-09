@@ -1,4 +1,4 @@
-# K22 break (2/3): the Campus notice board, still on the unprivileged nginx image.
+# K22 break (2/3): the Exam Week Board, still on the unprivileged nginx image.
 # The security team's next step has been added to this Deployment.
 apiVersion: apps/v1
 kind: Deployment
