@@ -187,5 +187,51 @@ curl -s "http://localhost:8101/api/status?token=change-me-123"
 ```
 This removes the container, the `d01-jupyter:1.0` image and your `work/` folder.
 
+## ✍️ Your turn: write a Dockerfile from scratch (5 min)
+Until now you fixed a file somebody else wrote. Now write one yourself. The goal: a tiny web page, packed into your own image on top of the pinned `nginx:1.27.5-alpine` (about 23 MB; skip the download if you already pulled it for another scenario).
+
+**1. Create the folder and two files.** The page first:
+```bash
+mkdir -p work/mine
+echo '<h1>Hello from my own Docker image</h1>' > work/mine/index.html
+```
+Now the Dockerfile. Three lines, and nothing else is needed: a comment, `FROM` (which image to start from) and `COPY` (which file to put inside it). Any editor works; this command writes the file for you:
+```bash
+cat > work/mine/Dockerfile <<'EOF'
+# My first Dockerfile
+FROM nginx:1.27.5-alpine
+COPY index.html /usr/share/nginx/html/index.html
+EOF
+```
+(`COPY index.html …` looks for `index.html` in the folder you build, `work/mine`. The second path is where nginx serves its pages from.)
+
+**2. Build it and run it** on port 8201:
+```bash
+docker build -t d01-mine:1.0 work/mine
+docker run -d --name d01-mine -p 8201:80 d01-mine:1.0
+```
+**3. Check it.** Laptop: open http://localhost:8201. Playground: open the port 8201 URL. Or:
+```bash
+curl localhost:8201
+```
+```
+<h1>Hello from my own Docker image</h1>
+```
+```bash
+docker ps --filter name=d01-mine
+```
+```
+CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS         PORTS                                     NAMES
+4396ffe207f5   d01-mine:1.0   "/docker-entrypoint.…"   2 seconds ago   Up 2 seconds   0.0.0.0:8201->80/tcp, [::]:8201->80/tcp   d01-mine
+```
+(Your ID will differ.) Change the text in `work/mine/index.html`, build again, remove the old container with `docker rm -f d01-mine`, run again: the page changes only after a new build, the same lesson as above.
+
+**Clean up** (removes `d01-mine` and your `work/` folder; `./cleanup.sh` does it too):
+```bash
+docker rm -f d01-mine
+docker rmi d01-mine:1.0
+rm -rf work
+```
+
 ## Next →
 [D02](../02-port-clash/README.md): *Two great apps. One door. Only one gets in.*

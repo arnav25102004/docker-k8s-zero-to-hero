@@ -286,5 +286,76 @@ networks:
 ```
 This removes the three containers, the network `d09_default`, the `d09-board:1.0` image and your `work/` folder.
 
+## ✍️ Your turn: turn two `docker run` lines into a `compose.yaml` (10 min)
+In [D03](../03-votes-cant-reach-redis/README.md) you typed two long `docker run` lines. Here they are again (the fixed version, plus the `docker network create` that came first):
+```
+docker network create d03-net
+docker run -d --name d03-redis --network d03-net redis:7.4.12-alpine
+docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0
+```
+Your job: write `work/mine/compose.yaml` that starts the same two containers. Use the project name `d09-mine` and the host port `8209`. Build the API from D03's `break/` folder (that is where its `Dockerfile` lives), so you do not need the D03 image on your computer. Each flag has a home in the file:
+
+| In `docker run` | In `compose.yaml` |
+|---|---|
+| `--name d03-redis` | the **service name** (`redis:` is a key under `services:`) |
+| `image` argument at the end | `image:` (or `build:` with a folder, to build it first) |
+| `-p 8103:8080` | `ports:` with `- "8209:8080"` |
+| `-e REDIS_HOST=d03-redis` | `environment:` with `REDIS_HOST: redis` |
+| `--network d03-net` | nothing: Compose makes one network per project for you, and service names are the host names on it |
+| `-v NAME:/path` | `volumes:` (none in D03, but this is where it goes) |
+
+Start like this, and fill in the rest:
+```bash
+mkdir -p work/mine
+```
+Then create `work/mine/compose.yaml` in any editor. Hints: it starts with `name: d09-mine`, then `services:`, then two services, `redis` and `api`. The API's Redis host name is the *service name* of Redis. The path in `build:` is relative to the compose file's own folder (`work/mine`), so D03's `break/` folder is three levels up: `../../../03-votes-cant-reach-redis/break`.
+
+<details><summary>Show my solution (try first!)</summary>
+
+```yaml
+name: d09-mine
+
+services:
+  redis:
+    image: redis:7.4.12-alpine
+
+  api:
+    build: ../../../03-votes-cant-reach-redis/break
+    ports:
+      - "8209:8080"
+    environment:
+      REDIS_HOST: redis
+```
+Save it as `work/mine/compose.yaml`. The service name `redis` replaced `--name d03-redis`, so `REDIS_HOST` is now `redis`. There is no `networks:` and no `docker network create`: both services join the project's default network, `d09-mine_default`.
+</details>
+
+Start it and check it (the first build takes a few seconds):
+```bash
+docker compose -f work/mine/compose.yaml up -d --build
+curl -s localhost:8209/readyz
+```
+```
+ Network d09-mine_default Created 
+ Container d09-mine-redis-1 Started 
+ Container d09-mine-api-1 Started 
+{"status": "ready", "storage": "redis"}
+```
+(shortened; Compose 5 may print some lines twice. If curl says "connection refused", wait two seconds and try again.) `"storage": "redis"` means the API found Redis by its service name. Laptop: http://localhost:8209. Playground: open the port 8209 URL.
+```bash
+docker compose -f work/mine/compose.yaml ps
+```
+```
+NAME               IMAGE                 COMMAND                  SERVICE   CREATED         STATUS                            PORTS
+d09-mine-api-1     d09-mine-api          "python app.py"          api       3 seconds ago   Up 2 seconds (health: starting)   0.0.0.0:8209->8080/tcp, [::]:8209->8080/tcp
+d09-mine-redis-1   redis:7.4.12-alpine   "docker-entrypoint.s…"   redis     3 seconds ago   Up 2 seconds                      6379/tcp
+```
+(Your times differ; `health: starting` turns into `healthy` after a few seconds.)
+
+**Clean up** (removes the `d09-mine` containers, network and image, plus `work/`; `./cleanup.sh` does it too):
+```bash
+docker compose -f work/mine/compose.yaml down --rmi local
+rm -rf work
+```
+
 ## Next →
 [D10](../10-qr-app-build-fails/README.md): *The file is RIGHT THERE. Docker says it doesn't exist.*
