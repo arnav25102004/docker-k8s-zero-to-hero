@@ -132,7 +132,7 @@ diff ../break/app.yaml app.yaml
 ```
 ```
 1c1
-< # K16 break (2/3): Dosa Dash, served by nginx. No tolerations, so no VIP-reserved node will take it.
+< # K16 break (2/3): Dosa Dash, served by nginx.
 ---
 > # K16 fix: the same game, now with a toleration for the VIP taint.
 16a17,21

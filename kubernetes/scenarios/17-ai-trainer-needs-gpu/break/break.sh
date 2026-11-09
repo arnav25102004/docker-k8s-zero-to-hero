@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K17 break: an "AI trainer" requires a node labelled accelerator=nvidia-gpu, which no node has.
+# K17 break: deploys the "AI trainer".
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K16 break: every node gets the taint z2h-vip=true:NoSchedule, then the game is deployed without a toleration.
+# K16 break: changes every node, then deploys the game.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

@@ -1,5 +1,4 @@
-# K19 break (3/4): the dashboard (Homer). The Pod template sets NO resources, and this
-# namespace has a ResourceQuota, so the ReplicaSet is not allowed to create the Pods.
+# K19 break (3/4): the dashboard (Homer).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

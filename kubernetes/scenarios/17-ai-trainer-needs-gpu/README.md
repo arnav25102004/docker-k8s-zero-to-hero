@@ -69,7 +69,7 @@ Events:
   ----     ------            ----  ----               -------
   Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 node(s) didn't match Pod's node affinity/selector. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
 ```
-(Shortened to the part that matters; the exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector.`) The scheduler looked at every node and refused all of them. The clue is **`didn't match Pod's node affinity/selector`**: the Pod is picky about *which* node. (The other part, a `control-plane` taint, is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it only appears on clusters with a separate control-plane node.)
+(Shortened to the part that matters; the exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector.`) The scheduler looked at every node and refused all of them. The clue is **`didn't match Pod's node affinity/selector`**: the Pod is picky about *which* node. (If the event names `node.kubernetes.io/not-ready` instead, the cluster was created moments ago and is still starting: wait a minute and run `break.sh` again.) (The other part, a `control-plane` taint, is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it only appears on clusters with a separate control-plane node.)
 
 **3. What is the Pod asking for?** The Pod's spec shows what it insisted on.
 ```bash
@@ -110,13 +110,12 @@ The script waits for the new Pod and for the training to finish (about 10 second
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,2c1,2
-< # K17 break: the "AI trainer" insists on a node labelled accelerator=nvidia-gpu (nodeSelector).
-< # No node in the cluster has that label, so the scheduler has nowhere to put the Pod. No Service: no web page.
+1c1,2
+< # K17 break: the "AI trainer". No Service: this app has no web page.
 ---
 > # K17 fix: the same trainer, but the GPU is only a preference (preferred node affinity), not a requirement.
 > # No Service: this app has no web page.
-17,18c17,26
+16,17c17,26
 <       nodeSelector:
 <         accelerator: nvidia-gpu
 ---

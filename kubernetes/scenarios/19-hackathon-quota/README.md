@@ -141,13 +141,12 @@ Within about half a minute the log flips from ❌ to ✅ lines (Ctrl+C to stop i
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,2c1,2
-< # K19 break (3/4): the dashboard (Homer). The Pod template sets NO resources, and this
-< # namespace has a ResourceQuota, so the ReplicaSet is not allowed to create the Pods.
+1c1,2
+< # K19 break (3/4): the dashboard (Homer).
 ---
 > # K19 fix: the same dashboard, now with requests and limits that fit inside the quota.
 > # Two replicas x (50m CPU, 32Mi) = 100m CPU, 64Mi in requests; the quota allows 500m / 256Mi.
-22a23,29
+21a23,29
 >           resources:
 >             requests:
 >               cpu: 50m
@@ -241,4 +240,4 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-[K20](../20-surprise-limitrange-oom/README.md): *Nobody set a memory limit. The app still got killed for exceeding it.*
+[K20](../20-surprise-limitrange-oom/README.md): "Nobody set a memory limit. The app still got killed for exceeding it."

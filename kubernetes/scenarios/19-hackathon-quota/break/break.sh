@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# K19 break: the namespace has a ResourceQuota, and the dashboard's Pods declare no resources,
-# so the ReplicaSet is refused every time it tries to create one.
+# K19 break: sets up the namespace and deploys the dashboard.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

@@ -1,8 +1,5 @@
-# The namespace's house rule, set by the "platform team": every container that does not
-# say how much memory it needs gets a 16Mi request and a 32Mi limit.
+# K20 break: settings for the namespace, set by the "platform team".
 # (In this YAML, `default` is the default LIMIT and `defaultRequest` is the default request.)
-# It only applies when a Pod is created. The app (about 16Mi, plus a 40Mi preload in its start command)
-# and the visitor both get these values; busybox is happy with 32Mi, the app is not.
 apiVersion: v1
 kind: LimitRange
 metadata:

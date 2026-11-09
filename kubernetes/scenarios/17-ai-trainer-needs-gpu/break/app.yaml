@@ -1,5 +1,4 @@
-# K17 break: the "AI trainer" insists on a node labelled accelerator=nvidia-gpu (nodeSelector).
-# No node in the cluster has that label, so the scheduler has nowhere to put the Pod. No Service: no web page.
+# K17 break: the "AI trainer". No Service: this app has no web page.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

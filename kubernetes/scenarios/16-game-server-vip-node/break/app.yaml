@@ -1,4 +1,4 @@
-# K16 break (2/3): Dosa Dash, served by nginx. No tolerations, so no VIP-reserved node will take it.
+# K16 break (2/3): Dosa Dash, served by nginx.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
