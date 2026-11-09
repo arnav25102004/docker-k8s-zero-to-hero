@@ -45,6 +45,11 @@ container_state() { # NAME
 nothing_left() {
   local label="z2h.scenario=$1" left
   left="$(docker ps -aq --filter "label=$label" 2>/dev/null)$(docker network ls -q --filter "label=$label" 2>/dev/null)$(docker volume ls -q --filter "label=$label" 2>/dev/null)$(docker images -q --filter "label=$label" 2>/dev/null)"
+  # Files-first scenarios type commands without --label, so also check names "ID-…"
+  # (compose projects named ID give "ID-svc-1", "ID_default", "ID_vol").
+  left="$left$(docker ps -a --format '{{.Names}}' 2>/dev/null | grep -E "^$1[-_]")"
+  left="$left$(docker network ls --format '{{.Name}}' 2>/dev/null | grep -E "^$1[-_]")"
+  left="$left$(docker volume ls --format '{{.Name}}' 2>/dev/null | grep -E "^$1[-_]")"
   [ -z "$left" ]
 }
 
