@@ -1,31 +1,35 @@
 #!/usr/bin/env bash
-# D07 fix: give uid 1000 / gid 100 (jovyan) ownership of everything in the volume, then restart Jupyter.
+# D07 fix: copy fix/ into work/, hand the volume to uid 1000 / gid 100 (jovyan),
+# then apply the fixed compose.yaml. Every Docker command is printed.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
-IMAGE="quay.io/jupyter/base-notebook:2026-11-02"
-HELPER="busybox:1.36"
-
-jupyter_up() { curl -s -f -o /dev/null --max-time 2 "http://localhost:8107/api/status?token=change-me-123"; }
+can_save() {
+  [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -X PUT \
+    -H 'Authorization: token change-me-123' -H 'Content-Type: application/json' \
+    -d '{"type":"file","format":"text","content":"hello"}' \
+    http://localhost:8107/api/contents/work/assignments/fix-check.txt)" = "201" ]
+}
 
 need_docker
-ensure_image "$IMAGE" "about 343 MB"
-ensure_image "$HELPER" "about 2 MB"
-docker volume inspect d07-notebooks >/dev/null 2>&1 \
-  || die "The volume d07-notebooks isn't there. Run ../break/break.sh first."
-docker inspect d07-jupyter >/dev/null 2>&1 \
-  || die "The container d07-jupyter isn't there. Run ../break/break.sh first."
+docker volume inspect d07_notebooks >/dev/null 2>&1 \
+  || die "The volume d07_notebooks isn't there. Run ../break/break.sh first."
 
-say "Giving the notebooks to jovyan (uid 1000, gid 100) with a one-off container…"
-docker run --rm --label z2h.scenario=d07 -v d07-notebooks:/data "$HELPER" chown -R 1000:100 /data \
+prepare_work "$HERE"
+cd "$HERE/.." || die "Could not enter the scenario folder."
+
+say "Step 1: give the files in the volume to uid 1000 / gid 100 (jovyan), using a one-off root container"
+run_shown docker compose -f work/compose.yaml run --rm --user root backup chown -R 1000:100 /data \
   || die "The chown container failed. Is Docker healthy?"
 
-say "Restarting Jupyter…"
-docker restart d07-jupyter >/dev/null || die "Could not restart d07-jupyter."
-wait_for "Jupyter to come back" 60 jupyter_up \
-  || die "Jupyter didn't come back in time. Is Docker healthy?"
+say "Step 2: apply the fixed compose.yaml (the backup job now runs as 1000:100)"
+run_shown docker compose -f work/compose.yaml up -d \
+  || die "docker compose up failed. Try it yourself:  docker compose -f work/compose.yaml up"
+
+wait_for "saving to work to succeed" 30 can_save \
+  || die "Saving still fails. Check: docker compose -f work/compose.yaml exec jupyter ls -ln work"
 
 show_next "✅ Fixed. Now verify it yourself:" \
-  "docker exec d07-jupyter touch /home/jovyan/work/assignments/test.ipynb"
+  "docker compose -f work/compose.yaml exec jupyter ls -ln work/assignments"

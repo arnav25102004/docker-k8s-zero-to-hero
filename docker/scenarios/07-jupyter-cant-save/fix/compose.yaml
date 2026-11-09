@@ -1,0 +1,24 @@
+# D07: a notebook server and the nightly backup job share one volume.
+name: d07
+
+services:
+  jupyter:
+    image: quay.io/jupyter/base-notebook:2026-11-02
+    command: start-notebook.py --IdentityProvider.token=change-me-123
+    ports:
+      - "8107:8888"
+    volumes:
+      - notebooks:/home/jovyan/work
+
+  # A one-shot job: it does its work and exits. "Exited (0)" is its normal ending.
+  backup:
+    image: busybox:1.36
+    user: "1000:100"
+    command: sh -c "mkdir -p /data/assignments && echo 'nightly backup folder' > /data/assignments/backup-note.txt"
+    volumes:
+      - notebooks:/data
+    depends_on:
+      - jupyter
+
+volumes:
+  notebooks:

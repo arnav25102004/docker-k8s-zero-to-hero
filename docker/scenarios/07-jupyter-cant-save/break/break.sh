@@ -1,42 +1,30 @@
 #!/usr/bin/env bash
-# D07 break: an "old backup job" (root) creates work/assignments, then Jupyter (uid 1000) starts.
+# D07 break: copy break/ into work/ and start the stack from work/compose.yaml.
+# Every Docker command is printed (▶ $ ...) exactly as you could type it.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/../../_lib.sh"
 
-IMAGE="quay.io/jupyter/base-notebook:2026-11-02"
-HELPER="busybox:1.36"
-
 jupyter_up() { curl -s -f -o /dev/null --max-time 2 "http://localhost:8107/api/status?token=change-me-123"; }
-cannot_save() { ! docker exec d07-jupyter touch /home/jovyan/work/assignments/test.ipynb; }
+backup_done() { [ "$(docker compose -p d07 ps -a backup --format '{{.State}} {{.ExitCode}}' 2>/dev/null)" = "exited 0" ]; }
 
 need_docker
 bash "$HERE/../cleanup.sh"
 port_free 8107 || die "Port 8107 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
-ensure_image "$IMAGE" "about 343 MB"
-ensure_image "$HELPER" "about 2 MB"
 
-say "Creating the notebooks volume, and letting an old backup job (running as root) set it up…"
-docker volume create --label z2h.scenario=d07 d07-notebooks >/dev/null \
-  || die "Could not create the volume. Is Docker healthy?"
-# The volume's top folder belongs to uid 1000 (like a normal Jupyter work folder);
-# the "assignments" folder inside it is created by root, mode 755.
-docker run --rm --label z2h.scenario=d07 -v d07-notebooks:/data "$HELPER" \
-  sh -c 'chown 1000:100 /data && mkdir /data/assignments && chown 0:0 /data/assignments && chmod 755 /data/assignments' \
-  || die "The backup-job container failed. Is Docker healthy?"
+prepare_work "$HERE"
+cd "$HERE/.." || die "Could not enter the scenario folder."
 
-say "Starting Jupyter…"
-docker run -d --name d07-jupyter --label z2h.scenario=d07 -p 8107:8888 \
-  -v d07-notebooks:/home/jovyan/work \
-  "$IMAGE" start-notebook.py --IdentityProvider.token=change-me-123 >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
+say "The first run downloads Jupyter (about 343 MB) and busybox (about 2 MB), unless you already have them."
+run_shown docker compose -f work/compose.yaml up -d \
+  || die "docker compose up failed. Try it yourself:  docker compose -f work/compose.yaml up"
 
-wait_for "Jupyter to start" 60 jupyter_up \
-  || die "Jupyter didn't start in time. Run cleanup.sh and try again."
-wait_for "the setup to settle" 10 cannot_save \
-  || die "Something is off with the setup. Run cleanup.sh and try again."
+wait_for "Jupyter to start" 90 jupyter_up \
+  || die "Jupyter didn't start in time. Run ../cleanup.sh and try again."
+wait_for "the backup job to finish" 30 backup_done \
+  || die "The backup job didn't finish. Check: docker compose -f work/compose.yaml logs backup"
 
 show_next \
-  "Jupyter is up: open http://localhost:8107/lab?token=change-me-123 (playground: the port 8107 URL + /lab?token=change-me-123). In the file browser open work, then assignments, and try to create or save a notebook there. Jupyter shows a permission error." \
-  "Look at the error, then ask the container who it is:  docker exec d07-jupyter id"
+  "Jupyter is up: open http://localhost:8107/lab?token=change-me-123 (playground: the port 8107 URL + /lab?token=change-me-123). In the file browser open work, then assignments, and try to create a notebook there. (The backup job shows Exited (0) in docker compose ps -a. That is normal for a one-shot job.)" \
+  "docker compose -f work/compose.yaml ps -a"
