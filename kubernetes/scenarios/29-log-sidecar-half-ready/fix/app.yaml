@@ -1,0 +1,73 @@
+# K29 fix: the same Pod. The log shipper now follows the file the web container really writes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice
+  namespace: k-29-sidecar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notice
+  template:
+    metadata:
+      labels:
+        app: notice
+    spec:
+      # A short goodbye, so replacing the Pod is quick (the log shipper ignores the polite stop signal).
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: web
+          image: nginxinc/nginx-unprivileged:1.27.5-alpine
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          volumeMounts:
+            - name: page
+              mountPath: /usr/share/nginx/html
+            - name: conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+            - name: logs
+              mountPath: /var/log/web
+        - name: log-shipper
+          image: busybox:1.36
+          env:
+            - name: LOG_FILE
+              value: /logs/access.log
+          # "tail -F" keeps waiting and retrying if the file is not there (yet).
+          command: ["sh", "-c", 'tail -F "$LOG_FILE"']
+          # Ready only once the log file exists.
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", 'test -f "$LOG_FILE"']
+            periodSeconds: 5
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+              readOnly: true
+      volumes:
+        - name: page
+          configMap:
+            name: hostel-board-page
+        - name: conf
+          configMap:
+            name: web-conf
+        # Scratch space shared by both containers; it lives as long as the Pod.
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notice
+  namespace: k-29-sidecar
+spec:
+  selector:
+    app: notice
+  ports:
+    - port: 80
+      targetPort: 8080
