@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D08 break: run IT-Tools on host port 8108 with a health check that probes the wrong port (8080).
+# D08 break: copy break/ into work/ (cp -R break work), build the image, run it, and wait for Docker's verdict.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
@@ -15,17 +15,20 @@ bash "$HERE/../cleanup.sh"
 port_free 8108 || die "Port 8108 is busy, so this scenario can't start. Free it (see above) and run break.sh again."
 ensure_image "$TOOLS_IMAGE" "about 24 MB"
 
-say "Starting IT-Tools on port 8108, with a health check…"
-docker run -d --name d08-tools --label z2h.scenario=d08 -p 8108:80 \
-  --health-cmd 'wget -qO- http://127.0.0.1:8080/ || exit 1' --health-interval 3s --health-retries 2 \
-  "$TOOLS_IMAGE" >/dev/null \
-  || die "docker run failed. Is Docker healthy?"
+cd "$HERE/.." || die "Could not enter the scenario folder"
+rm -rf work
+say "The night before registration opens. Building the tools page from work/Dockerfile (a fresh copy of break/):"
+run_shown cp -R break work || die "Could not copy break/ to work/"
+run_shown docker build -t d08-tools:1.0 work || die "The build failed. Read the error above."
+run_shown docker run -d --name d08-tools -p 8108:80 d08-tools:1.0 \
+  || die "docker run failed. Is port 8108 free?"
 
 wait_for "IT-Tools to answer on port 8108" 60 app_up \
-  || die "IT-Tools didn't come up in time. Run cleanup.sh and try again."
-wait_for "Docker to give its verdict" 60 is_unhealthy \
+  || die "IT-Tools didn't come up in time. Check: docker logs d08-tools"
+# Docker needs interval x retries (3 s x 2) of failed checks, so about 6-9 seconds.
+wait_for "Docker to give its verdict (about 10 seconds)" 60 is_unhealthy \
   || die "Unexpected health state. Run cleanup.sh and try again."
 
 show_next \
-  "Open http://localhost:8108: the app works. But Docker says the container is sick." \
-  "docker ps"
+  "Open http://localhost:8108 (playground: the port 8108 URL): the app works. But Docker says the container is sick." \
+  "docker ps --filter name=d08-tools"
