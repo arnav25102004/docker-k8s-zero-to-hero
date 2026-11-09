@@ -1,9 +1,10 @@
-# One service: build the trainer from ./Dockerfile and run it.
-name: d06
+# What to run, written down.
+name: d06                     # the project name; containers are called d06-<service>-1
 
 services:
-  trainer:
-    build: .
-    image: d06-trainer:1.0
+  trainer:                    # one service, one container
+    build: .                  # build the image from the Dockerfile next to this file
+    image: d06-trainer:1.0    # name the built image
     mem_limit: 1g
-    restart: "no"
+    memswap_limit: 1g
+    restart: "no"             # do not start it again when it stops

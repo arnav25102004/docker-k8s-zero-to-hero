@@ -2,7 +2,7 @@
 
 *Your AI model was a few epochs into training. Then it vanished. No error. No goodbye.*
 
-⏱ 12 min · beginner · a small Python "AI trainer" (`python:3.12-alpine`) run with Docker Compose · compose files, resource fences, exit codes, reading `docker inspect`
+⏱ 12 min · beginner · a small Python "AI trainer" (`python:3.12-alpine`) run with Docker Compose · compose files, exit codes, reading `docker inspect`
 
 ⬇️ First run downloads about 19 MB (`python:3.12-alpine`, probably already on your laptop from other scenarios). Do it before the session anyway. The trainer image is built on your machine from a 5-line `Dockerfile`; there is no big Jupyter download in this one.
 
@@ -12,17 +12,15 @@ It's exam week at Christ University and your final-year project is a "model" tha
 ## 🧠 The concept: why, what, how
 **First, Compose in three sentences.** So far you typed long `docker run` lines with flags. A **`compose.yaml`** is a file that writes those flags down, so you read and edit them instead of retyping. `docker compose -f work/compose.yaml up -d` reads the file and does the `docker build` and `docker run` for you.
 
-**Now the bug's world.** A container shares the host's memory and CPU with everyone else, so Docker lets you put fences around a container (`docker run --memory …`, or a line in the compose file). The kernel enforces those fences with a Linux feature called a **cgroup** (D00 §7.2). Fences are good. The question for today: what happens when a program meets one?
-
-Think of a hostel mess with one plate per student: the rule is fine, until someone doesn't know about it.
+**Now the bug's world.** A container is just a process on a machine that many other things share. When one of them stops without saying why, you do not guess: you read what you wrote down (the files) and what Docker recorded (`docker inspect`, logs, exit codes), and compare the two.
 
 ## 🏢 Where you'll meet this at work
-- **Kubernetes**: a Pod that restarts again and again with exit code 137 in `kubectl describe pod` (SRE, platform team; this is [scenario K08](../../../kubernetes/scenarios/08-ai-trainer-oomkilled/README.md)).
+- **Kubernetes**: a Pod that restarts again and again with nothing useful in its logs (SRE, platform team; this is [scenario K08](../../../kubernetes/scenarios/08-ai-trainer-oomkilled/README.md)).
 - **A service that runs fine on a laptop and dies in production**, with nothing in its logs (developer).
 - **Data jobs on big files**: a nightly batch loads a file that grew this month (data engineer).
 
 ## 💥 Break it
-`break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use):
+`break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose -f work/compose.yaml up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use; `build: .` inside it is relative to the compose file's own folder, `work/`, not to the folder you type from):
 ```bash
 rm -rf work && cp -R break work
 docker compose -f work/compose.yaml up -d --build
@@ -41,7 +39,7 @@ Real output of `./break/break.sh` (shortened: the build log and some repeated li
  Network d06_default Created 
  Container d06-trainer-1 Created 
  Container d06-trainer-1 Started 
-⏳ Waiting for the container to stop .... ✔ ready
+⏳ Waiting for the container to stop .. ✔ ready
 
 👀 What you should see now
    Your AI model was training. Now the container is gone from 'docker ps': no error, no goodbye.
@@ -59,8 +57,8 @@ Guess first, then run these **in order**.
 docker compose -f work/compose.yaml ps -a
 ```
 ```
-NAME            IMAGE             COMMAND               SERVICE   CREATED         STATUS                                PORTS
-d06-trainer-1   d06-trainer:1.0   "python trainer.py"   trainer   5 seconds ago   Exited (137) Less than a second ago   
+NAME            IMAGE             COMMAND               SERVICE   CREATED         STATUS                      PORTS
+d06-trainer-1   d06-trainer:1.0   "python trainer.py"   trainer   3 seconds ago   Exited (137) 1 second ago   
 ```
 Not running (plain `docker compose ps` would show nothing). Look at the status: `Exited (137)`. That number is a clue.
 
@@ -75,10 +73,8 @@ docker compose -f work/compose.yaml logs trainer
 ```
 trainer-1  | epoch 1/5 ... loading 150 MB
 trainer-1  | epoch 2/5 ... loading 150 MB
-trainer-1  | epoch 3/5 ... loading 150 MB
-trainer-1  | epoch 4/5 ... loading 150 MB
 ```
-It stops part-way, with no error message and no "model trained". A program that crashed on its own would usually say something. This one never got the chance. (It died at epoch 4 on the run above; on a machine where Docker may also use swap space it can be epoch 3 or 4. The story is the same.)
+It stops after epoch 2 is announced, with no error message and no "model trained". A program that crashed on its own would usually say something. This one never got the chance. (It dies during epoch 2 on every engine: the compose file also limits swap, see below, so the epoch count is the same everywhere.)
 
 **3. Ask Docker: was it killed for memory?**
 ```bash
@@ -94,17 +90,18 @@ true 137
 cat work/compose.yaml
 ```
 ```
-# One service: build the trainer from ./Dockerfile and run it.
-name: d06
+# What to run, written down.
+name: d06                     # the project name; containers are called d06-<service>-1
 
 services:
-  trainer:
-    build: .
-    image: d06-trainer:1.0
+  trainer:                    # one service, one container
+    build: .                  # build the image from the Dockerfile next to this file
+    image: d06-trainer:1.0    # name the built image
     mem_limit: 300m
-    restart: "no"
+    memswap_limit: 300m
+    restart: "no"             # do not start it again when it stops
 ```
-One line is about memory: `mem_limit: 300m`.
+The comments say what the keys mean. Two lines are about memory: `mem_limit` and `memswap_limit` (swap is disk space used as slow extra memory).
 
 **5. What will Docker really run? Compare with what we wrote.** `docker compose config` prints the file after Compose has read it, the "what Docker will really run" view:
 ```bash
@@ -112,8 +109,9 @@ docker compose -f work/compose.yaml config | grep -i mem
 ```
 ```
     mem_limit: "314572800"
+    memswap_limit: "314572800"
 ```
-314,572,800 bytes = 300 MiB. And the container itself agrees:
+Newer Compose versions print bytes like this; older ones may print `300m`. 314,572,800 bytes = 300 MiB. And the container itself agrees:
 ```bash
 docker inspect -f '{{.HostConfig.Memory}}' d06-trainer-1
 ```
@@ -129,7 +127,7 @@ Docker's memory limit is a hard fence (a cgroup). Inside it the program keeps as
 
 The training needs about **750 MB** (5 epochs x 150 MB); `compose.yaml` gives the container only **300 MB** (`mem_limit: 300m`). When the next epoch pushed memory past the fence, the kernel's OOM killer sent SIGKILL. Python never saw it coming, so there was no error in the logs. Docker recorded it as `OOMKilled=true`, exit code 137.
 
-Calibration: a bare Python process on this image uses about 10 MB, so the kill is certain on any laptop: 750 MB needed against a 300 MB fence. On Docker Desktop the container may also borrow some swap space, so it can get one epoch further before the kill; it never gets to the end.
+Calibration: a bare Python process on this image uses about 10 MB, so epoch 1 fits (about 160 MB) and epoch 2 (about 310 MB) does not fit in 300 MB: the kill comes during epoch 2, never at the end. `memswap_limit: 300m` (same as `mem_limit`) means the container cannot borrow swap space either; without it, Docker Desktop would let it spill into swap and die a few epochs later, and the epoch would differ between machines.
 </details>
 
 ## 🔧 Fix it
@@ -138,39 +136,43 @@ What changed: the memory limit, nothing else. `fix/` holds the corrected copy:
 diff break/compose.yaml fix/compose.yaml
 ```
 ```
-8c8
+8,9c8,9
 <     mem_limit: 300m
+<     memswap_limit: 300m
 ---
 >     mem_limit: 1g
+>     memswap_limit: 1g
 ```
-By hand: open `work/compose.yaml` in your editor and change `300m` to `1g` (1 GB, comfortably above 750 MB). Then tell Compose to apply the file; it sees the container's settings changed and re-creates it (the image is unchanged, so there is nothing to rebuild):
+By hand: open `work/compose.yaml` in your editor and change both `300m` lines to `1g` (1 GB, comfortably above 750 MB). Then run the same command `fix.sh` prints; Compose sees the container's settings changed and re-creates it (the image is unchanged, so the build step is instant):
 ```bash
-docker compose -f work/compose.yaml up -d
+docker compose -f work/compose.yaml up -d --build
 ```
 ```
+ Image d06-trainer:1.0 Building 
+ Image d06-trainer:1.0 Built 
  Container d06-trainer-1 Recreate 
  Container d06-trainer-1 Recreated 
  Container d06-trainer-1 Starting 
  Container d06-trainer-1 Started 
 ```
-Or run `./fix/fix.sh`, which does the same from the corrected files (`./fix/fix.sh`; it makes a fresh `work/` and prints its commands).
+Or run `./fix/fix.sh`, which does the same from the corrected files (it makes a fresh `work/` and prints its commands).
 
 ## ✅ Verify it yourself
-Right after `up -d`, watch the memory live (3 seconds in, mid-training):
+Right after `up -d --build`, watch the memory live (3 seconds in, mid-training):
 ```bash
 sleep 3; docker stats --no-stream d06-trainer-1
 ```
 ```
 CONTAINER ID   NAME            CPU %     MEM USAGE / LIMIT   MEM %     NET I/O         BLOCK I/O     PIDS
-472d3b40da3c   d06-trainer-1   3.30%     604.9MiB / 1GiB     59.08%    1.17kB / 126B   0B / 28.7kB   1
+8190b46f2aea   d06-trainer-1   3.85%     604.9MiB / 1GiB     59.08%    1.17kB / 126B   0B / 0B   1
 ```
 (Your numbers will differ a little.) Already past the old 300 MiB limit and happily running. The training takes about 5 seconds, so if you are slow the container will have finished and `docker stats` shows zeros: that is fine, read the proof instead:
 ```bash
 docker compose -f work/compose.yaml ps -a
 ```
 ```
-NAME            IMAGE             COMMAND               SERVICE   CREATED         STATUS                     PORTS
-d06-trainer-1   d06-trainer:1.0   "python trainer.py"   trainer   9 seconds ago   Exited (0) 3 seconds ago   
+NAME            IMAGE             COMMAND               SERVICE   CREATED          STATUS                     PORTS
+d06-trainer-1   d06-trainer:1.0   "python trainer.py"   trainer   10 seconds ago   Exited (0) 3 seconds ago   
 ```
 ```bash
 docker compose -f work/compose.yaml logs trainer
@@ -189,7 +191,7 @@ docker inspect -f '{{.State.OOMKilled}} {{.State.ExitCode}}' d06-trainer-1
 ```
 false 0
 ```
-Not killed, and a clean exit code **0**. (The outputs above come from one real run of the steps in this README, with pauses between commands; the second `up -d` printed no build output the second time because nothing was rebuilt.)
+Not killed, and a clean exit code **0**. (The outputs above come from one real run of the steps in this README, with pauses between commands; the build lines in the fix output were instant because the image was cached.)
 
 ## 🎯 Key takeaways
 - A `compose.yaml` is `docker run` flags written down; `docker compose config` shows what Compose will really use.
