@@ -183,4 +183,4 @@ Our two labels sit next to one the base image already had. A Dockerfile that sta
 (It removes the container, the `d05-tools` image and `work/`.)
 
 ## Next →
-[D06](../06-jupyter-oom-killed/README.md): *Your AI model was a few epochs into training. Then it vanished. No error. No goodbye.*
+[D06](../06-ai-trainer-oom-killed/README.md): *Your AI model was a few epochs into training. Then it vanished. No error. No goodbye.*

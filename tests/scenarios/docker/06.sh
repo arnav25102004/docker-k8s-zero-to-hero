@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Spec for scenario D06 (06-jupyter-oom-killed). Sourced by tests/scenarios/docker.sh.
+# Spec for scenario D06 (06-ai-trainer-oom-killed). Sourced by tests/scenarios/docker.sh.
 
 broken() {
   assert_eq "$(docker inspect -f '{{.State.OOMKilled}} {{.State.ExitCode}}' d06-trainer-1 2>/dev/null)" "true 137" "d06-trainer-1 was OOM-killed (exit 137)"
