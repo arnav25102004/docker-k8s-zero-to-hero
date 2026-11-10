@@ -8,6 +8,14 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 require_test_cluster() {
   local ctx
   ctx=$(kubectl config current-context 2>/dev/null)
+  if [ -n "${Z2H_DRY_RUN_CONTEXT:-}" ]; then
+    if [ "$ctx" = "$Z2H_DRY_RUN_CONTEXT" ]; then
+      printf '⚠ Dry run on context "%s": scenario namespaces (k-NN-*) on it will be deleted and recreated.\n' "$ctx" >&2
+      return 0
+    fi
+    printf 'Refusing to run: Z2H_DRY_RUN_CONTEXT is "%s" but the current context is "%s".\n' "$Z2H_DRY_RUN_CONTEXT" "${ctx:-none}" >&2
+    return 1
+  fi
   if [ "$ctx" != "kind-z2h-test" ]; then
     printf 'Refusing to run: current kubectl context is "%s", not "kind-z2h-test".\n' "${ctx:-none}" >&2
     printf 'Create the test cluster and use it:\n  tests/scenarios/k8s-cluster.sh up\n  export KUBECONFIG=$HOME/.kube/z2h-test.config\n' >&2
