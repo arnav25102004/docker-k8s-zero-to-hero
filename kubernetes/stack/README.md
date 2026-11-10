@@ -17,3 +17,4 @@ kubectl port-forward svc/frontend 8080:80
 kubectl port-forward --address 0.0.0.0 svc/frontend 8080:80
 # share http://<your-laptop-ip>:8080   (macOS: ipconfig getifaddr en0)
 ```
+⚠️ `--address 0.0.0.0` opens the app to everyone on the same network. Use it only on a network you trust, and press Ctrl+C when the demo is over. (On a playground such as Killercoda or iximiuz, `--address 0.0.0.0` is how the platform's port link reaches it.)

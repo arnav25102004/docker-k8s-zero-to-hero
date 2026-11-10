@@ -58,13 +58,14 @@ Open it for the whole room:
 kubectl -n shop port-forward --address 0.0.0.0 svc/frontend 8080:80
 # big screen: http://localhost:8080 · phones: http://<laptop-ip>:8080
 ```
+⚠️ `--address 0.0.0.0` opens the app to everyone on the same network. Use it only on a network you trust, and press Ctrl+C when the demo is over. (On a playground such as Killercoda or iximiuz, `--address 0.0.0.0` is how the platform's port link reaches it.)
 Or through the Gateway (needs Envoy Gateway from [K12 Step 1](../12-gateway-ingress/README.md)):
 ```bash
 kubectl apply -f kubernetes/18-capstone/gateway.yaml
 kubectl -n shop wait gateway/shop --for=condition=Accepted --timeout=2m
 kubectl wait -n envoy-gateway-system --for=condition=Ready pod -l gateway.envoyproxy.io/owning-gateway-name=shop --timeout=2m
 SVC=$(kubectl get svc -n envoy-gateway-system -l gateway.envoyproxy.io/owning-gateway-name=shop -o jsonpath='{.items[0].metadata.name}')
-kubectl -n envoy-gateway-system port-forward --address 0.0.0.0 svc/$SVC 8888:80
+kubectl -n envoy-gateway-system port-forward svc/$SVC 8888:80
 ```
 
 ## Part 3: 🔥 The Gauntlet (45 min)

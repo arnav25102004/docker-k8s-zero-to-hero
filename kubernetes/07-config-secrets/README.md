@@ -23,8 +23,9 @@ kubectl apply -f kubernetes/stack/
 kubectl apply -f kubernetes/07-config-secrets/config.yaml
 kubectl apply -f kubernetes/07-config-secrets/deployment.yaml
 kubectl rollout status deploy/api
-kubectl port-forward --address 0.0.0.0 svc/frontend 8080:80
+kubectl port-forward svc/frontend 8080:80
 ```
+(On a playground such as Killercoda or iximiuz, add `--address 0.0.0.0` so the platform's port link can reach it.)
 The page shows **Cats vs Dogs, v1.1.0**, values that came from the ConfigMap.
 
 ### Step 2: How the app receives config

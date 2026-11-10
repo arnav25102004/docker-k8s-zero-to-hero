@@ -55,8 +55,9 @@ kubectl wait -n envoy-gateway-system --for=condition=Ready pod \
 ### Step 3: Open the Gateway
 ```bash
 ENVOY_SVC=$(kubectl get svc -n envoy-gateway-system -l gateway.envoyproxy.io/owning-gateway-name=shop-gateway -o jsonpath='{.items[0].metadata.name}')
-kubectl -n envoy-gateway-system port-forward --address 0.0.0.0 svc/$ENVOY_SVC 8888:80
+kubectl -n envoy-gateway-system port-forward svc/$ENVOY_SVC 8888:80
 ```
+(On a playground such as Killercoda or iximiuz, add `--address 0.0.0.0` so the platform's port link can reach it.)
 Open **http://localhost:8888**. *(Docker Desktop also publishes it on `http://localhost` directly: the Service gets `EXTERNAL-IP localhost`.)*
 
 ### Step 4: 🦄 Watch the canary

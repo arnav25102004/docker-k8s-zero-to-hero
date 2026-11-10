@@ -66,11 +66,16 @@ kubectl get pods -l app=api -o custom-columns=NAME:.metadata.name,IP:.status.pod
 The endpoint IPs are exactly the Pod IPs, and the list updates itself as Pods come and go.
 
 ### Step 4: 📱 Let the room in
-Option A, port-forward on all interfaces (works on every cluster):
+Option A, port-forward (works on every cluster). On your own screen only:
+```bash
+kubectl port-forward svc/frontend 8080:80
+```
+To share it with phones on the same Wi-Fi, listen on all interfaces instead:
 ```bash
 kubectl port-forward --address 0.0.0.0 svc/frontend 8080:80
 # share http://<laptop-ip>:8080   (macOS: ipconfig getifaddr en0)
 ```
+⚠️ `--address 0.0.0.0` opens the app to everyone on the same network. Use it only on a network you trust, and press Ctrl+C when the demo is over. (On a playground such as Killercoda or iximiuz, `--address 0.0.0.0` is how the platform's port link reaches it.)
 Option B, **NodePort**:
 ```bash
 kubectl apply -f kubernetes/05-services/nodeport.yaml
