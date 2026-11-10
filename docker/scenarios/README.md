@@ -71,7 +71,35 @@ Docker not running? Start Docker Desktop, wait for the whale to settle, then ste
 
 ## Playground dry-run checklist
 
-Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested macOS (Docker Desktop, arm64) only.
+### Run the automated dry run (about 20 minutes)
+
+Do this once on every platform you will teach from, a day or more before the event. It runs every scenario twice (break, check broken, fix, check fixed, cleanup) and prints ✅ or ❌ per scenario.
+
+1. Get the repo onto that machine:
+   ```bash
+   git clone https://github.com/vellankikoti/docker-k8s-zero-to-hero.git && cd docker-k8s-zero-to-hero
+   ```
+2. **Git Bash on Windows only:** run this once in the terminal. Without it, Git Bash rewrites paths like `/data` and some scenarios fail for the wrong reason.
+   ```bash
+   export MSYS_NO_PATHCONV=1
+   ```
+3. Check the tools (Docker, `docker compose`, `curl`, `bash`). The last lines should say `0 failed`; lines marked `•` are only tips:
+   ```bash
+   ./scripts/check-prereqs.sh
+   ```
+4. Run all 15 scenarios:
+   ```bash
+   ./tests/scenarios/docker.sh 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+   ```
+5. The last lines are a summary, one line per scenario. All ✅ means you can tick that platform's column in the table below. Finish with `./labs.sh docker clean`.
+
+**If a scenario shows ❌:** run it again on its own (for example `./tests/scenarios/docker.sh 06`). A second ❌ is real. The lines just above `FAILED at step:` say which check failed. Then open that scenario's README and run it by hand to see what the room would see. The usual causes are in "Known platform-sensitive scenarios" below.
+
+**Not blocked by:** your own containers. The tests touch only names that start with `dNN-` / `dNN_` and never prune anything else.
+
+### Results
+
+Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested macOS (Docker Desktop, arm64) only, which is not a column here; all 15 passed there.
 
 | Scenario | Killercoda | iximiuz | Play with Docker | Linux | WSL2 | Git Bash |
 |----------|:---:|:---:|:---:|:---:|:---:|:---:|

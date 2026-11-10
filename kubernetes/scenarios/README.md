@@ -104,40 +104,87 @@ Stay calm. Everything lives in the `k-NN-...` namespaces, except K16's node tain
 
 ## Playground dry-run checklist
 
-Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested **kind only** (3 nodes and 1 node, on macOS arm64); every other cell is still to be ticked by an instructor.
+### Run the automated dry run (about 45 minutes)
+
+Do this once on every platform you will teach from, a day or more before the event. It runs each scenario twice (break, check broken, fix, check fixed, cleanup) and prints ✅ or ❌ per scenario.
+
+> ⚠️ Use a cluster you can throw away (a fresh playground, a new minikube or kind cluster). The dry run deletes and recreates every `k-NN-…` namespace, and K16 and K25 change the whole cluster (they undo it at the end).
+
+1. Get the repo onto that machine and open a terminal in it:
+   ```bash
+   git clone https://github.com/vellankikoti/docker-k8s-zero-to-hero.git && cd docker-k8s-zero-to-hero
+   ```
+2. Check the tools (`kubectl`, `bash`, `curl`; Docker only for the preload). The last lines should say `0 failed`; lines marked `•` are only tips:
+   ```bash
+   ./scripts/check-prereqs.sh
+   ```
+3. Check that `kubectl` talks to the cluster you mean to test, and note its exact name:
+   ```bash
+   kubectl config current-context
+   ```
+4. **Tell the test harness that this cluster may be used.** By default it refuses every cluster except the build machine's throwaway `kind-z2h-test`, so that it can never touch a real cluster by mistake. You unlock it for one cluster by naming it exactly:
+   ```bash
+   export Z2H_DRY_RUN_CONTEXT="$(kubectl config current-context)"
+   ```
+5. Run everything except K16 and K25:
+   ```bash
+   ./tests/scenarios/k8s.sh 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 17 18 19 20 21 22 23 24 26 27 28 29 30
+   ```
+6. Run K16 and K25 on their own, one after the other (they change every node, and install metrics-server only if the cluster has none):
+   ```bash
+   ./tests/scenarios/k8s.sh 16
+   ```
+   ```bash
+   ./tests/scenarios/k8s.sh 25
+   ```
+7. All ✅ in the summaries means you can tick that platform's column in the table below. Lock the harness again and clean up:
+   ```bash
+   unset Z2H_DRY_RUN_CONTEXT
+   ```
+   ```bash
+   ./labs.sh k8s clean
+   ```
+
+**If you see `Refusing to run`:** step 4 was skipped, or the current context changed since. Repeat steps 3 and 4. The harness only runs when `Z2H_DRY_RUN_CONTEXT` equals the current context exactly.
+
+**If a scenario shows ❌:** run it again on its own (for example `./tests/scenarios/k8s.sh 13`). A second ❌ is real. The lines just above `FAILED at step:` say which check failed. Then run that scenario by hand from its README to see what the room would see. The usual causes are in "Known platform-sensitive scenarios" below (for example, K13 needs a cluster that enforces NetworkPolicy).
+
+### Results
+
+Tick each cell after you have run the whole scenario (break, fix, cleanup) on that platform. The build machine tested **kind only** (3 nodes and 1 node, on macOS arm64), so the kind column is ticked; every other cell is still to be ticked by an instructor.
 
 | Scenario | kind | minikube | Docker Desktop | Killercoda | iximiuz | WSL2 |
 |----------|:---:|:---:|:---:|:---:|:---:|:---:|
-| K01 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K02 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K03 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K04 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K05 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K06 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K07 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K08 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K09 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K10 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K11 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K12 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K13 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K14 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K15 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K16 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K17 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K18 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K19 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K20 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K21 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K22 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K23 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K24 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K25 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K26 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K27 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K28 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K29 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K30 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K01 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K02 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K03 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K04 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K05 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K06 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K07 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K08 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K09 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K10 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K11 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K12 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K13 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K14 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K15 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K16 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K17 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K18 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K19 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K20 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K21 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K22 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K23 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K24 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K25 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K26 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K27 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K28 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K29 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K30 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

@@ -13,6 +13,7 @@ cd "$REPO" || exit 1
 if [ -z "${Z2H_DRY_RUN_CONTEXT:-}" ] && [ "${KUBECONFIG:-}" != "$HOME/.kube/z2h-test.config" ]; then
   printf 'Refusing to run: KUBECONFIG is "%s", not the throwaway cluster'"'"'s (context kind-z2h-test).\n' "${KUBECONFIG:-}" >&2
   printf 'Create and use the test cluster:\n  tests/scenarios/k8s-cluster.sh up\n  export KUBECONFIG=$HOME/.kube/z2h-test.config\n' >&2
+  printf 'Dry run on a playground or another throwaway cluster instead (see kubernetes/scenarios/README.md, "Playground dry-run checklist"):\n  export Z2H_DRY_RUN_CONTEXT="$(kubectl config current-context)"\n' >&2
   exit 1
 fi
 # shellcheck source=k8s-lib.sh
