@@ -26,6 +26,8 @@ Think of a train ticket: the station (registry), the train (repository) and the 
 - **Kubernetes `ErrImagePull` / `ImagePullBackOff`**: same cause, different name, on a cluster (SRE).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 Every command in this README runs from the scenario folder (the one holding `break/`, `fix/` and this file). You get a folder with a `Dockerfile` and `hello.html`. Make your own working copy and build it, exactly like Ravi did (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
 ./cleanup.sh
@@ -36,7 +38,7 @@ Or the one-line shortcut, which makes `work/` for you and prints every Docker co
 ```bash
 ./break/break.sh
 ```
-(Git Bash on Windows: the scripts set `MSYS_NO_PATHCONV=1` for you; if you type Docker commands with paths yourself, set it first.) `docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
+`docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
 
 ## 🔍 Investigate
 Guess first, then run these **in order**. Run them from the scenario folder, the same place you ran `./break/break.sh`.

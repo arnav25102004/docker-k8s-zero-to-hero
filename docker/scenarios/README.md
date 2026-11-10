@@ -94,7 +94,7 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 **Known platform-sensitive scenarios.** Look at these first:
 
 - **D05 and D10 need Docker Hub reachable:** D05's lesson needs the registry to answer (offline it shows a DNS error instead of "not found"); D10 pulls nginx on first run.
-- **D06 OOM:** the memory limit and exit code 137 behave the same on cgroup v1 and v2, but `docker inspect` / `docker stats` numbers differ a little. On Play with Docker and older hosts (cgroup v1) check that `OOMKilled` shows `true`.
+- **D06 OOM:** the memory limit and exit code 137 behave the same on cgroup v1 and v2, but `docker inspect` / `docker stats` numbers differ a little. On Play with Docker and older hosts (cgroup v1) check that `OOMKilled` shows `true`. Some Linux hosts can't limit swap (Docker warns: *your kernel does not support swap limit capabilities*). The training is still killed, but possibly at a later epoch than the README shows.
 - **D09 DNS error wording:** the exact message from the failed name lookup differs between Docker versions and base images. The idea (name not found on the default bridge) is the same.
 - **D11 curl error wording:** "Connection refused" vs "Empty reply from server" depends on the curl and Docker version. Check what your screen shows before the class.
 - **D13 bind mount path on WSL:** the repo must live in the Linux filesystem (`~/…`). From `/mnt/c/…` the mount can be slow or behave differently.

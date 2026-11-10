@@ -24,6 +24,8 @@ One more plus of Compose: the Excalidraw image reference is long (`latest@sha256
 - **A hard-coded IP in a config file** that worked yesterday and is wrong after a restart (everyone).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 Stay in this scenario's folder (`docker/scenarios/09-status-board-no-dns`) for everything below. Copy the files you will work on into a scratch folder `work/`, then let Compose build the board and start the three services (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
 ./cleanup.sh

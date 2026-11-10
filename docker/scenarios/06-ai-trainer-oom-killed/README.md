@@ -20,6 +20,8 @@ It's exam week at Christ University and your final-year project is a "model" tha
 - **Data jobs on big files**: a nightly batch loads a file that grew this month (data engineer).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 `break/` holds three files: `trainer.py` (the "training"), `Dockerfile` (how to package it) and `compose.yaml` (how to run it). Run everything from this scenario folder. Make your own working copy and start it; `docker compose -f work/compose.yaml up -d --build` builds the image and starts the container in the background (`-f` says which compose file to use; `build: .` inside it is relative to the compose file's own folder, `work/`, not to the folder you type from). `./cleanup.sh` first is safe at any time and makes a repeat run start clean:
 ```bash
 ./cleanup.sh
@@ -30,7 +32,7 @@ Or the one-line shortcut, which does the same and prints every command it runs:
 ```bash
 ./break/break.sh
 ```
-Real output of `./break/break.sh` (shortened: the build log and some repeated lines are left out):
+Real output of `./break/break.sh` (shortened: the build log is left out, and Compose 5 may print some lines twice):
 ```
 ✅ Scenario d06 cleaned up
 ▶ $ rm -rf work && cp -R break work

@@ -27,6 +27,9 @@ Every container gets its **own private network**, like its own flat in an apartm
 - **"Works on my machine"** during a Friday deploy, when the only difference is where the dependency lives (SRE).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+> 🐢 First run on this machine? `docker run` first prints `Unable to find image '…' locally` and a few download lines, then the container ID. That's normal, not an error.
+
 Here are the files. `break/` holds your own copy of the voting API: `Dockerfile`, `app.py` and `static/`. They are copied there on purpose, so you own a complete project that builds from one folder (the source of truth for the app is `apps/api`; the `Dockerfile` here is a copy with a few lines of its own). Type these yourself, all from this scenario folder (`./cleanup.sh` first is safe at any time and makes a repeat run start clean):
 ```bash
 ./cleanup.sh
@@ -40,7 +43,7 @@ Or use the one-line shortcut, which prints (`▶ $`) every command it runs, the 
 ```bash
 ./break/break.sh
 ```
-(Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` first, so paths are not rewritten.) The room should see: open http://localhost:8103 (playground: the port 8103 URL), press a vote button, and the status bar blinks and the feed shows "Request failed: [Errno 111] Connection refused".
+The room should see: open http://localhost:8103 (playground: the port 8103 URL), press a vote button, and the status bar blinks and the feed shows "Request failed: [Errno 111] Connection refused".
 
 The real run, from `./break/break.sh` (shortened; the build prints more lines the first time because nothing is cached):
 ```

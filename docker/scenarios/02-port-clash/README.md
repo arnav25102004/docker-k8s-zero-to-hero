@@ -28,6 +28,9 @@ browser ──▶ localhost:8102 ──(-p 8102:80)──▶ container, port 80
 - **Local Postgres vs Docker Postgres** both wanting 5432 on a laptop (developer).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+> 🐢 First run on this machine? `docker run` first prints `Unable to find image '…' locally` and a few download lines, then the container ID. That's normal, not an error.
+
 Type these two lines yourself, one after the other. The first starts Excalidraw. The second starts IT-Tools. (The Excalidraw image name is long on purpose: it is pinned to one exact version, so copy and paste it from here.)
 
 ```bash

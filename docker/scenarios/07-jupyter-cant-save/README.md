@@ -26,6 +26,8 @@ Think of a hostel with room keys. A room keyed to one person opens only for that
 - **Kubernetes pods** that mount the same persistent volume: the same "Permission denied" with a different YAML (SRE, platform team).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 By hand: copy the `break/` folder to `work/` (this is the folder you will edit), then start it. (`./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
 ./cleanup.sh

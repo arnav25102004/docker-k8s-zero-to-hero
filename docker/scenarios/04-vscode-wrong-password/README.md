@@ -24,13 +24,15 @@ Think of a breakfast cafe: the kitchen (the app) can cook anything, but it only 
 - **Kubernetes Secrets or ConfigMaps not mounted**: the pod runs, but the setting never arrived (SRE, platform team).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+> 🐢 First run on this machine? `docker run` first prints `Unable to find image '…' locally` and a few download lines, then the container ID. That's normal, not an error.
+
 Work from this scenario's folder (`docker/scenarios/04-vscode-wrong-password`). The settings file `break/app.env` is yours to read. First make your own working copy (`./cleanup.sh` first is safe at any time and makes a repeat run start clean), then start VS Code with it:
 ```bash
 ./cleanup.sh
 rm -rf work && cp -R break work
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
-(Git Bash on Windows: prefix with `MSYS_NO_PATHCONV=1` if a path gets mangled.)
 
 Shortcut: `./break/break.sh` does the same and prints every command it runs. It always starts from a fresh `work/` (which also holds a copy of the script; ignore it).
 

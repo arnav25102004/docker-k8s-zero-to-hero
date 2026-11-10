@@ -26,6 +26,8 @@ Think of the **floor manager** of a hotel who knocks on a guest's door every few
 - **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([K06](../../../kubernetes/scenarios/06-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([K07](../../../kubernetes/scenarios/07-showdown-slow-start/README.md)).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 You get a folder `break/` with the `Dockerfile` (and the `break.sh` shortcut). Make your own working copy, build it and run it, exactly like the team did. (`rm -rf work` first, so a leftover copy never gets in the way; `./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
 ./cleanup.sh
@@ -37,7 +39,6 @@ Or the one-line shortcut, which prints every Docker command it runs:
 ```bash
 ./break/break.sh
 ```
-(Git Bash on Windows: the scripts set `MSYS_NO_PATHCONV=1` for you; if you type Docker commands with paths yourself, set it first.)
 
 Laptop: http://localhost:8108 shows IT-Tools. Playground: open the port 8108 URL. Docker needs a few failed checks before it gives its verdict, so wait about 10 seconds. (The script waits for you.)
 

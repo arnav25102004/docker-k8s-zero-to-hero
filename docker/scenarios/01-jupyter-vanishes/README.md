@@ -27,6 +27,8 @@ The cook leaves with a number, the **exit code**:
 - **CI pipelines:** a job "passes" in 0.1 seconds because the container exited, and nobody read the log (DevOps).
 
 ## 💥 Break it
+> 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).
+
 You can do it by hand. Stay in this scenario's folder (`docker/scenarios/01-jupyter-vanishes`) for everything below. Make a fresh copy of the files you will work on in a scratch folder `work/`, build the image from it, and run it. (`./cleanup.sh` first is safe at any time and makes a repeat run start clean.)
 ```bash
 ./cleanup.sh
