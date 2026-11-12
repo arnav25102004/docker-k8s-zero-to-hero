@@ -78,11 +78,11 @@ kubectl describe pod game-6f85c5c5bf-5mwqs -n k-16-vip-node | grep -A6 '^Events'
 Events:
   Type     Reason            Age   From               Message
   ----     ------            ----  ----               -------
-  Warning  FailedScheduling  13s   default-scheduler  0/3 nodes are available: 3 node(s) had untolerated taint {z2h-vip: true}. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling  13s   default-scheduler  0/3 nodes are available: 3 node(s) had untolerated taint(s). preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
 ```
-(Names, ages and the node count will differ: it says `0/1` on a one-node cluster. The exact wording changes between Kubernetes versions: older ones say `had taint {z2h-vip: true}, that the pod didn't tolerate`. If the message mentions a control-plane taint instead, keep reading: the idea is the same.) The scheduler checked **every** node and each one has a taint this Pod doesn't tolerate: `z2h-vip: true`.
+(Names, ages and the node count will differ: it says `0/1` on a one-node cluster.) The scheduler checked **every** node and each one has a taint this Pod doesn't tolerate. Current Kubernetes (1.37) only says `untolerated taint(s)` and does not name the taint; older versions printed it, as in `had untolerated taint {z2h-vip: true}`. If the message mentions a control-plane taint as well, keep reading: the idea is the same. So the event tells you **taints** are the problem, and the nodes will tell you **which**.
 
-**3. What are the nodes refusing?** The event names the taint. Confirm it on the nodes themselves.
+**3. What are the nodes refusing?** The event says a taint is in the way, not which one. Ask the nodes themselves.
 ```bash
 kubectl describe nodes | grep -A2 Taints
 ```

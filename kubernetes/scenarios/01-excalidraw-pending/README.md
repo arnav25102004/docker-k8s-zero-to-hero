@@ -79,7 +79,7 @@ Status:           Pending
 Events:
   Type     Reason            Age   From               Message
   ----     ------            ----  ----               -------
-  Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 Insufficient memory. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+  Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 Insufficient memory. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
 ```
 (shortened) `Node: <none>`: nobody picked a node. The scheduler's own words are `Insufficient memory`. Your numbers will differ: on one-node clusters (minikube, Docker Desktop) it says `0/1 nodes are available`, and the control-plane taint part appears only on multi-node clusters. Look for **Insufficient memory**.
 
