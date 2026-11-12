@@ -158,6 +158,8 @@ kubectl get deploy showdown -n k-26-init-stuck -o yaml | grep -A8 'initContainer
 The Pod has an init container, `wait-for-redis`, whose job is to hold the app back until Redis accepts connections. Its loop tries to connect to `redsi` on port 6379, a typo of `redis`, so the connection never succeeds and the loop never exits. Kubernetes only starts the app container after every init container has exited successfully, so the app never started: no logs, no restarts, just `Init:0/1`. Redis itself, the Service and the app code were all fine.
 
 If an init container had *failed* (exited with an error), the Pod's `restartPolicy` would retry it, and you would see `Init:Error` and then `Init:CrashLoopBackOff`. This one never exits at all, so it sits quietly at `Init:0/1`.
+
+![Diagram: the init container waits for a Service called redsi that does not exist, so the app container never starts](../images/k26-init-container-wait.svg)
 </details>
 
 ## 🔧 Fix it
