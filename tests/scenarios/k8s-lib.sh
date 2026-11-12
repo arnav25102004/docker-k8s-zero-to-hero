@@ -33,7 +33,7 @@ require_test_cluster() {
 # then prints the reason on stderr and returns 1. Wait and tries: Z2H_POD_WAIT (90 s) and
 # Z2H_POD_TRIES (3).
 in_cluster_pod() {
-  local ns="$1" ov="$2" name i phase out why try tries="${Z2H_POD_TRIES:-3}" wait="${Z2H_POD_WAIT:-90}"
+  local ns="$1" ov="$2" name i phase out why runerr try tries="${Z2H_POD_TRIES:-3}" wait="${Z2H_POD_WAIT:-90}"
   shift 2
   # A namespace that enforces Pod Security "restricted" (K44, K45) refuses a plain helper Pod,
   # so give the helper the same checklist the learner's Pods carry.
@@ -42,15 +42,18 @@ in_cluster_pod() {
   fi
   for try in $(seq 1 "$tries"); do
     name="ic-$$-$RANDOM"
+    runerr=""
     if [ -n "$ov" ] && [ "$#" -gt 0 ]; then
-      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" --command -- "$@" >/dev/null 2>&1
+      runerr=$(kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" --command -- "$@" 2>&1 >/dev/null)
     elif [ -n "$ov" ]; then
-      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" >/dev/null 2>&1
+      runerr=$(kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" 2>&1 >/dev/null)
     elif [ "$#" -gt 0 ]; then
-      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --command -- "$@" >/dev/null 2>&1
+      runerr=$(kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --command -- "$@" 2>&1 >/dev/null)
     else
-      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 >/dev/null 2>&1
+      runerr=$(kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 2>&1 >/dev/null)
     fi
+    # "Warning: would violate PodSecurity" lines are not errors; keep only a real failure.
+    runerr=$(printf '%s' "$runerr" | grep -v '^Warning' | head -n 3 | tr '\n' ' ')
     i=0
     phase=""
     while [ "$i" -lt "$wait" ]; do
@@ -68,6 +71,7 @@ in_cluster_pod() {
         ;;
     esac
     why=$(kubectl get pod "$name" -n "$ns" -o jsonpath='{.status.phase}{" "}{.status.containerStatuses[0].state.waiting.reason}{" "}{.status.conditions[?(@.type=="PodScheduled")].message}' 2>/dev/null)
+    [ -n "$runerr" ] && why="kubectl run said: $runerr"
     kubectl delete pod "$name" -n "$ns" --now --wait=false >/dev/null 2>&1
   done
   printf 'in_cluster_pod: the helper Pod never finished in namespace %s after %s tries (last state: %s)\n' "$ns" "$tries" "${why:-unknown}" >&2
