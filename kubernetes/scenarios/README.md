@@ -1,8 +1,8 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-39 stage demos: 30 main scenarios, two 3-problem practice lanes (K31 to K36) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+45 stage demos: 30 main scenarios, four 3-problem practice lanes (K31 to K36, K40 to K45) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K39 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K45 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
 
 ## The lineup
 
@@ -47,6 +47,12 @@
 | K37 | [The Pod that will not leave](37-pod-that-will-not-leave/README.md) | an old stall (terminal only) | *You said delete. Kubernetes said yes. The Pod did not get the message.* | - | 17 MB |
 | K38 | [Applied here, looking there](38-applied-here-looking-there/README.md) | Night canteen | *The deploy said "created". The cluster says "No resources found". Both are telling the truth.* | `9238` | 21 MB |
 | K39 | [The robot that cannot move the stalls](39-robot-that-cannot-move-the-stalls/README.md) | Idli stall | *Every night the maintenance robot asks to move one Pod. Every night the answer is no.* | `9239` | 21 MB |
+| K40 | [The stall that asked for too much](40-stall-that-asked-for-too-much/README.md) | Chaat stall (practice) | *The Pod asked for a gigabyte. The kitchen rule said: 128 megabytes, no more.* | `9240` | 17 MB |
+| K41 | [The autoscaler pointing at nobody](41-autoscaler-pointing-at-nobody/README.md) | Lassi stall (practice) | *The lassi stall is fine. The autoscaler is watching a stall that does not exist.* | `9241` | 17 MB |
+| K42 | [Who gets evicted first](42-who-gets-evicted-first/README.md) | Three little stalls (boss, terminal only) | *When the node runs out of memory, Kubernetes has a list. You decide where each Pod stands on it.* | - | 17 MB |
+| K43 | [The maintenance van wants the master key](43-maintenance-van-wants-the-master-key/README.md) | Chai van (practice) | *The van only wanted to serve chai. It asked for a key to the entire market.* | `9243` | 17 MB |
+| K44 | [The checklist](44-the-checklist/README.md) | Kitchen cart (practice) | *The gate does not say "no". It hands you a checklist, and your kitchen cart ticks none of it.* | `9244` | 17 MB |
+| K45 | [The locked-down kitchen](45-the-locked-down-kitchen/README.md) | Kitchen (boss) | *The paperwork is perfect. The cook still cannot start. Welcome to the boss level.* | `9245` | 42 MB |
 
 ### 🏋️ Practice lanes
 Reading about a fix is not the same as finding one alone. A **practice lane** takes one idea from a scenario you have already done (the *worked example*) and gives you more problems on the same idea, each with less help than the last. K31 to K33 are the first lane: **"Services find Pods"**, after [K04](04-it-tools-no-endpoints/README.md).
@@ -66,6 +72,24 @@ A second lane, **"Ready or alive?"**, follows the same pattern after [K06](06-ka
 | Guided | [K34](34-doorbell-on-the-wrong-door/README.md) | questions and a hint ladder |
 | Mostly solo | [K35](35-biryani-that-needs-20-seconds/README.md) | questions only |
 | Boss | [K36](36-two-probes-two-mistakes/README.md) | no hints for the first 5 minutes |
+
+Two more lanes cover resources and security. **"Resources"**, after [K08](08-ai-trainer-oomkilled/README.md), [K20](20-surprise-limitrange-oom/README.md) and [K25](25-showdown-hpa-not-scaling/README.md):
+
+| Step | Scenario | You get |
+|---|---|---|
+| Worked examples | [K08](08-ai-trainer-oomkilled/README.md), [K20](20-surprise-limitrange-oom/README.md), [K25](25-showdown-hpa-not-scaling/README.md) | every step explained |
+| Guided | [K40](40-stall-that-asked-for-too-much/README.md) | questions and a hint ladder |
+| Mostly solo | [K41](41-autoscaler-pointing-at-nobody/README.md) | questions only |
+| Boss | [K42](42-who-gets-evicted-first/README.md) | no hints for the first 5 minutes |
+
+**"Security"**, after [K21](21-notice-board-runasnonroot/README.md) and [K22](22-notice-board-readonly-fs/README.md):
+
+| Step | Scenario | You get |
+|---|---|---|
+| Worked examples | [K21](21-notice-board-runasnonroot/README.md), [K22](22-notice-board-readonly-fs/README.md) | every step explained |
+| Guided | [K43](43-maintenance-van-wants-the-master-key/README.md) | questions and a hint ladder |
+| Mostly solo | [K44](44-the-checklist/README.md) | questions only |
+| Boss | [K45](45-the-locked-down-kitchen/README.md) | no hints for the first 5 minutes |
 
 Every practice scenario has a `./check.sh` in its folder. Run it whenever you like: it only looks, never changes anything, and tells you whether you are done.
 
@@ -110,6 +134,9 @@ Things to know before you start:
 - **K30 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the others, when the class has seen each kind of fault on its own.
 - **K37 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.sh` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
 - **K38 changes your kubeconfig's current namespace** (that is its fix). `./cleanup.sh` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
+- **K43 to K45 label their namespace with a Pod Security level.** Pod Security Admission is built into Kubernetes 1.25 and later, so it needs nothing installed. K45 also pulls two small nginx images.
+- **K42 only reads Pod classes.** It never starves the node, so it is safe on a one-node cluster.
+- **K41 needs no metrics-server.** The autoscaler's complaint is about its target, which every cluster can show.
 - **K39 sends one eviction request, not a drain.** A real `kubectl drain` would cordon a whole node, which is unsafe on a one-node Docker Desktop or minikube. The robot asks for one Pod only, so it is safe everywhere.
 - **Scenarios behave the same on 1 node and 3 nodes** (minikube and Docker Desktop are one node; the course's kind config is three).
 
@@ -227,6 +254,12 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K37 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K38 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K39 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K40 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K41 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K42 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K43 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K44 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K45 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

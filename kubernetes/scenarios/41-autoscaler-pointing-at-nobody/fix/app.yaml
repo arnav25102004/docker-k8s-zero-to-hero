@@ -1,0 +1,63 @@
+# K41 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lassi
+  namespace: k-41-hpa-target
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lassi
+  template:
+    metadata:
+      labels:
+        app: lassi
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🥛 Sweet lassi, extra cold."]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            periodSeconds: 2
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lassi
+  namespace: k-41-hpa-target
+spec:
+  selector:
+    app: lassi
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lassi
+  namespace: k-41-hpa-target
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lassi
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

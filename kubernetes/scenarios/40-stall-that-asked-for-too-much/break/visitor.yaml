@@ -1,0 +1,27 @@
+# A small visitor that asks the chaat stall every 2 seconds: the live signal on stage.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-40-limit-max
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      resources:
+        requests: {cpu: 5m, memory: 8Mi}
+        limits: {cpu: 50m, memory: 16Mi}
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            r=$(wget -q -T 2 -O - http://chaat 2>/dev/null)
+            if [ -n "$r" ]; then
+              echo "✅ $(date +%T) $r"
+            else
+              echo "❌ $(date +%T) the chaat stall is closed"
+            fi
+            sleep 2
+          done
