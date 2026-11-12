@@ -84,10 +84,10 @@ A finalizer's name looks like <code>domain/name</code>, and the domain usually t
 ## 🪤 The tempting wrong fix: force delete
 You made a prediction earlier. Now test it:
 ```bash
-kubectl delete pod old-stall -n k-37-stuck-pod --grace-period=0 --force
+kubectl delete pod old-stall -n k-37-stuck-pod --grace-period=0 --force --wait=false
 kubectl get pods -n k-37-stuck-pod
 ```
-You get a warning about immediate deletion, and the Pod is **still there**. A force delete skips *waiting for the container to stop*. It does not skip the finalizer, because that note is not about the container. Force deleting usually works only because, normally, nothing is holding the object.
+You get a warning about immediate deletion, and the Pod is **still there**. (Try it once *without* `--wait=false`: the command never returns, because by default `kubectl delete` waits for the object to be gone, and that includes waiting for its finalizers. Press Ctrl+C. That hang is this whole scenario in miniature.) A force delete skips *waiting for the container to stop*. It does not skip the finalizer, because that note is not about the container. Force deleting usually works only because, normally, nothing is holding the object.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>

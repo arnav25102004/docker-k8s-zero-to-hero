@@ -20,9 +20,9 @@ if [ -z "$addrs" ]; then
 fi
 
 sum_restarts() { kubectl get pods -n "$NS" -l app=thali -o jsonpath='{range .items[*]}{.status.containerStatuses[0].restartCount}{"\n"}{end}' 2>/dev/null | awk '{s+=$1} END{print s+0}'; }
-say "Watching the stall for 12 seconds to see whether it stays up…"
+say "Watching the stall for ${Z2H_CHECK_WATCH:-12} seconds to see whether it stays up…"
 r1=$(sum_restarts)
-sleep 12
+sleep "${Z2H_CHECK_WATCH:-12}"
 r2=$(sum_restarts)
 if [ "$r1" != "$r2" ]; then
   warn "The stall restarted while I was watching ($r1 → $r2 restarts). Not stable yet."

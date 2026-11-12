@@ -37,7 +37,9 @@ broken() {
   wait_event34 "Readiness probe failed"
   assert_contains "$(events34)" "Readiness probe failed" "the events say the readiness probe failed"
   assert_contains "$(events34)" "connection refused" "...because the connection was refused (a wrong port, not a 404)"
-  assert_eq "$(kubectl get endpointslices -n k-34-doorbell -l kubernetes.io/service-name=dosa -o jsonpath='{..addresses}' 2>&1)" "" "the Service has no endpoint addresses"
+  # A Pod that is not Ready still appears in the EndpointSlice, marked ready:false; the Endpoints object lists ready addresses only.
+  assert_contains "$(kubectl get endpointslices -n k-34-doorbell -l kubernetes.io/service-name=dosa -o jsonpath='{..conditions}' 2>&1)" '"ready":false' "the Service's endpoints are marked not ready"
+  assert_eq "$(kubectl get endpoints dosa -n k-34-doorbell -o jsonpath='{.subsets[*].addresses}' 2>/dev/null)" "" "the Service has no ready endpoints"
   assert_cmd_fails "check.sh says: not done yet" bash "$CHECK34"
 }
 

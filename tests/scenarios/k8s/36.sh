@@ -10,6 +10,7 @@ ready36() { local r; r="$(kubectl get deployment thali -n k-36-two-probes -o jso
 
 check_passes36() {
   local i
+  export Z2H_CHECK_WATCH=5   # the learner's check.sh watches 12 s; the harness retries, so 5 s is enough
   for i in 1 2 3 4 5 6 7 8; do
     bash "$CHECK36" >/dev/null 2>&1 && return 0
     sleep 2
