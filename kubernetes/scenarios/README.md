@@ -254,12 +254,12 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K37 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K38 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K39 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K40 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K41 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K42 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K43 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K44 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K45 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K40 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K41 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K42 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K43 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K44 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K45 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
