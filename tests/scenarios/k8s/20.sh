@@ -29,6 +29,6 @@ fixed() {
   kubectl rollout status deployment/showdown -n "$NS20" --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out"
   assert_eq "$(in_cluster_http_wait "$NS20" http://showdown/healthz 200)" "200" "/healthz returns 200 (the test curl Pod runs under the 32Mi default)"
-  assert_eq "$(kubectl get pods -n "$NS20" -l app=showdown -o jsonpath='{.items[0].spec.containers[0].resources.limits.memory}' 2>&1)" "128Mi" "the Pod now has limits.memory=128Mi"
+  assert_eq "$(kubectl get pods -n "$NS20" -l app=showdown --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1:].spec.containers[0].resources.limits.memory}' 2>&1)" "128Mi" "the Pod now has limits.memory=128Mi"
   assert_eq "$(kubectl get pods -n "$NS20" -l app=showdown --no-headers 2>&1 | wc -l | tr -d ' ')" "2" "exactly 2 app Pods are left"
 }

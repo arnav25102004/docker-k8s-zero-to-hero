@@ -7,10 +7,12 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && p
 
 NS29="k-29-sidecar"
 
-# ready/total containers of the notice Pod, e.g. "1/2".
+# ready/total containers of the newest notice Pod, e.g. "1/2". After a fix the old Pod can linger,
+# terminating, next to its replacement (the log-shipper ignores the stop signal), so .items[0]
+# may be the old one: sort by age and take the last.
 notice_ready_count() {
   local r total=0 ready=0 x
-  r="$(kubectl get pods -n "$NS29" -l app=notice -o jsonpath='{range .items[0].status.containerStatuses[*]}{.ready}{" "}{end}' 2>/dev/null)"
+  r="$(kubectl get pods -n "$NS29" -l app=notice --sort-by=.metadata.creationTimestamp -o jsonpath='{range .items[-1:].status.containerStatuses[*]}{.ready}{" "}{end}' 2>/dev/null)"
   for x in $r; do
     total=$((total + 1))
     [ "$x" = "true" ] && ready=$((ready + 1))
