@@ -262,6 +262,21 @@ Or open http://localhost:9220 in your browser and cast a vote. Press Ctrl+C in t
 - **Compare the spec you wrote with the spec that ran:** `kubectl get pod <name> -o yaml` (or a `-o jsonpath` query), and look for the `kubernetes.io/limit-ranger` annotation.
 - **Say what you need.** Explicit `resources` always win over defaults, and the app team knows the app best. Change the LimitRange only when the namespace rule itself is wrong.
 
+## 🏋️ Now you try (optional, 3 minutes)
+Before you touch anything, answer from the YAML alone, then confirm with one command.
+1. Which Pods in this namespace get the default limit: ones that set `resources.limits.memory`, or ones that don't?
+2. Prove it for the running Pod:
+   ```bash
+   kubectl get pod -n k-20-limitrange -l app=showdown -o jsonpath='{.items[0].metadata.annotations}{"\n"}'
+   ```
+   What does the annotation tell you, and who wrote it?
+
+<details><summary>Answers</summary>
+
+1. Only Pods that **don't** set a limit. An explicit value always wins.
+2. The `kubernetes.io/limit-ranger` annotation says which defaults were filled in. It was written by the API server when the Pod was created, not by you.
+</details>
+
 ## 💎 Lifelong lesson
 > Read the spec Kubernetes actually ran, not the one you wrote: `kubectl get pod -o yaml`.
 

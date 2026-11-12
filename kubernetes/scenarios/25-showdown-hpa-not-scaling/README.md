@@ -246,6 +246,16 @@ Good to know: when the load stops, the HPA waits about 5 minutes before removing
 - **`kubectl top` separates the suspects:** if it shows numbers, metrics-server is fine and the problem is somewhere else.
 - **Give the app a limit too,** so one busy copy cannot take a whole node.
 
+## 🏋️ Now you try (optional, 3 minutes)
+1. The HPA target is `50%` of the CPU **request**. If a Pod requests `100m`, at what usage does it ask for more Pods? And what if the request is `10m` instead?
+2. Which is more likely to make an autoscaler flap: a very small request or a generous one? Why?
+
+<details><summary>Answers</summary>
+
+1. At about `50m` of CPU in use for `100m`; with `10m` the same app trips at `5m`, so it looks "busy" almost all the time.
+2. A very small request. The percentage is a fraction of the request, so a tiny request makes every blip look like a spike. Request what the app needs, not the smallest number that fits.
+</details>
+
 ## 💎 Lifelong lesson
 > Autoscaling percentages are percentages of what you requested. No request, no scaling.
 

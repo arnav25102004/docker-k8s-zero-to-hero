@@ -244,6 +244,20 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9222
 - **An `emptyDir` is scratch space that lives as long as the Pod.** It is wiped when the Pod is replaced, so never keep data you need in it.
 - Fix the app's needs, not the rule: turning the setting off is the wrong fix.
 
+## 🏋️ Now you try (optional, 3 minutes)
+1. After the fix, try to write a file inside the container's root filesystem, then inside the folder you gave an `emptyDir`:
+   ```bash
+   kubectl exec -n k-22-readonly-fs deploy/board -- sh -c 'echo hi > /etc/test && echo ok || echo blocked'
+   ```
+   Which one is blocked? Then try again with `/tmp`, the folder the fix mounts as `emptyDir`.
+2. Why is an `emptyDir` a poor place to keep data you care about?
+
+<details><summary>Answers</summary>
+
+1. The write to `/etc` is blocked; `/tmp` accepts writes.
+2. It lives only as long as the Pod. A replaced Pod starts with an empty folder.
+</details>
+
 ## 💎 Lifelong lesson
 > Read-only filesystems are great. Give apps a scratchpad for what they must write.
 
