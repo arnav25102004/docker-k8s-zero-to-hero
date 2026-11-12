@@ -45,6 +45,17 @@ kubectl logs visitor -n k-22-readonly-fs --tail=2
 ```
 (Times will differ.) You can follow it live with `kubectl logs -f visitor -n k-22-readonly-fs` and stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The container's filesystem is read-only, and nginx needs to write to `/tmp`. Before you look:
+1. Will the app start?
+2. What will `STATUS` say?
+
+<details><summary>Check your prediction</summary>
+
+1. No: it exits with an error when it cannot write.
+2. `CrashLoopBackOff`.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
 
@@ -105,6 +116,10 @@ kubectl get deploy board -n k-22-readonly-fs -o jsonpath='{.spec.template.spec.c
 {"readOnlyRootFilesystem":true}
 ```
 There is "the security team's next step": the container's root filesystem is read-only. The image was built for a normal user (that is why last week's fix works), but it still wants a writable `/tmp` for its pid file and temp folders. The setting and the app disagree, so nginx stops before it ever serves a page.
+
+## 🪤 The tempting wrong fix: turn the rule off
+"Remove `readOnlyRootFilesystem`."
+It would start, and you would have thrown away a real protection: a read-only filesystem stops an attacker from writing to the container. (Text only.) The rule was right. The app just needs one writable place.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -237,6 +252,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `readOnlyRootFilesystem` protect against?
+2. How do you give the app somewhere to write?
+3. Where does the writable space live, and how long does it last?
+
+<details><summary>Answers</summary>
+
+1. A compromised process writing files into the container.
+2. Mount an `emptyDir` volume at the folder it needs, here `/tmp`.
+3. In the Pod, for as long as the Pod lives.
+</details>
 
 ## Next →
 [K23](../23-dark-mode-not-applied/README.md): Dark mode is ON in the config. The site is still blinding white.

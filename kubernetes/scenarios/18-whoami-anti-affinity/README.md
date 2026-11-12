@@ -50,6 +50,17 @@ kubectl logs -f visitor -n k-18-anti-affinity
 ```
 The visitor calls the Service (until every expected Pod has answered, or 60 tries) and counts how many *different* Pods answered, against how many there should be.
 
+## 🔮 Predict first (60 seconds)
+"Never two on one node" is a hard rule, and there is one more replica than there are nodes. Before you look:
+1. How many Pods can run?
+2. What happens to the extra one?
+
+<details><summary>Check your prediction</summary>
+
+1. One per node that accepts Pods.
+2. It stays `Pending`: the rule leaves it nowhere to go.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. Note what is *not* happening: the website is not down. Some replicas are serving, so this is a capacity problem, not an outage.
 
@@ -117,6 +128,14 @@ kubectl get deployment whoami -n k-18-anti-affinity -o yaml | grep -A7 ' affinit
       containers:
 ```
 A **required** anti-affinity: never two `app=whoami` Pods on the same node.
+
+## 🪤 The tempting wrong fix: delete the Pending Pod
+"Clear out the stuck one."
+```bash
+kubectl delete pods -n k-18-anti-affinity --field-selector status.phase=Pending
+kubectl get pods -n k-18-anti-affinity
+```
+The Deployment still wants one more replica than there is room for, so it creates a new Pod, which is `Pending` for the same reason. You cannot clear a Pod that the Deployment keeps ordering.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -243,6 +262,18 @@ The `Hostname:` line is the Pod that answered. Note that `port-forward` connects
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between required and preferred anti-affinity?
+2. Why does the extra Pod stay `Pending`?
+3. Name two ways to fix it.
+
+<details><summary>Answers</summary>
+
+1. Required is a hard rule. Preferred is a wish the scheduler can break when it must.
+2. The hard rule has no node left to satisfy.
+3. Make the rule preferred, run fewer replicas, or add nodes.
+</details>
 
 ## Next →
 [K19](../19-hackathon-quota/README.md): The deploy succeeded. Kubernetes created… nothing.

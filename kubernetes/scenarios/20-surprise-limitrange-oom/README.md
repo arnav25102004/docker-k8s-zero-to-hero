@@ -42,6 +42,17 @@ kubectl logs -f visitor -n k-20-limitrange
 ```
 (Press Ctrl+C to stop.) Red, and staying red.
 
+## 🔮 Predict first (60 seconds)
+The YAML sets no memory limit, but the app is killed for exceeding one. Before you look:
+1. Does the Deployment's YAML show a limit?
+2. Where does the limit come from?
+
+<details><summary>Check your prediction</summary>
+
+1. No, none at all.
+2. A LimitRange in the namespace, which filled in defaults when the Pod was created. It only shows in the Pod that actually ran.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -141,6 +152,14 @@ kubectl get pod visitor -n k-20-limitrange -o jsonpath='{.spec.containers[0].res
 {"limits":{"memory":"32Mi"},"requests":{"memory":"16Mi"}}
 ```
 The visitor got the same defaults. Busybox needs only a few MiB, so it is perfectly happy, and so are the short-lived `curlimages/curl` Pods you may run to test (also well under 32Mi). Only our app (about 16 MiB plus the demo's 40 MiB preload) is too big.
+
+## 🪤 The tempting wrong fix: restart the Pod
+"There is no limit, so it must be a glitch."
+```bash
+kubectl delete pods -n k-20-limitrange -l app=showdown
+kubectl get pods -n k-20-limitrange
+```
+The new Pod is admitted through the same LimitRange, gets the same invisible default, and is killed in the same way. The limit is not a glitch: it is applied every time.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -251,6 +270,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does a LimitRange do?
+2. How do you see the limit that was really applied?
+3. What is the fix?
+
+<details><summary>Answers</summary>
+
+1. It gives containers default requests and limits (and can enforce a minimum and maximum) in a namespace.
+2. `kubectl get pod <name> -o yaml`, the live Pod, not the Deployment.
+3. Write explicit `resources` in the Deployment.
+</details>
 
 ## Next →
 [K21](../21-notice-board-runasnonroot/README.md): Security turned on one rule. The notice board went dark.

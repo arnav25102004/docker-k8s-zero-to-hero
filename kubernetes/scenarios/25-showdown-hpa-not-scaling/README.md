@@ -40,6 +40,17 @@ showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1     
 ```
 (Your `AGE` will differ.) `-w` prints the current line once, and after that **only when the autoscaler's record changes**. While it is stuck, that can mean nothing new for a minute or two, so a quiet watch is not a frozen one. Leave it running; it comes back to life in the Fix step.
 
+## 🔮 Predict first (60 seconds)
+The HPA targets a percentage of the CPU request, and the Deployment has no request. Before you look:
+1. What will the HPA show under `TARGETS`?
+2. Is metrics-server the problem?
+
+<details><summary>Check your prediction</summary>
+
+1. `<unknown>`.
+2. No: `kubectl top` works. The percentage has nothing to be divided by.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -109,6 +120,10 @@ kubectl get deployment showdown -n k-25-hpa -o jsonpath='{.spec.template.spec.co
 {}
 ```
 Empty. No CPU request (and no limit) anywhere.
+
+## 🪤 The tempting wrong fix: lower the target
+"Make the autoscaler more eager."
+Try a lower target percentage, or a higher `maxReplicas`. (Text only.) The HPA still shows `<unknown>`, because it needs the CPU *request* to compute any percentage, and the Deployment has none. The knobs on the HPA cannot fix a missing number in the Deployment.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -240,6 +255,18 @@ Press Ctrl+C in any terminal still running the port-forward, then:
 cd .. && ./cleanup.sh
 ```
 This deletes the namespace and, only if this scenario installed it, metrics-server. If you press Ctrl+C in the middle of `break.sh`, just run `cleanup.sh`: it is safe at any point.
+
+## 🧪 Quick recap (3 questions)
+1. What is a utilisation percentage a percentage of?
+2. Why did `kubectl top` work while the HPA did not?
+3. What is the fix?
+
+<details><summary>Answers</summary>
+
+1. The Pod's CPU **request**.
+2. metrics-server was fine and reported usage. The request, the other half of the sum, was missing.
+3. Add `resources.requests.cpu` to the Deployment.
+</details>
 
 ## Next →
 [K26](../26-showdown-init-stuck/README.md): Cats vs Dogs is waiting for its database. Forever.

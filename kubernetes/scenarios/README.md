@@ -75,8 +75,8 @@ Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each 
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
 2. **Break it**: `cd break && ./break.sh`
-3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13, K16, K18–K24, K26, K27, K29, K30) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (K25 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
-4. **Fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
+3. **Predict, then investigate by hand.** Every scenario (K01 to K29, and the practice lanes) opens its investigation with a 60-second **predict-first** box: say what you expect before you type anything. Then the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (K01–K07, K09–K13, K16, K18–K24, K26, K27, K29, K30) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (K25 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
+4. **Meet the tempting wrong fix.** Each scenario names the fix everyone reaches for first (restart it, scale it up, switch the rule off) and shows why it does not work. Then **fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
    ```bash
    kubectl port-forward -n <namespace> svc/<service> 92NN:<port>
@@ -218,15 +218,15 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K28 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K29 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K30 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K31 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K32 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K33 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K34 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K35 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K36 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K37 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K38 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K39 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K31 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K32 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K33 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K34 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K35 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K36 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K37 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K38 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K39 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

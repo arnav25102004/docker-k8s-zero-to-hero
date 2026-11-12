@@ -42,6 +42,17 @@ kubectl logs -f visitor -n k-27-config-key
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The ConfigMap key is `config.yaml`, and the volume asks for `config.yml`. Before you look:
+1. Will the Pod start?
+2. Where will the reason be?
+
+<details><summary>Check your prediction</summary>
+
+1. No: it stays stuck before starting.
+2. In the Pod's Events: the volume cannot be built because the key does not exist.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The symptom: nobody answers.
 
@@ -105,6 +116,14 @@ kubectl get cm homer-config -n k-27-config-key -o go-template='{{range $k, $v :=
 config.yaml
 ```
 Put the two answers side by side: the Pod asks for `config.yml`, the ConfigMap has `config.yaml`.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Maybe the volume will mount next time."
+```bash
+kubectl delete pods -n k-27-config-key -l app=dashboard
+kubectl get pods -n k-27-config-key
+```
+The new Pod asks for the same missing key and is stuck in the same place. `.yml` and `.yaml` are different strings, however alike they look.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -206,6 +225,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Why are `config.yml` and `config.yaml` different?
+2. How can you list the keys a ConfigMap really has?
+3. What does `items` in a volume do?
+
+<details><summary>Answers</summary>
+
+1. A key name is just a string: it must match exactly.
+2. `kubectl describe configmap` or `kubectl get configmap -o yaml`.
+3. It picks which keys become files, so each listed key must exist.
+</details>
 
 ## Next →
 [K28](../28-leaderboard-reset-job/README.md): The midnight reset ran. Three times. Then gave up.

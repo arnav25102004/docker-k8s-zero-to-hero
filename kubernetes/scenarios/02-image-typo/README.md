@@ -47,6 +47,17 @@ kubectl logs -f visitor -n k-02-image-typo
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The image name has a one-letter typo. Before you look:
+1. Is the *app* crashing?
+2. Which command will show the real reason?
+
+<details><summary>Check your prediction</summary>
+
+1. No. No container ever started: the image could not even be downloaded.
+2. `kubectl describe pod` (or `kubectl get events`). The reason is in the Events, not in the logs.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -90,6 +101,14 @@ kubectl get deploy draw -n k-02-image-typo -o jsonpath='{..image}'; echo
 excalidraw/excalidrw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
 ```
 Read the repository name slowly: `excalidraw/excalidrw`. A letter is missing (the `a` in `excalidraw`). The digest after `@sha256:` is the real, correct one, but it belongs to a repository that Docker Hub does not have under this name.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Maybe it just needs a fresh start."
+```bash
+kubectl delete pods -n k-02-image-typo -l app=draw
+kubectl get pods -n k-02-image-typo
+```
+A new Pod appears, and it fails to pull the same misspelled image for the same reason. The Pod was never the problem: the *name* in the Deployment is.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -173,6 +192,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between `ErrImagePull` and `ImagePullBackOff`?
+2. Where do you find the real cause?
+3. Why does the wait between retries keep growing?
+
+<details><summary>Answers</summary>
+
+1. `ErrImagePull`: the pull just failed. `ImagePullBackOff`: Kubernetes is waiting before it tries again.
+2. In the Pod's Events (`describe pod`).
+3. A back-off, so a broken pull does not hammer the registry.
+</details>
 
 ## Next →
 [K03](../03-showdown-crashloop/README.md): It starts. It dies. It starts. It dies. Welcome to the loop.

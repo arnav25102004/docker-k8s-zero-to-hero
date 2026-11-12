@@ -46,6 +46,17 @@ kubectl logs -f visitor -n k-10-pvc-pending
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+A Pod needs a disk that cannot be provided. Before you look:
+1. What will the Pod's status be?
+2. Where will you find the real reason?
+
+<details><summary>Check your prediction</summary>
+
+1. `Pending`.
+2. On the **PVC**, not the Pod: `kubectl describe pvc`.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody is served.
 
@@ -107,6 +118,14 @@ NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE  
 standard (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  4h46m
 ```
 (The name differs per cluster: `standard` on kind and minikube, `hostpath` on Docker Desktop, `local-path` on Killercoda. Look for the one marked `(default)`.) There is no `fast-ssd`; there is a default.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Maybe the Pod is stuck."
+```bash
+kubectl delete pods -n k-10-pvc-pending -l app=board
+kubectl get pods,pvc -n k-10-pvc-pending
+```
+The new Pod waits for the same claim, and the claim is still `Pending`. The Pod is only a passenger: the problem is further down the chain.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -211,6 +230,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the chain from a Pod to a real disk?
+2. Which command shows why a PVC is `Pending`?
+3. What happens if a claim names no `storageClassName`?
+
+<details><summary>Answers</summary>
+
+1. Pod → PersistentVolumeClaim → StorageClass → PersistentVolume.
+2. `kubectl describe pvc` (the Events).
+3. The cluster's default StorageClass is used.
+</details>
 
 ## Next →
 [K11](../11-showdown-bad-rollout/README.md): Friday, 6 PM. The release goes out. Nobody notices… because Kubernetes saved you.

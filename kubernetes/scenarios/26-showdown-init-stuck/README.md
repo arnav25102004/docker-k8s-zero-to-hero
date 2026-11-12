@@ -48,6 +48,17 @@ kubectl logs visitor -n k-26-init-stuck --tail=3
 ```
 You can follow it live with `kubectl logs -f visitor -n k-26-init-stuck` (Ctrl+C to stop). We'll watch it again when we fix things.
 
+## 🔮 Predict first (60 seconds)
+An init container waits for a service whose name is mistyped. Before you look:
+1. Will the app container start?
+2. What will `STATUS` say?
+
+<details><summary>Check your prediction</summary>
+
+1. No: init containers must finish first, and this one never does.
+2. `Init:0/1`, meaning 0 of 1 init containers finished.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -151,6 +162,14 @@ kubectl get deploy showdown -n k-26-init-stuck -o yaml | grep -A8 'initContainer
         name: wait-for-redis
 ```
 (`kubectl` wraps the long line.) The Deployment's init container runs a loop: "try to open a connection to `redsi` on port 6379 (Redis's port); if that fails, say so and try again in 2 seconds". The name was typed wrong, so it can never succeed.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Start over."
+```bash
+kubectl delete pods -n k-26-init-stuck -l app=showdown
+kubectl get pods -n k-26-init-stuck
+```
+The new Pod runs the same init container, which waits for the same wrong name, forever. There is no point restarting a loop that cannot succeed.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -283,6 +302,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `Init:0/1` mean?
+2. How do you read the log of an init container?
+3. Why does the app have no logs?
+
+<details><summary>Answers</summary>
+
+1. 0 of the 1 init containers has finished.
+2. `kubectl logs <pod> -c <init container name>`.
+3. The app container has not even been created yet.
+</details>
 
 ## Next →
 [K27](../27-dashboard-config-missing-key/README.md): The dashboard is ready. Its config is right there. It still won't start.

@@ -41,6 +41,17 @@ cd break && ./break.sh
 ```
 What the room should see: the script puts five players on a Redis leaderboard, runs the reset Job, waits about half a minute while it retries, and finishes saying the scores were meant to be reset and the Job has stopped trying. There is no web page here, only a Job, Pods and logs.
 
+## 🔮 Predict first (60 seconds)
+The Job's Redis host name is mistyped. Before you look:
+1. How many Pods will the Job create before giving up?
+2. Will retrying help?
+
+<details><summary>Check your prediction</summary>
+
+1. Three (the Job's retry limit), then it stops.
+2. No: retrying the same wrong name cannot work.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -147,6 +158,10 @@ Arjun
 ```
 The old scores are all still there. The reset never reached Redis.
 
+## 🪤 The tempting wrong fix: raise the retry limit
+"Give it more tries."
+With a higher `backoffLimit` you would simply get more failures instead of three: ten Pods trying the same name that does not exist, instead of three. (Text only.) Retries help when something is *temporarily* wrong. A typo is permanent.
+
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
@@ -245,6 +260,18 @@ Arjun
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `backoffLimit` control?
+2. Why do failed Job Pods stick around?
+3. Why do you delete and recreate a Job to change its environment?
+
+<details><summary>Answers</summary>
+
+1. How many times the Job retries before it is marked failed.
+2. So you can read their logs.
+3. A Job's Pod template cannot be edited after creation.
+</details>
 
 ## Next →
 [K29](../29-log-sidecar-half-ready/README.md): Half ready. Fully confusing.

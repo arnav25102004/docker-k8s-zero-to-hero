@@ -48,6 +48,17 @@ kubectl logs -f visitor -n k-01-pending
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The Deployment asks for one replica. Before you look:
+1. What will `STATUS` say, and will `RESTARTS` ever go up?
+2. Will waiting longer help?
+
+<details><summary>Check your prediction</summary>
+
+1. `Pending`, and `RESTARTS` stays 0: the Pod was never even given a node, so there is nothing to restart.
+2. No. Time does not make a node bigger.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -106,6 +117,14 @@ z2h-test-worker          4     8125288Ki
 z2h-test-worker2         4     8125288Ki
 ```
 (Your node names and sizes will differ.) About 8 million Ki is roughly 8 GiB per node. The Pod wants 64 GiB. Unless your node really has 64 GiB free, none is even close.
+
+## 🪤 The tempting wrong fix: scale it up
+"One Pod is not enough. Let's add more."
+```bash
+kubectl scale deployment draw -n k-01-pending --replicas=3
+kubectl get pods -n k-01-pending
+```
+Three Pods, all `Pending`. Each one asks for the same enormous amount of memory, so each is refused for the same reason. More Pods do not make a bigger node: you just get three of the same problem. (Put it back with `--replicas=1` when you have seen enough.)
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -195,6 +214,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Which words in `describe pod` tell you why a Pod is `Pending`?
+2. Is a memory *request* a cap, or a reservation?
+3. Why does `RESTARTS` stay at 0?
+
+<details><summary>Answers</summary>
+
+1. The `FailedScheduling` event, which says `Insufficient memory`.
+2. A reservation: the scheduler must find a node with that much free. The *limit* is the cap.
+3. No container ever started, so there was nothing to restart.
+</details>
 
 ## Next →
 [K02](../02-image-typo/README.md): One missing letter. Kubernetes tries, waits, tries again… forever.

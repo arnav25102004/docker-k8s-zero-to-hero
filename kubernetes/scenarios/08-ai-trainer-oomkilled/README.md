@@ -40,6 +40,17 @@ cd break && ./break.sh
 ```
 What the room should see: the script says the trainer was deployed, but the training never finishes. The Pod keeps restarting and its `RESTARTS` count keeps climbing. There is **no web page and no port to open** in this scenario (it isn't a web app), so everything we do, finding the problem and checking the fix, happens in the terminal with `logs` and `describe`.
 
+## 🔮 Predict first (60 seconds)
+The trainer needs more memory than its limit allows. Before you look:
+1. Will `kubectl logs` show an error?
+2. Which exit code do you expect?
+
+<details><summary>Check your prediction</summary>
+
+1. No. The kernel kills the process with SIGKILL, which gives it no chance to log anything.
+2. 137 (128 + 9, where 9 is SIGKILL).
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -100,6 +111,14 @@ kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A4 ' resources:'
             memory: 64Mi
 ```
 The limit is **64Mi** (about 67 MB). Does the program need more than that? Each epoch loads 25 MB, six epochs: 150 MB.
+
+## 🪤 The tempting wrong fix: restart it
+"Just restart the trainer."
+```bash
+kubectl delete pods -n k-08-oomkilled -l app=trainer
+kubectl get pods -n k-08-oomkilled -w
+```
+The new Pod runs the same training under the same 64Mi fence and is killed at the same epoch. Nothing about a restart changes how much memory the job needs. (Ctrl+C to stop watching.)
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -189,6 +208,18 @@ kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -E 'State:|Restart 
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `OOMKilled` mean?
+2. Who enforces a memory limit?
+3. What exit code means "killed by SIGKILL"?
+
+<details><summary>Answers</summary>
+
+1. The container used more memory than its limit, so the kernel killed it.
+2. The Linux kernel, not Kubernetes.
+3. 137.
+</details>
 
 ## Next →
 [K09](../09-adminer-missing-secret/README.md): The database tool won't even start. No logs. Nothing.

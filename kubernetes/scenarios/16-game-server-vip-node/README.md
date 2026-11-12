@@ -51,6 +51,17 @@ kubectl logs -f visitor -n k-16-vip-node
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things. (The visitor itself *does* run: it is the player, not the game, so it was set up differently from the start. We'll see how later.)
 
+## 🔮 Predict first (60 seconds)
+Every node is reserved with a taint, and the Deployment does not mention it. Before you look:
+1. What will the Pods' status be?
+2. Which object on the nodes is responsible?
+
+<details><summary>Check your prediction</summary>
+
+1. `Pending`.
+2. The taint on the nodes. (On current Kubernetes the event only says `untolerated taint(s)`, so you ask the nodes which one.)
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
 
@@ -106,6 +117,10 @@ Lease:
 kubectl get deploy game -n k-16-vip-node -o yaml | grep -A4 tolerations
 ```
 It prints **nothing**. There is no `tolerations:` section at all: the game is not on the list. (For comparison, `kubectl get pod visitor -n k-16-vip-node -o yaml | grep -A5 tolerations` shows the toleration the visitor was given.)
+
+## 🪤 The tempting wrong fix: remove the taint
+"The taint is in the way, so remove it."
+That would make the Pods schedule, and it would also throw away the reservation somebody put there on purpose, for every other workload too. (Text only: the cleanup script removes the taint for you.) A taint is a decision. A toleration on the one Deployment that is allowed in respects it.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -207,6 +222,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 cd .. && ./cleanup.sh
 ```
 This also removes the `z2h-vip` taint from every node. Don't skip it: otherwise the taint stays on every node, and every later scenario's Pods sit in `Pending` with an event that looks just like this one. If that happens, re-run `./cleanup.sh` (safe at any time) or run `kubectl taint nodes --all z2h-vip-`. You can check: `kubectl describe nodes | grep -A2 Taints` no longer lists `z2h-vip`.
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between a taint and a toleration?
+2. Where does a toleration go?
+3. How do you list a node's taints?
+
+<details><summary>Answers</summary>
+
+1. A taint repels Pods from a node. A toleration lets a Pod ignore one.
+2. In the Pod spec (in the Deployment's Pod template).
+3. `kubectl describe nodes | grep Taints`.
+</details>
 
 ## Next →
 [K17](../17-ai-trainer-needs-gpu/README.md): The trainer is waiting for a GPU that this cluster doesn't have.

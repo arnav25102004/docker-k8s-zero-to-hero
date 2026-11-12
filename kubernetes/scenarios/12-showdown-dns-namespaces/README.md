@@ -49,6 +49,17 @@ kubectl logs -f visitor -n k-12-dns-app
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The app is configured with the short name `redis`. Before you look:
+1. In which namespace is a short name looked up first?
+2. What do you expect the app to say?
+
+<details><summary>Check your prediction</summary>
+
+1. The Pod's **own** namespace.
+2. A name-resolution failure ("Name does not resolve"): it never got an address, which is different from "connection refused".
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -118,6 +129,14 @@ kubectl exec -n k-12-dns-app deploy/showdown -- python -c "import socket;print(s
 10.96.62.241
 ```
 The full name finds it right away.
+
+## 🪤 The tempting wrong fix: restart the app
+"Maybe DNS was slow."
+```bash
+kubectl delete pods -n k-12-dns-app -l app=showdown
+kubectl logs -n k-12-dns-app -l app=showdown --tail=3
+```
+The new Pod asks DNS for the same short name from the same namespace and gets the same answer. DNS was not slow, it was correct: no Service called `redis` exists *there*.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -230,6 +249,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the full name of a Service?
+2. How do "Name does not resolve" and "connection refused" differ?
+3. Why did it work on the laptop?
+
+<details><summary>Answers</summary>
+
+1. `<service>.<namespace>.svc.cluster.local`.
+2. The first means there was no address for the name. The second means there was an address, but nobody was listening.
+3. Everything lived in one namespace there, so the short name was enough.
+</details>
 
 ## Next →
 [K13](../13-lockdown-blocks-dns/README.md): Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.
