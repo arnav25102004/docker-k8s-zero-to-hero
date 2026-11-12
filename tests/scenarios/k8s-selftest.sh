@@ -113,7 +113,7 @@ test_cleanup_waits_for_namespace() {
 test_cleanup_stops_port_forward() {
   local f=0 out rc i
   bash -c "source '$LIB'; fresh_ns k-98-selftest" >/dev/null 2>&1
-  kubectl create deployment whoami -n k-98-selftest --image=traefik/whoami:v1.10.3 >/dev/null 2>&1
+  kubectl create deployment whoami -n k-98-selftest --image=traefik/whoami:v1.10.4 >/dev/null 2>&1
   kubectl expose deployment whoami -n k-98-selftest --port=80 >/dev/null 2>&1
   kubectl rollout status deployment/whoami -n k-98-selftest --timeout=180s >/dev/null 2>&1
   kubectl port-forward -n k-98-selftest --address 127.0.0.1 svc/whoami 9298:80 >/dev/null 2>&1 &
