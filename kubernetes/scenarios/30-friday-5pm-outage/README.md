@@ -473,7 +473,7 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-**That was the finale: you've finished the 30 main Kubernetes scenarios.** 🏆 Want more reps? The practice lanes turn one idea at a time into three more problems each, ending in a boss: "Services find Pods" ([K31 to K33](../31-two-stalls-one-signboard/README.md)) and "Ready or alive?" ([K34 to K36](../34-doorbell-on-the-wrong-door/README.md)).
+**That was the finale: you've finished the 30 main Kubernetes scenarios.** 🏆 Want more reps? The practice lanes turn one idea at a time into three more problems each, ending in a boss: "Services find Pods" ([K31 to K33](../31-two-stalls-one-signboard/README.md)) and "Ready or alive?" ([K34 to K36](../34-doorbell-on-the-wrong-door/README.md)). Three more worked examples cover things people meet on the job: a Pod stuck `Terminating` ([K37](../37-pod-that-will-not-leave/README.md)), applying in one namespace and looking in another ([K38](../38-applied-here-looking-there/README.md)), and a maintenance robot refused by a PodDisruptionBudget ([K39](../39-robot-that-cannot-move-the-stalls/README.md)).
 
 Think back to K01: a whiteboard stuck in `Pending`, and one question, "why won't it start?". Since then you've chased image typos, crash loops, wrong ports, impatient probes, out-of-memory kills, missing secrets and disks, DNS across namespaces, locked-down networks, forbidden bots, taints, quotas, security rules, stale config, stuck init containers, failing Jobs and half-ready sidecars. Today you handled three at once, calmly, one change at a time. That's what on-call engineers do for a living.
 
