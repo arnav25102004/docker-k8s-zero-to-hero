@@ -1,9 +1,9 @@
-# metrics-server v0.8.0 for the Kubernetes break/fix scenarios (K25 "kubectl top").
+# metrics-server v0.9.1 for the Kubernetes break/fix scenarios (K25 "kubectl top").
 #
-# Source: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.8.0/components.yaml
+# Source: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.1/components.yaml
 #         (sha256 of the unmodified upstream file:
-#          ff64d1a13b9ac3b0635f0dd985815fb44c23eed4706c04e5db1daadf6bc0a83b)
-# Image:  registry.k8s.io/metrics-server/metrics-server:v0.8.0 (amd64 + arm64)
+#          3c7f57cdbee0f57fb0259a150e8f6d6cb4f29d72d1aa5dce8803151dd6d4c2a1)
+# Image:  registry.k8s.io/metrics-server/metrics-server:v0.9.1 (amd64 + arm64)
 #
 # Only two changes were made to the upstream file:
 #   1. The container arg --kubelet-insecure-tls (kind's kubelets use self-signed
@@ -167,7 +167,7 @@ spec:
         # kind kubelets serve self-signed certificates; without this metrics-server logs x509 errors.
         - --kubelet-insecure-tls
         - --metric-resolution=15s
-        image: registry.k8s.io/metrics-server/metrics-server:v0.8.0
+        image: registry.k8s.io/metrics-server/metrics-server:v0.9.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
