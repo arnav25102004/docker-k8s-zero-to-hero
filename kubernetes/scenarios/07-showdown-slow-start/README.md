@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 It's the night before the Christ University fest and Ravi deploys the "Cats vs Dogs" poll. The app warms up for about 20 seconds when it starts (it "loads its data"). Priya, being careful, adds a **liveness probe** so Kubernetes will restart the app if it ever hangs. Nice idea. But now the poll never opens: the Pod restarts again and again, and nothing in the logs says "error". The app isn't broken. It is being killed for being slow to wake up.
 
+![Diagram: the setup for K07, who talks to whom and what your mission is](../images/k07-context.svg)
+
 ## 🧠 The concept: why, what, how
 Kubernetes has three kinds of health check ("probes"), and each asks a different question:
 

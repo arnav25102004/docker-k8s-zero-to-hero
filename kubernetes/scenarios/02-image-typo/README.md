@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 It's the night before the Christ University fest demo. Ravi is tidying the whiteboard's YAML, and while "cleaning up" the image line he drops one letter: `excalidrw` instead of `excalidraw`. He applies it, `kubectl` happily says `created`, and goes to get chai. When he comes back, the Pod is not running. It isn't crashing either. It just says `ImagePullBackOff`, and keeps saying it.
 
+![Diagram: the setup for K02, who talks to whom and what your mission is](../images/k02-context.svg)
+
 ## 🧠 The concept: why, what, how
 A container needs an **image** (the packaged app). Kubernetes doesn't carry images around: each **node** has an agent, the **kubelet**, and the kubelet **pulls** the image from a **registry** (Docker Hub here) onto its own node before starting the container.
 

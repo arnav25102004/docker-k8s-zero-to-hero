@@ -13,6 +13,8 @@ Output columns and wording can differ a little between kubectl versions, contain
 ## 📖 The story
 Meera's team launches the campus-fest voting poll at noon, and the whole college opens it at once. Lakshmi set up an autoscaler the night before: "if the app gets busy, add more copies". Now the load is real, the one app Pod is flat out, and Ravi checks the autoscaler. It has not added a single copy, and instead of a number it says `<unknown>`. The metrics are there. The traffic is there. Why does the autoscaler shrug?
 
+![Diagram: the setup for K25, who talks to whom and what your mission is](../images/k25-context.svg)
+
 ## 🧠 The concept: why, what, how
 A **HorizontalPodAutoscaler (HPA)** watches a number and adds or removes Pod copies to keep it near a target. Here the number is CPU, and the target is "50%".
 - **metrics-server** is the add-on that measures how much CPU and memory every Pod uses right now. It is what makes `kubectl top` work. The HPA asks it, about every 15 seconds. A new Pod's first readings take up to a minute to show up.

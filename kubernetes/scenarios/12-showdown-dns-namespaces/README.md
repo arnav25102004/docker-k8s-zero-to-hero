@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 The platform team at a Bengaluru startup gives every team a shared Redis, so nobody runs their own. It lives in its own namespace, `k-12-dns-data`. Meera's "Cats vs Dogs" poll for the campus fest runs in `k-12-dns-app`, and her config says `REDIS_HOST=redis`. It worked perfectly on her laptop, where everything sat in one namespace. In the shared cluster the Redis Pod is healthy, the Service is there, and yet the poll says it cannot find Redis. Same cluster. Same name. "Never heard of it."
 
+![Diagram: the setup for K12, who talks to whom and what your mission is](../images/k12-context.svg)
+
 ## 🧠 The concept: why, what, how
 A **namespace** is a folder inside the cluster: it groups objects and keeps names from clashing. Two teams can both have a Service called `redis`, as long as they are in different namespaces. Every Service also gets a **DNS name**, and Kubernetes' DNS answers this question: "which IP is `redis`?"
 

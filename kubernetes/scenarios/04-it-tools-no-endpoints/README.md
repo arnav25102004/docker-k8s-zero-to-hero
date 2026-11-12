@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Lakshmi's team runs a small "developer toolbox" (IT-Tools) for the whole class. Last week someone tidied the YAML and renamed a label while the rest of the team was at lunch. The deploy went green, `kubectl get pods` shows two happy `Running` Pods, and still every student gets a failed page. Nothing crashed. Nothing restarted. Nobody can get in.
 
+![Diagram: the setup for K04, who talks to whom and what your mission is](../images/k04-context.svg)
+
 ## 🧠 The concept: why, what, how
 Pods come and go, and every new Pod gets a new IP address. So you never talk to a Pod directly. You talk to a **Service**: one stable name and address (here `tools`) that sends your request to whichever Pods are alive right now.
 

@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Ravi's team uses Adminer, a small web page for peeking into the project database. It worked perfectly in the staging namespace. Today he applies the same Deployment to a fresh namespace for the hackathon, and the Pod just sits there. He runs `kubectl logs`, hoping for an error message, and gets nothing useful. The app has not crashed. It has not even started.
 
+![Diagram: the setup for K09, who talks to whom and what your mission is](../images/k09-context.svg)
+
 ## 🧠 The concept: why, what, how
 A Pod can take its settings from a **Secret**: a small object that holds sensitive values such as passwords, kept out of your YAML and your image.
 

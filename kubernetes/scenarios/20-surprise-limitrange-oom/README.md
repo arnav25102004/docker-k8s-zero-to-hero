@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 Priya deploys the Cats vs Dogs poll for the department's fest into the shared `k-20-limitrange` namespace. Her YAML is tidy: image, port, readiness probe. She did not write a `resources:` section, because "it's a tiny Python app". Her teammate Ravi did the same thing last week in another team's namespace and it was fine. This time both Pods start, die, start, die... and Priya swears she never limited anything.
 
+![Diagram: the setup for K20, who talks to whom and what your mission is](../images/k20-context.svg)
+
 ## 🧠 The concept: why, what, how
 Every container can say two things about memory:
 - **request:** "reserve at least this much for me." The scheduler uses it to pick a node.

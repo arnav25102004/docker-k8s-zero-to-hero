@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 The Student Council wants one page with everything a student needs: the canteen menu, library hours, the last bus. Lakshmi writes the "Campus quick links" settings, and Ravi deploys the dashboard with a single `kubectl apply`. `kubectl` says `deployment.apps/dashboard created` and `configmap/homer-config created`. Green, green. The settings are in the cluster, the Deployment is in the cluster, the image is a good one. But the page never appears, and a small visitor who checks it every few seconds keeps getting no answer. The Pod is not crashing, either. It is just... getting ready. Forever.
 
+![Diagram: the setup for K27, who talks to whom and what your mission is](../images/k27-context.svg)
+
 ## 🧠 The concept: why, what, how
 A **ConfigMap** keeps settings outside your container image, so one image can run in many places. One way to hand it to a Pod is as a **volume**: Kubernetes turns the ConfigMap into files, and the kubelet (the agent on each node that starts your containers) puts them inside the container before it starts.
 

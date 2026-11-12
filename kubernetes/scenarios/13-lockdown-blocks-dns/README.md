@@ -13,6 +13,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 Before the campus-fest launch, the security team at a Bengaluru startup runs a "hardening sprint". Their rule: the poll app may talk to Redis and nothing else. Ravi applies the NetworkPolicy, checks that Redis is still allowed, and goes home happy. The next morning Lakshmi opens the poll: not ready, nobody can vote. Redis is running. The Service is there. The policy even *allows* Redis. So what is blocked?
 
+![Diagram: the setup for K13, who talks to whom and what your mission is](../images/k13-context.svg)
+
 ## 🧠 The concept: why, what, how
 A **NetworkPolicy** is a firewall rule for Pods. By default every Pod can talk to everything. But the moment a policy **selects** a Pod for `Egress` (traffic going *out*), that Pod is on a guest list: anything not listed is dropped. Rules only ever *add* to the list; there is no "deny" rule, only "everything else is denied".
 

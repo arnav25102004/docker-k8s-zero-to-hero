@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 It is 2 AM at the BengaluruBuild 24-hour hackathon. Lakshmi from the organising team has built a "Hackathon team links" page, so every team can find the judges' scoring sheet, the demo order and the Wi-Fi password in one place. Ravi deploys it to the hackathon namespace that the organisers set up yesterday. `kubectl` says `deployment.apps/dashboard created`. Green. Everyone relaxes. But the page is not there, and a small visitor who checks it every few seconds keeps getting no answer. Strangely, there is no crashing Pod, no `Pending` Pod, no error Pod. Where did the Pods go?
 
+![Diagram: the setup for K19, who talks to whom and what your mission is](../images/k19-context.svg)
+
 ## 🧠 The concept: why, what, how
 A shared cluster is like a shared hostel kitchen: if one team switches on every burner, nobody else gets to cook. Platform teams prevent that with budgets per namespace:
 

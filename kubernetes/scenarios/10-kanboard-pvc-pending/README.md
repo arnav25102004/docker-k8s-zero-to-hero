@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Ravi's team runs a Kanboard (a Trello-style task board) for the hackathon, and it keeps every task on a disk so nothing is lost on restart. The manifests were copied straight from the company's cloud cluster, where the disk type is called `fast-ssd`. On the laptop cluster the deploy "works": no error message, nothing red. But the Pod never starts, and the board never opens.
 
+![Diagram: the setup for K10, who talks to whom and what your mission is](../images/k10-context.svg)
+
 ## 🧠 The concept: why, what, how
 A container's own filesystem disappears when the container does. To keep data, Kubernetes separates *asking for a disk* from *making a disk*:
 

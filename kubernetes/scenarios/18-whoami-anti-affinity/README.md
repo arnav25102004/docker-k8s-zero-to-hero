@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 It's the college open house, and Lakshmi's team is expecting a crowd on the campus info page. Ravi scales the little `whoami` service up so every visitor is served by one of several copies, and nothing turns red: the site still answers. But a small check that counts which copies actually answer is not happy. This one is easy to miss, because there is no outage to point at.
 
+![Diagram: the setup for K18, who talks to whom and what your mission is](../images/k18-context.svg)
+
 ## 🧠 The concept: why, what, how
 Running several copies (**replicas**) of a Pod is how you survive a node dying: if all copies sit on one node and that node goes down, everything goes with it. So you tell the **scheduler** (the part of Kubernetes that picks a node for each new Pod) to keep copies apart. That is **pod anti-affinity**: "don't put me near Pods that look like me".
 

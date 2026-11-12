@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Priya's team runs a Kanboard (a Trello-style task board) for the hackathon. Before the big demo, someone adds a readiness probe "for safety", copying a path from another project. The deploy goes through. `kubectl get pods` says `Running`. There are no restarts, no crashes, no red anywhere. But the board never opens for anyone, and the Pod sits at `0/1`.
 
+![Diagram: the setup for K06, who talks to whom and what your mission is](../images/k06-context.svg)
+
 ## 🧠 The concept: why, what, how
 Kubernetes asks your container two different questions, and the answers do very different things:
 
