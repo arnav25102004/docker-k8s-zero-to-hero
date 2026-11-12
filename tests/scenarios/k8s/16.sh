@@ -9,11 +9,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && p
 # in_cluster_http cannot be used here: its curl Pod has no toleration, so while every node
 # carries z2h-vip it would sit Pending forever. Same probe, plus the toleration.
 tolerant_http() {
-  local out code
-  out=$(kubectl run "thttp-$$-$RANDOM" -n "$1" --rm -i --restart=Never --quiet \
-    --image=curlimages/curl:8.11.1 \
-    --overrides='{"spec":{"tolerations":[{"key":"z2h-vip","operator":"Equal","value":"true","effect":"NoSchedule"}]}}' \
-    --command -- curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$2" 2>/dev/null)
+  local out code ov
+  ov='{"spec":{"tolerations":[{"key":"z2h-vip","operator":"Equal","value":"true","effect":"NoSchedule"}]}}'
+  out=$(in_cluster_pod "$1" "$ov" curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$2") || { printf 'ERR\n'; return 0; }
   code=$(printf '%s' "$out" | grep -o '^[0-9][0-9][0-9]' | head -n 1)
   printf '%s\n' "${code:-000}"
 }

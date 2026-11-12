@@ -23,12 +23,58 @@ require_test_cluster() {
   fi
 }
 
-# in_cluster_http NS URL: HTTP status code seen from inside the cluster, or 000.
+# in_cluster_pod NS OVERRIDES [COMMAND ARGS...]
+# Run COMMAND in a throwaway curl Pod in NS and print what it wrote to stdout.
+# It creates the Pod, waits for it to finish, then reads `kubectl logs`. It does NOT use
+# `kubectl run -i --rm`: that attaches to the Pod, and when the Pod exits at once the
+# attach can lose the output, which looked exactly like "connection refused" (000).
+# OVERRIDES is "" or a --overrides JSON string; "@NAME@" in it becomes the Pod's name.
+# If the helper Pod itself cannot run (image pull stuck, quota, scheduling) it retries,
+# then prints the reason on stderr and returns 1. Wait and tries: Z2H_POD_WAIT (90 s) and
+# Z2H_POD_TRIES (3).
+in_cluster_pod() {
+  local ns="$1" ov="$2" name i phase out why try tries="${Z2H_POD_TRIES:-3}" wait="${Z2H_POD_WAIT:-90}"
+  shift 2
+  for try in $(seq 1 "$tries"); do
+    name="ic-$$-$RANDOM"
+    if [ -n "$ov" ] && [ "$#" -gt 0 ]; then
+      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" --command -- "$@" >/dev/null 2>&1
+    elif [ -n "$ov" ]; then
+      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --overrides="${ov//@NAME@/$name}" >/dev/null 2>&1
+    elif [ "$#" -gt 0 ]; then
+      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 --command -- "$@" >/dev/null 2>&1
+    else
+      kubectl run "$name" -n "$ns" --restart=Never --image=curlimages/curl:8.11.1 >/dev/null 2>&1
+    fi
+    i=0
+    phase=""
+    while [ "$i" -lt "$wait" ]; do
+      phase=$(kubectl get pod "$name" -n "$ns" -o jsonpath='{.status.phase}' 2>/dev/null)
+      case "$phase" in Succeeded | Failed) break ;; esac
+      sleep 1
+      i=$((i + 1))
+    done
+    case "$phase" in
+      Succeeded | Failed)
+        out=$(kubectl logs "$name" -n "$ns" 2>/dev/null)
+        kubectl delete pod "$name" -n "$ns" --now --wait=false >/dev/null 2>&1
+        printf '%s' "$out"
+        return 0
+        ;;
+    esac
+    why=$(kubectl get pod "$name" -n "$ns" -o jsonpath='{.status.phase}{" "}{.status.containerStatuses[0].state.waiting.reason}{" "}{.status.conditions[?(@.type=="PodScheduled")].message}' 2>/dev/null)
+    kubectl delete pod "$name" -n "$ns" --now --wait=false >/dev/null 2>&1
+  done
+  printf 'in_cluster_pod: the helper Pod never finished in namespace %s after %s tries (last state: %s)\n' "$ns" "$tries" "${why:-unknown}" >&2
+  return 1
+}
+
+# in_cluster_http NS URL: HTTP status code seen from inside the cluster. 000 means curl itself
+# could not connect (a real refusal or timeout). ERR means the helper Pod could not run, so
+# nothing was tested (the reason is printed on stderr).
 in_cluster_http() {
   local ns="$1" url="$2" out code
-  out=$(kubectl run "ihttp-$$-$RANDOM" -n "$ns" --rm -i --restart=Never --quiet \
-    --image=curlimages/curl:8.11.1 --command -- \
-    curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null)
+  out=$(in_cluster_pod "$ns" "" curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url") || { printf 'ERR\n'; return 0; }
   code=$(printf '%s' "$out" | grep -o '^[0-9][0-9][0-9]' | head -n 1)
   printf '%s\n' "${code:-000}"
 }

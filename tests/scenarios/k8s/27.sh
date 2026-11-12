@@ -8,14 +8,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && p
 # in_cluster_body NS URL: the response BODY (whitespace removed) seen from inside the cluster, or "none".
 # Kept in this spec on purpose: the shared lib only returns status codes.
 in_cluster_body() {
-  local ns="$1" url="$2" out="" try
-  # `kubectl run --rm -i` can lose the output of a Pod that exits instantly: retry a couple of times.
-  for try in 1 2 3; do
-    out=$(kubectl run "ibody-$$-$RANDOM" -n "$ns" --rm -i --restart=Never --quiet \
-      --image=curlimages/curl:8.11.1 --command -- \
-      curl -s --max-time 5 "$url" 2>/dev/null | tr -d '[:space:]')
-    [ -n "$out" ] && break
-  done
+  local ns="$1" url="$2" out=""
+  out=$(in_cluster_pod "$ns" "" curl -s --max-time 5 "$url" | tr -d '[:space:]')
   printf '%s\n' "${out:-none}"
 }
 
