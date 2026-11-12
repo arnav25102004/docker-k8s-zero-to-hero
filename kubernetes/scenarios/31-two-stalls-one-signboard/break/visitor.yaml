@@ -1,0 +1,24 @@
+# A small visitor that asks the stall every 2 seconds: the live signal on stage.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-31-two-stalls
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            r=$(wget -q -T 2 -O - http://chai 2>/dev/null)
+            if [ -n "$r" ]; then
+              echo "✅ $(date +%T) $r"
+            else
+              echo "❌ $(date +%T) the stall is silent"
+            fi
+            sleep 2
+          done

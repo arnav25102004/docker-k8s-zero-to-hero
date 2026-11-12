@@ -1,0 +1,13 @@
+# K31 scenario manifest
+apiVersion: v1
+kind: Service
+metadata:
+  name: chai
+  namespace: k-31-two-stalls
+spec:
+  selector:
+    app: chai
+    track: fresh
+  ports:
+    - port: 80
+      targetPort: 5678

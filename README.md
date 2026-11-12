@@ -10,7 +10,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
   🐱🐶 Build & ship a live voting app the whole room uses from their phones
   💀 Delete every server and watch Kubernetes bring them back
   🦄 "One more thing…": release a new version mid-vote with 0 failed requests
-  🔥 Break things on purpose, 53 times, and fix them like a pro
+  🔥 Break things on purpose, 56 times, and fix them like a pro
 ```
 
 ---
@@ -89,7 +89,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K16](kubernetes/16-pod-security/README.md) | securityContext, Pod Security | the API server says no |
 | [K17](kubernetes/17-scheduling/README.md) | affinity, taints, PDBs, drain | node maintenance with zero downtime |
 | [K18 🏆](kubernetes/18-capstone/README.md) | **capstone: production-grade deploy** | 🔥 the Gauntlet: chaos vs your platform |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **30 break-and-fix incidents** (K01–K30) | |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **33 break-and-fix incidents** (K01–K33) | |
 
 ## 🚀 Quick start
 ```bash
@@ -109,7 +109,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 Docker and Kubernetes scenarios are run by hand from their folders: see [docker/scenarios/README.md](docker/scenarios/README.md) and [kubernetes/scenarios/README.md](kubernetes/scenarios/README.md). `./labs.sh docker clean` and `./labs.sh k8s clean` reset them all.
 
-53 real-world incidents (8 Git, 15 Docker, 30 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+56 real-world incidents (8 Git, 15 Docker, 33 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
 
 ## 📁 Repository layout
 ```
@@ -121,7 +121,7 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (30 scenarios)
+├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (33 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · load-image.sh
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
