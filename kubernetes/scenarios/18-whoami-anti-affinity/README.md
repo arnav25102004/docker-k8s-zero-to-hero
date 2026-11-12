@@ -80,7 +80,7 @@ kubectl get events -n k-18-anti-affinity --field-selector reason=FailedSchedulin
 ```
 ```
 LAST SEEN   TYPE      REASON             OBJECT                        MESSAGE
-14s         Warning   FailedScheduling   pod/whoami-85f467d95f-lksdp   0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 node(s) didn't match pod anti-affinity rules. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+14s         Warning   FailedScheduling   pod/whoami-85f467d95f-lksdp   0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 node(s) didn't match pod anti-affinity rules. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
 ```
 (The exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match pod anti-affinity rules.`) The clue is **`didn't match pod anti-affinity rules`**: the nodes have room, but the Pod's own rule about neighbours rules them out. (The `control-plane` taint part is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it appears only on clusters with a separate control-plane node.)
 

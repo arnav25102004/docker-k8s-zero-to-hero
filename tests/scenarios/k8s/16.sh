@@ -18,9 +18,10 @@ tolerant_http() {
 
 broken() {
   assert_eq "$(kubectl get pods -n k-16-vip-node -l app=game -o jsonpath='{.items[*].status.phase}' 2>&1)" "Pending Pending" "both game Pods are Pending"
-  # Wording differs by version: "untolerated taint" (current) or "had taint" (older).
+  # Wording differs by version: "untolerated taint(s)" (current) or "had taint" (older).
   assert_contains "$(kubectl get events -n k-16-vip-node 2>&1)" "taint" "the scheduler events mention the taint"
-  assert_contains "$(kubectl get events -n k-16-vip-node 2>&1)" "z2h-vip" "the events name the z2h-vip taint"
+  # Kubernetes 1.37 no longer names the taint in the event, so ask the nodes.
+  assert_contains "$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>&1)" "z2h-vip" "the nodes carry the z2h-vip taint"
 }
 
 fixed() {

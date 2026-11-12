@@ -69,7 +69,7 @@ kubectl describe pod -n k-17-needs-gpu -l app=trainer | grep -A6 '^Events:'
 Events:
   Type     Reason            Age   From               Message
   ----     ------            ----  ----               -------
-  Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 2 node(s) didn't match Pod's node affinity/selector. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 node(s) didn't match Pod's node affinity/selector. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
 ```
 (Shortened to the part that matters; the exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector.`) The scheduler looked at every node and refused all of them. The clue is **`didn't match Pod's node affinity/selector`**: the Pod is picky about *which* node. (If the event names `node.kubernetes.io/not-ready` instead, the cluster was created moments ago and is still starting: wait a minute and run `break.sh` again.) (The other part, a `control-plane` taint, is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it only appears on clusters with a separate control-plane node.)
 
