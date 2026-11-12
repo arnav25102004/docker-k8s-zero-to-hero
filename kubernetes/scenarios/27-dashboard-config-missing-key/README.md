@@ -21,6 +21,8 @@ A **ConfigMap** keeps settings outside your container image, so one image can ru
 - The kubelet sets up the volume **before** it creates the container. If the volume can't be built, the container never starts, and the Pod waits in `ContainerCreating` while the kubelet keeps trying.
 - A Pod stuck there never ran, so there are **no logs**. The explanation is in the Events.
 
+Once a Pod is running, a changed ConfigMap reaches a mounted folder only after a delay, and never reaches a `subPath` mount or an environment variable. The full comparison is in [K23](../23-dark-mode-not-applied/README.md).
+
 Analogy: the ConfigMap is a cupboard of labelled boxes, and `items` is the shopping list you hand the helper. The helper packs your bag before the trip starts. If a box on your list isn't in the cupboard, the helper doesn't guess: you simply don't leave.
 
 ## 🏢 Where you'll meet this at work

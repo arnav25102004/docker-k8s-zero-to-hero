@@ -35,6 +35,11 @@ require_test_cluster() {
 in_cluster_pod() {
   local ns="$1" ov="$2" name i phase out why try tries="${Z2H_POD_TRIES:-3}" wait="${Z2H_POD_WAIT:-90}"
   shift 2
+  # A namespace that enforces Pod Security "restricted" (K44, K45) refuses a plain helper Pod,
+  # so give the helper the same checklist the learner's Pods carry.
+  if [ -z "$ov" ] && [ "$(kubectl get namespace "$ns" -o jsonpath='{.metadata.labels.pod-security\.kubernetes\.io/enforce}' 2>/dev/null)" = "restricted" ]; then
+    ov='{"spec":{"securityContext":{"runAsNonRoot":true,"runAsUser":100,"seccompProfile":{"type":"RuntimeDefault"}},"containers":[{"name":"@NAME@","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}}]}}'
+  fi
   for try in $(seq 1 "$tries"); do
     name="ic-$$-$RANDOM"
     if [ -n "$ov" ] && [ "$#" -gt 0 ]; then

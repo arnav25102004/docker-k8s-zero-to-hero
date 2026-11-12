@@ -219,6 +219,20 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9221
 - **Normal users can't write to root-owned folders, and traditionally can't use ports below 1024** (some platforms relax that). "Unprivileged" images use port 8080 and user-writable paths for exactly this reason.
 - Fix the side that is wrong: the image does not fit the rule, so change the image. Do not delete the rule, and do not paper over it with `runAsUser` on an image built for root.
 
+## 🏋️ Now you try (optional, 3 minutes)
+1. After the fix, find out which user the container really runs as:
+   ```bash
+   kubectl exec -n k-21-nonroot deploy/board -- id
+   ```
+   Is it root? Is it the same user the Pod spec asked for?
+2. Why does an unprivileged image use port 8080 and not 80?
+
+<details><summary>Answers</summary>
+
+1. A normal user, not root (uid not `0`). `runAsNonRoot` guaranteed that.
+2. Traditionally only root may open ports below 1024. A non-root process listens on a high port, and the Service maps it.
+</details>
+
 ## 💎 Lifelong lesson
 > Fix the image, not the policy. Weakening security is never the fix.
 

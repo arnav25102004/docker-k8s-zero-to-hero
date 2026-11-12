@@ -201,6 +201,21 @@ kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -E 'State:|Restart 
 - Debug path: `get pods` (OOMKilled / CrashLoopBackOff) → `describe` (Last State, 137) → `logs --previous` (stops mid-epoch) → the limit in the Deployment.
 - Set limits from measured usage plus headroom (`kubectl top`, Prometheus), and alert on OOM kills.
 
+## 🏋️ Now you try (optional, 3 minutes)
+After the fix, same Deployment, one more experiment. Predict first, then check.
+1. Lower the limit back to `64Mi` on the *fixed* Deployment:
+   ```bash
+   kubectl set resources deployment trainer -n k-08-oomkilled --requests=memory=64Mi --limits=memory=64Mi
+   ```
+   Will the new Pod survive? What do you expect `RESTARTS` and `Last State` to say?
+2. Why did the command set the request too? Which of the two numbers does the OOM kill look at?
+
+<details><summary>Answers</summary>
+
+1. No: the script needs more than 64 Mi, so it is killed again (`OOMKilled`, exit 137) and `RESTARTS` climbs.
+2. A request above the limit is rejected, so both had to come down. The kill looks only at the **limit**; the request is what the scheduler uses to place the Pod.
+</details>
+
 ## 💎 Lifelong lesson
 > Exit 137 means someone killed it. In Kubernetes, `describe` tells you who.
 

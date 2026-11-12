@@ -23,6 +23,16 @@ Analogy: the ConfigMap is the notice on the office board, the environment variab
 
 So "I changed the config" and "the app uses the new config" are two different events, and something has to connect them.
 
+**Which way does a ConfigMap update reach the app?**
+
+| How the Pod gets it | Edit the ConfigMap, and the running Pod… | To pick it up |
+|---|---|---|
+| `env` / `envFrom` | **never changes**: values were copied at container start | restart the Pods |
+| Volume (whole folder) | gets new files **after a delay** (up to about a minute or two) | the app must re-read the file, or restart |
+| Volume with `subPath` | **never changes**, like an env var | restart the Pods |
+
+The row to remember is the middle one: "updated" does not mean "the app noticed". Most apps read their config once at start.
+
 ## 🏢 Where you'll meet this at work
 - **A feature flag, log level or API URL changed in a ConfigMap** and "nothing happened" in production (developer, SRE).
 - **A rotated setting or password** that the running Pods still use, because they never started again (platform team).
