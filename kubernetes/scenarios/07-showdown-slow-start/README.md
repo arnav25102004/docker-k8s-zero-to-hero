@@ -48,6 +48,17 @@ kubectl logs -f visitor -n k-07-slow-start
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first: do the maths
+The app needs about 20 seconds to wake up. The liveness probe starts checking after `initialDelaySeconds: 5`, and gives up after `failureThreshold: 1` miss.
+1. Roughly when will the first restart happen?
+2. Will the app ever become ready?
+
+<details><summary>Check your prediction</summary>
+
+1. At about 5 seconds: the first check fails, one miss is all it takes, and the container is replaced. The watch below shows exactly that, a restart about every 5 seconds.
+2. Never. The app needs 20 s and is killed at 5 s, every time.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -111,6 +122,14 @@ kubectl get deploy showdown -n k-07-slow-start -o yaml | grep -A8 '^ *livenessPr
           successThreshold: 1
 ```
 The kubelet starts knocking after 5 seconds, gives up after 1 failure, and the app needs 20 seconds. 5 < 20: it can never win.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Give it a fresh start."
+```bash
+kubectl delete pods -n k-07-slow-start -l app=showdown
+kubectl get pods -n k-07-slow-start -w
+```
+The new Pod is exactly as slow as the old one, and the probe is exactly as impatient, so you get the same loop with a different Pod name. A fresh start does not help when the *rules* are the problem. Press Ctrl+C when you have seen enough.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -214,6 +233,29 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does a liveness probe do when it fails, and how is that different from readiness?
+2. What does a startup probe do?
+3. An app needs 40 s to start. Why is a bigger `initialDelaySeconds` a weaker fix than a startup probe?
+
+<details><summary>Answers</summary>
+
+1. It restarts the container. A failing readiness probe only withholds traffic.
+2. It holds back the other probes until the app has started, then steps aside.
+3. A delay is a fixed guess that also delays detecting real crashes later. A startup probe waits only as long as needed, up to a generous limit.
+</details>
+
+## 🏋️ Now you try: the "Ready or alive?" practice lane
+You have now seen both probe failures once, with every step explained ([K06](../06-kanboard-never-ready/README.md) and this one). Lock it in with three more problems, each with less help than the last:
+
+| # | Practice | What is new | Hand-holding |
+|---|----------|-------------|--------------|
+| [K34](../34-doorbell-on-the-wrong-door/README.md) | The doorbell on the wrong door | a readiness probe with the wrong *port* | guided questions + hint ladder |
+| [K35](../35-biryani-that-needs-20-seconds/README.md) | The biryani that needs 20 seconds | a slow starter, and the timing maths | questions only |
+| [K36](../36-two-probes-two-mistakes/README.md) | Two probes, two mistakes | both probes wrong at once (boss) | no hints for 5 minutes |
+
+Each one has a `./check.sh` that tells you, any time, whether you are done.
 
 ## Next →
 [K08](../08-ai-trainer-oomkilled/README.md): Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.

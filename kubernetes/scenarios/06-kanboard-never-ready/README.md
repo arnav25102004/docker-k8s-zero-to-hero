@@ -45,6 +45,17 @@ kubectl logs -f visitor -n k-06-never-ready
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+Kanboard is installed, but nobody can reach it. Before you run anything:
+1. Will the `RESTARTS` column go up?
+2. Which kind of probe do you suspect, readiness or liveness, and why?
+
+<details><summary>Check your prediction</summary>
+
+1. No. Nothing is crashing, so nothing restarts.
+2. Readiness. A readiness probe only decides whether a Pod may receive traffic, so the symptom is "running but nobody gets in". A failing *liveness* probe would show up as restarts instead.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody is served.
 
@@ -117,6 +128,14 @@ kubectl exec -n k-06-never-ready $POD -- wget -qO- http://127.0.0.1/healthcheck.
 {"status":200,"message":"Database connection is OK"}
 ```
 The app is perfectly healthy. Only the probe's path is wrong.
+
+## 🪤 The tempting wrong fix: more Pods
+"One Pod is not enough. Let's add more."
+```bash
+kubectl scale deployment board -n k-06-never-ready --replicas=5
+kubectl get pods -n k-06-never-ready
+```
+Five Pods, all `0/1`. Every new Pod asks for the same page that does not exist, so you have five times the nothing. Scaling multiplies a problem as happily as it multiplies a solution. (Put it back with `--replicas=1` when you are done laughing.)
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -211,5 +230,17 @@ Press Ctrl+C in the port-forward terminal first, then:
 cd .. && ./cleanup.sh
 ```
 
+## 🧪 Quick recap (3 questions)
+1. A Pod is `Running`, `0/1`, and `RESTARTS` is 0. Which probe is failing?
+2. In the events, how do "connection refused" and "404" differ for a failing probe?
+3. Why does a failing readiness probe not restart the Pod?
+
+<details><summary>Answers</summary>
+
+1. Readiness. Liveness failures show up as restarts.
+2. "Connection refused": nothing listens on that port. "404": something answers, but that page does not exist.
+3. Its only job is to decide whether to send traffic. Restarting is the liveness probe's job.
+</details>
+
 ## Next →
-[K07](../07-showdown-slow-start/README.md): A perfectly healthy app keeps getting killed, again and again, every few seconds.
+[K07](../07-showdown-slow-start/README.md), the other worked example: A perfectly healthy app keeps getting killed, again and again, every few seconds. Then try the **"Ready or alive?" practice lane**: [K34](../34-doorbell-on-the-wrong-door/README.md), [K35](../35-biryani-that-needs-20-seconds/README.md), [K36](../36-two-probes-two-mistakes/README.md).
