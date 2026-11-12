@@ -1,0 +1,75 @@
+# K42 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: k-42-qos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🧊 Ice cache: please do not lose me."]
+          ports:
+            - containerPort: 5678
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 50m, memory: 64Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: k-42-qos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🌐 Web counter: open all day."]
+          ports:
+            - containerPort: 5678
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: batch
+  namespace: k-42-qos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: batch
+  template:
+    metadata:
+      labels:
+        app: batch
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=📦 Batch job: nice to have."]
+          ports:
+            - containerPort: 5678

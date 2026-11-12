@@ -1,0 +1,40 @@
+# K43 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: van
+  namespace: k-43-van
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: van
+  template:
+    metadata:
+      labels:
+        app: van
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🚐 Mobile chai van, at your service."]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: van
+  namespace: k-43-van
+spec:
+  selector:
+    app: van
+  ports:
+    - port: 80
+      targetPort: 5678
