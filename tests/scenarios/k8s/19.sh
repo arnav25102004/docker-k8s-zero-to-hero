@@ -8,18 +8,11 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && p
 # in_cluster_http cannot be used here: the namespace quota refuses any Pod without
 # requests and limits, so its curl Pod would be rejected. Same probe, with resources.
 quota_http() {
-  local name out code="" try
-  # `kubectl run --rm -i` can lose the output of a Pod that exits instantly: retry a couple of times.
-  for try in 1 2 3; do
-    name="qhttp-$$-$RANDOM"
-    # The container (command included) is defined in --overrides, which replaces the generated one.
-    out=$(kubectl run "$name" -n "$1" --rm -i --restart=Never --quiet \
-      --image=curlimages/curl:8.11.1 \
-      --overrides='{"spec":{"containers":[{"name":"'"$name"'","image":"curlimages/curl:8.11.1","command":["curl","-s","-o","/dev/null","-w","%{http_code}","--max-time","5","'"$2"'"],"resources":{"requests":{"cpu":"10m","memory":"8Mi"},"limits":{"cpu":"50m","memory":"32Mi"}}}]}}' \
-      2>/dev/null)
-    code=$(printf '%s' "$out" | grep -o '^[0-9][0-9][0-9]' | head -n 1)
-    [ -n "$code" ] && break
-  done
+  local out code ov
+  # The container (command included) is defined in the overrides, which replace the generated one.
+  ov='{"spec":{"containers":[{"name":"@NAME@","image":"curlimages/curl:8.11.1","command":["curl","-s","-o","/dev/null","-w","%{http_code}","--max-time","5","'"$2"'"],"resources":{"requests":{"cpu":"10m","memory":"8Mi"},"limits":{"cpu":"50m","memory":"32Mi"}}}]}}'
+  out=$(in_cluster_pod "$1" "$ov") || { printf 'ERR\n'; return 0; }
+  code=$(printf '%s' "$out" | grep -o '^[0-9][0-9][0-9]' | head -n 1)
   printf '%s\n' "${code:-000}"
 }
 

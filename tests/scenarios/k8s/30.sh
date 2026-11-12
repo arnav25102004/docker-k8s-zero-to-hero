@@ -10,8 +10,7 @@ NS30="k-30-friday"
 
 # in_cluster_sh NS SCRIPT: run a small sh script in a throwaway curl Pod, print its output.
 in_cluster_sh() {
-  kubectl run "ish-$$-$RANDOM" -n "$1" --rm -i --restart=Never --quiet \
-    --image=curlimages/curl:8.11.1 --command -- sh -c "$2" 2>/dev/null
+  in_cluster_pod "$1" "" sh -c "$2"
 }
 
 broken() {
