@@ -227,9 +227,28 @@ test_cleanup_removes_work_and_orphan_project() {
   return $f
 }
 
+# A removal that fails must be reported, never hidden behind a green "cleaned up".
+test_cleanup_reports_failure() {
+  local f=0 out rc shim real
+  real=$(command -v docker) || return 77
+  docker info >/dev/null 2>&1 || return 77
+  shim=$(mktemp -d) || return 1
+  # a docker whose "rm" always fails
+  printf '#!/bin/bash\nif [ "$1" = rm ]; then echo "simulated: device busy" >&2; exit 1; fi\nexec %s "$@"\n' "$real" > "$shim/docker"
+  chmod +x "$shim/docker"
+  "$real" run -d --name d94-stuck --label z2h.scenario=d94 busybox:1.36 sleep 300 >/dev/null 2>&1 || { rm -rf "$shim"; return 77; }
+  out=$(PATH="$shim:$PATH" bash -c "source '$LIB'; scenario_cleanup d94" 2>&1); rc=$?
+  check "exits non-zero" rc_is "$rc" 1 || f=1
+  check "names the container" has "$out" 'could not remove container d94-stuck' || f=1
+  check "no green cleaned-up line" bash -c "! printf '%s' \"\$1\" | grep -q 'cleaned up'" _ "$out" || f=1
+  "$real" rm -fv d94-stuck >/dev/null 2>&1
+  rm -rf "${shim:?}"
+  return $f
+}
+
 for t in test_run_shown test_prepare_work test_cleanup_removes_work_and_orphan_project test_run_cycle_catches_early_assert test_port_busy test_first_pull_message test_wait_for test_no_daemon_message \
          test_any_cwd test_work_guard test_cleanup_idempotent test_cleanup_by_name_prefix \
-         test_cleanup_removes_anonymous_volume test_cleanup_removes_unlabelled_image; do
+         test_cleanup_removes_anonymous_volume test_cleanup_removes_unlabelled_image test_cleanup_reports_failure; do
   run_test "$t"
 done
 
