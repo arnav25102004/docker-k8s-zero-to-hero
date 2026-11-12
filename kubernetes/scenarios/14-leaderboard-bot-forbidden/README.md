@@ -163,6 +163,8 @@ rolebinding.rbac.authorization.k8s.io/leaderboard-bot-reads-pods created
 ```
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 There is no web page to open, so we read the proof. What does the bot say now?
 ```bash
 kubectl logs bot -n k-14-forbidden --tail=3

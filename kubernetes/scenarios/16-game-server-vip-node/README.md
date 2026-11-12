@@ -171,6 +171,8 @@ kubectl apply -f app.yaml
 **Why a toleration, and not removing the taint?** You *could* un-reserve the nodes (`kubectl taint nodes --all z2h-vip-`, with the trailing `-`) and the Pods would land at once. But the taint is somebody else's decision: Meera reserved those nodes on purpose, and removing it would quietly break her VIP plan. The game's team owns the game's YAML, so the app-side fix is to say "this Pod is allowed there". If the reservation itself is wrong, that is a conversation with whoever owns the nodes. (To undo it afterwards, `./cleanup.sh` removes the taint for you.)
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-16-vip-node -o wide
 ```

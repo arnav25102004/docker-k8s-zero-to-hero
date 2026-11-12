@@ -166,16 +166,38 @@ run_cycle_k8s() {
   return 1
 }
 
+# The learner's ./check.sh ("am I done?") for K01 to K30. K31 and up test theirs inside their own
+# spec. It must say "not done" while the scenario is broken and "done" once it is fixed.
+_generic_check_broken() {
+  [ -n "${GENERIC_CHECK:-}" ] || return 0
+  assert_cmd_fails "check.sh says: not done yet" bash "$GENERIC_CHECK"
+}
+_generic_check_fixed() {
+  [ -n "${GENERIC_CHECK:-}" ] || return 0
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    bash "$GENERIC_CHECK" >/dev/null 2>&1 && { printf '    ok: check.sh says: done\n'; return 0; }
+    sleep 2
+  done
+  printf '    FAIL: check.sh still says not done 20 s after the fix:\n'
+  bash "$GENERIC_CHECK" 2>&1 | sed 's/^/      | /'
+  return 1
+}
+
 _run_cycle_k8s() {
   local dir="$1" id="$2" n
   shift 2
+  GENERIC_CHECK=""
+  case "$id" in k[0-2][0-9] | k30) [ -f "$dir/check.sh" ] && GENERIC_CHECK="$dir/check.sh" ;; esac
   for n in 1 2; do
     printf '  -- cycle %s/2\n' "$n"
     _step cleanup "$n" "$dir/cleanup.sh" || return 1
     _step break.sh "$n" "$dir/break/break.sh" || return 1
     _check broken "$n" broken || return 1
+    _check "check.sh while broken" "$n" _generic_check_broken || return 1
     _step fix.sh "$n" "$dir/fix/fix.sh" || return 1
     _check fixed "$n" fixed || return 1
+    _check "check.sh after the fix" "$n" _generic_check_fixed || return 1
     _step "final cleanup" "$n" "$dir/cleanup.sh" || return 1
     nothing_left_k8s "$id" "$@" || { printf '  FAILED at step: nothing-left check (cycle %s)\n' "$n"; return 1; }
   done

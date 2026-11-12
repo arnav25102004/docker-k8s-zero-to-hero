@@ -168,6 +168,8 @@ kubectl apply -f app.yaml
 Kubernetes starts a new Pod with the startup probe and removes the old one. Wait about 25 seconds for the new Pod to become `1/1` before you start verifying.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-07-slow-start
 ```
@@ -259,3 +261,5 @@ Each one has a `./check.sh` that tells you, any time, whether you are done.
 
 ## Next →
 [K08](../08-ai-trainer-oomkilled/README.md): Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.
+
+🏋️ **More reps on this idea (optional):** the practice lane K34 to K36 ("Ready or alive?"), starting at [K34](../34-doorbell-on-the-wrong-door/README.md).

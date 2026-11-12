@@ -202,6 +202,8 @@ kubectl apply -f app.yaml
 Wait about 10 seconds before you verify.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 All replicas should be Ready, and the extra one should share a node with a sibling:
 ```bash
 kubectl get pods -n k-18-anti-affinity -o wide

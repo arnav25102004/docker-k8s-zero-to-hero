@@ -154,6 +154,8 @@ kubectl apply -f app.yaml
 Kubernetes starts a new Pod with the right value and removes the crashing one. (The one-line alternative is `kubectl set env deploy/showdown -n k-03-crashloop PORT=8080`.)
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-03-crashloop
 ```

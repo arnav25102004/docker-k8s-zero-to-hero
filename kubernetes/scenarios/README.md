@@ -91,7 +91,7 @@ Two more lanes cover resources and security. **"Resources"**, after [K08](08-ai-
 | Mostly solo | [K44](44-the-checklist/README.md) | questions only |
 | Boss | [K45](45-the-locked-down-kitchen/README.md) | no hints for the first 5 minutes |
 
-Every practice scenario has a `./check.sh` in its folder. Run it whenever you like: it only looks, never changes anything, and tells you whether you are done.
+**Every scenario has a `./check.sh`** in its folder. Run it whenever you like: it only looks, never changes anything, and tells you in one line whether you are done.
 
 Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. Logins: Kanboard (K06, K10) uses the default `admin` / `admin`; the other apps need no login (Adminer in K09 only shows its login form, and there is no database behind it). All images and sizes are in [IMAGES.md](IMAGES.md).
 

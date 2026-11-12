@@ -186,6 +186,8 @@ kubectl apply -f app.yaml
 **Why add resources, and not raise the quota?** You *could* ask for a bigger quota, but here the budget was never the problem: the dashboard asks for very little (50m CPU and 32Mi per Pod), and the quota has room for many more. A quota is the platform team's decision, and the app team's job is to say what its Pods need. If the numbers truly don't fit, that is a conversation about the budget, not a reason to remove it. A platform team has another option: a **LimitRange** fills in default requests and limits for containers that omit them, so the quota would admit them. This namespace has none, which is why the Pods were refused; [K20](../20-surprise-limitrange-oom/README.md) shows the surprising side of a LimitRange. Whatever the source, keep the limits modest but not tiny: a Pod that tries to use more memory than its limit gets killed (you will meet exactly that in K08).
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get deployment,pods -n k-19-hackathon
 ```

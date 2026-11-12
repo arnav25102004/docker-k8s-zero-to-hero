@@ -162,6 +162,8 @@ kubectl apply -f app.yaml
 Kubernetes starts a new Pod, which the scheduler can now place, and removes the old Pending one. Wait about 10 seconds (longer on a cold cluster) before you start verifying.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 There is no web page to open, so we read the proof. Is the Pod running, and which node did it land on?
 ```bash
 kubectl get pods -n k-17-needs-gpu -o wide

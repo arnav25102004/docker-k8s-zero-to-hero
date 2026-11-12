@@ -209,3 +209,32 @@ remove_metrics_server_if_ours() {
   kubectl delete clusterrolebinding,clusterrole -l "$sel" --ignore-not-found >/dev/null 2>&1
   return 0
 }
+
+# ---- "Am I done?" helpers. Read-only: they look, they never change anything. ----
+
+# check_rollouts NS...: every Deployment in these namespaces has all its replicas Ready.
+# Prints what is still missing and returns 1 if not.
+check_rollouts() {
+  local ns name want have bad=0
+  for ns in "$@"; do
+    while read -r name want have; do
+      [ -z "$name" ] && continue
+      if [ "${have:-0}" != "$want" ]; then
+        warn "Deployment $name has ${have:-0} of $want Pods Ready (namespace $ns)."
+        bad=1
+      fi
+    done < <(kubectl get deployments -n "$ns" -o jsonpath='{range .items[*]}{.metadata.name} {.spec.replicas} {.status.readyReplicas}{"\n"}{end}' 2>/dev/null)
+  done
+  return "$bad"
+}
+
+# check_visitor NS: the visitor's last three lines are all ✅.
+check_visitor() {
+  local ns="$1" lines n
+  lines=$(kubectl logs visitor -n "$ns" --tail=3 2>/dev/null)
+  n=$(printf '%s\n' "$lines" | grep -c '^✅')
+  [ "$n" -ge 3 ] && return 0
+  warn "The visitor is not all ✅ yet. Its latest lines:"
+  printf '%s\n' "$lines" | sed 's/^/     /'
+  return 1
+}
