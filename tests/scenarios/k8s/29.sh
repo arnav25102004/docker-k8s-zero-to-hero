@@ -27,7 +27,7 @@ fixed() {
   kubectl rollout status deployment/notice -n "$NS29" --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "notice Deployment rolled out"
   assert_eq "$(notice_ready_count)" "2/2" "the notice Pod is 2/2 Ready"
-  assert_eq "$(in_cluster_http "$NS29" http://notice)" "200" "the board answers 200 inside the cluster"
+  assert_eq "$(in_cluster_http_wait "$NS29" http://notice 200)" "200" "the board answers 200 inside the cluster"
   local i=0 out=""
   while [ "$i" -lt 20 ]; do
     out="$(kubectl logs -n "$NS29" -l app=notice -c log-shipper --tail=50 2>&1)"

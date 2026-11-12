@@ -14,5 +14,5 @@ broken() {
 fixed() {
   kubectl rollout status deployment/showdown -n k-03-crashloop --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out"
-  assert_eq "$(in_cluster_http k-03-crashloop http://showdown/healthz)" "200" "showdown answers 200 on /healthz inside the cluster"
+  assert_eq "$(in_cluster_http_wait k-03-crashloop http://showdown/healthz 200)" "200" "showdown answers 200 on /healthz inside the cluster"
 }

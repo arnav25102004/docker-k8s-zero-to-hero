@@ -13,7 +13,7 @@ broken() {
 fixed() {
   kubectl rollout status deployment/showdown -n k-12-dns-app --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out"
-  assert_eq "$(in_cluster_http k-12-dns-app http://showdown/readyz)" "200" "showdown answers 200 on /readyz"
+  assert_eq "$(in_cluster_http_wait k-12-dns-app http://showdown/readyz 200)" "200" "showdown answers 200 on /readyz"
   local before after
   before="$(in_cluster_pod k-12-dns-app "" curl -s --max-time 5 http://showdown/api/results)"
   in_cluster_pod k-12-dns-app "" curl -s --max-time 5 "http://showdown/api/vote?option=cats" >/dev/null 2>&1

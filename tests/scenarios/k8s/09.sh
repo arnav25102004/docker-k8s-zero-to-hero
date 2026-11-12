@@ -19,7 +19,7 @@ fixed() {
     sleep 3
   done
   assert_eq "$ready" "true" "the adminer Pod is Ready (same Pod, started by the kubelet)"
-  assert_eq "$(in_cluster_http k-09-missing-secret http://adminer)" "200" "adminer answers 200 via the Service"
+  assert_eq "$(in_cluster_http_wait k-09-missing-secret http://adminer 200)" "200" "adminer answers 200 via the Service"
   local seen=""
   for i in 1 2 3 4 5; do
     if kubectl logs visitor -n k-09-missing-secret --tail=3 2>/dev/null | grep -q "✅"; then seen=yes; break; fi
