@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 It is the evening before the Christ University inter-department showdown, and Ravi has added a real database to the "Cats vs Dogs" poll: Redis, so votes survive an app restart. He deploys both, sees `created` twice, and goes to get chai. Redis is green. The poll page never loads, and the vote count is stuck at zero because the app Pod never shows `Running`. The status column shows a word he has never seen before. Everyone assumes the app is broken. He opens its logs, and Kubernetes answers... with an error instead of logs.
 
+![Diagram: the setup for K26, who talks to whom and what your mission is](../images/k26-context.svg)
+
 ## 🧠 The concept: why, what, how
 Some apps must not start until something else is ready: a database, a config service, a migration. Kubernetes gives a Pod **init containers** for exactly this. They are small helper containers that run **one at a time, in order, before the app container**. Each one must exit successfully (exit code 0) before the next starts, and the app containers only start after the last one finishes.
 

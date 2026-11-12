@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 Priya is helping the Christ University fest team ship the "Cats vs Dogs" poll for the inter-department showdown. The deploy file was copied from last year's, and she tidied it up just before leaving the lab. `kubectl` says `created`. The Pod never turns green, and the restart counter keeps climbing. She runs `kubectl logs` to see what the app is complaining about, and gets... nothing. Not an error. Not a traceback. A blank line, and a poll nobody can vote in.
 
+![Diagram: the setup for K24, who talks to whom and what your mission is](../images/k24-context.svg)
+
 ## 🧠 The concept: why, what, how
 Starting a container is two steps, done by two different parties. The **kubelet** (the agent on each node) asks the container runtime to create the container, and the runtime then tries to **execute** the program it was told to run. Only after that does *your* code run, and only your code writes to `kubectl logs`.
 

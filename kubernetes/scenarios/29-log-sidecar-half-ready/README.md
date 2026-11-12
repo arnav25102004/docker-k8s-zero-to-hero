@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Priya looks after the hostel's **Notice Board** page: the mess menu, the laundry slots and the quiet-hours reminder. This semester the warden wants to see who actually visits it, so Ravi adds a second container to the same Pod: a small helper that follows the web server's access log and prints each line, the first step towards "ship the logs to a central place". He deploys it and runs `kubectl get pods`. The Pod says `1/2`. The website is down, but when Ravi reads the server's logs, nginx looks perfectly happy. Half ready. Fully confusing.
 
+![Diagram: the setup for K29, who talks to whom and what your mission is](../images/k29-context.svg)
+
 ## 🧠 The concept: why, what, how
 A Pod can hold **more than one container**. They run side by side on the same node, share the Pod's network, and can share folders (volumes). A common recipe is a **sidecar**: the main container does the job (here: nginx serves the page), and a helper container does a chore next to it (here: follow the log file). They talk through a folder both can see, an `emptyDir` (scratch space that lives as long as the Pod).
 

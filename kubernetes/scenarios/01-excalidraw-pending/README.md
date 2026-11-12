@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl and cluster versi
 ## 📖 The story
 It's the week before the Christ University hackathon, and Lakshmi is setting up a shared whiteboard (Excalidraw) for all the teams. To be "safe", she copy-pastes the resource block from the big backend service her seniors wrote, the one that asks for 64 GiB of memory. She applies it, `kubectl` says `created`, and then... nothing. No error, no crash, no running whiteboard. The Pod just sits there, waiting.
 
+![Diagram: the setup for K01, who talks to whom and what your mission is](../images/k01-context.svg)
+
 ## 🧠 The concept: why, what, how
 Before Kubernetes starts a Pod, a component called the **scheduler** must pick a **node** (a machine) for it. To choose, it reads the Pod's **requests**: the amount of memory and CPU the Pod is *reserving*.
 

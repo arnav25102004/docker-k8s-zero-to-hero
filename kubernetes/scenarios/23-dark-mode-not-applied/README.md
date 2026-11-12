@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 The campus has screens in the canteen, the library and the main gate, all showing the "Campus Today" page: lunch menu, library hours, the last bus. After 8 PM the white page glares in the dark corridors, so Meera from the design team asks for a dark theme. Ravi flips the setting in the config: `THEME: dark`. `kubectl` says `configmap/ui-settings patched`. He walks to the canteen. The screen is still blinding white. He checks the config again. It says dark. He checks it a third time. Still dark. So who is lying?
 
+![Diagram: the setup for K23, who talks to whom and what your mission is](../images/k23-context.svg)
+
 ## 🧠 The concept: why, what, how
 A **ConfigMap** keeps settings outside your container image, so one image can run in many places with different settings. A Pod can receive a ConfigMap in two main ways:
 

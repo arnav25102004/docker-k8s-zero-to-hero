@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Lakshmi runs the **Campus notice board**, a page that lists fest dates, the canteen menu and the lost-and-found. It has been running happily for weeks. Yesterday the security team rolled out a new policy for every app on the cluster, and Ravi updated the notice board's Deployment to follow it. Now the Pods will not come up, and the whole college is staring at an empty board.
 
+![Diagram: the setup for K21, who talks to whom and what your mission is](../images/k21-context.svg)
+
 ## 🧠 The concept: why, what, how
 By default, a container in Kubernetes runs as whatever user its image says, and many images say **root**, the all-powerful user. If a root process is hijacked, the attacker starts with a lot of power. So security teams ask: "never run as root".
 

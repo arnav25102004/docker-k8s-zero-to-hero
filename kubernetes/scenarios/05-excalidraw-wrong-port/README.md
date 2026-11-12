@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Ravi's hackathon team shares a whiteboard (Excalidraw) for sketching designs. Last time the Service didn't find the Pods ([K04](../04-it-tools-no-endpoints/README.md)); this time Meera fixed the labels, and `kubectl get pods` is green. The Service even lists two addresses. Yet every request comes back refused. Someone copied a Service from another project that "used 8080", and nobody checked what Excalidraw really listens on.
 
+![Diagram: the setup for K05, who talks to whom and what your mission is](../images/k05-context.svg)
+
 ## 🧠 The concept: why, what, how
 A request to a Service passes through two ports, and they don't have to be the same number:
 

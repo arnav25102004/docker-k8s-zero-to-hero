@@ -13,6 +13,8 @@ It's the last Friday before the Christ University fest, and the Cats vs Dogs gra
 
 Three things broke. Nobody knows that yet.
 
+![Diagram: the setup for K30, who talks to whom and what your mission is](../images/k30-context.svg)
+
 ## 🧠 The concept: why, what, how
 When production breaks, the worst thing you can do is panic-change things. **Incident response** is the calm routine teams use instead:
 

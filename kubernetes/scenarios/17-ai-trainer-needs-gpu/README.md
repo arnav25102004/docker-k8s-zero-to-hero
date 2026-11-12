@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Arjun copies a training Deployment from a blog post and applies it to the college lab cluster. The Pod never starts. It doesn't crash and prints no error, because it never even began: it sits in `Pending`, forever. Nothing else on the cluster is wrong.
 
+![Diagram: the setup for K17, who talks to whom and what your mission is](../images/k17-context.svg)
+
 ## 🧠 The concept: why, what, how
 The **scheduler** is the part of Kubernetes that decides which node a new Pod runs on. By default it picks any node with enough room. Sometimes you want to steer it:
 

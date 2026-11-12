@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 It's the Friday of the campus fest and Priya pushes "just a tiny change" to the Cats vs Dogs poll at 6 PM, because nobody wants to work on Monday. Her deploy tool reports "timed out" and she panics: is the poll down during the fest's busiest hour? Ravi opens a terminal, looks at who is actually voting right now... and everything is fine. Version 1 is still serving every single visitor. The broken version 2 never took a single vote.
 
+![Diagram: the setup for K11, who talks to whom and what your mission is](../images/k11-context.svg)
+
 ## 🧠 The concept: why, what, how
 A Deployment doesn't swap your app in one risky step. It does a **rolling update**: it starts a few new Pods, waits until they are *Ready*, and only then retires old ones. The Pods come from a **ReplicaSet**, one per version, so the old version stays around as a ready-made way back.
 

@@ -13,6 +13,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Priya has built **Dosa Dash**, a catch-the-dosa game for the college fest, and Ravi deploys it. The cluster is healthy and every node says `Ready`. But the game never starts: both Pods sit in `Pending`. Yesterday Meera from the platform team changed something on the nodes before the big fest demo, and nobody told the game's team. The cluster has plenty of room, yet nothing new gets a place.
 
+![Diagram: the setup for K16, who talks to whom and what your mission is](../images/k16-context.svg)
+
 ## 🧠 The concept: why, what, how
 Normally the scheduler may put a Pod on any node with room. Sometimes a team wants to say "not here, unless you really need to be":
 

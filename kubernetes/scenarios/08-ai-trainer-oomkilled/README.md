@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl, container runtim
 ## 📖 The story
 It's exam week at Christ University and Meera's final-year project is a "model" that learns from a big dataset. She deploys the training to the lab's Kubernetes cluster and goes for a filter coffee. When she comes back, the training never finishes: the Pod keeps restarting, and each time the output stops at epoch 3 of 6. No red error, no traceback, nothing. Her teammate says, *"Maybe Python crashed?"* Python did not crash. Someone else ended it. This is the Docker story from [D06](../../../docker/scenarios/06-ai-trainer-oom-killed/README.md), and this time Kubernetes tells you who.
 
+![Diagram: the setup for K08, who talks to whom and what your mission is](../images/k08-context.svg)
+
 ## 🧠 The concept: why, what, how
 A cluster node's memory is shared by many Pods. To stop one greedy container from eating the whole machine, Kubernetes lets you set a **memory limit** on it. Under the hood it is a Linux **cgroup**: a fence the kernel builds around the container's processes.
 

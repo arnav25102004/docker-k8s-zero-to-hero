@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Priya writes a small worker for the campus fest scoreboard. It reads the Redis port from a variable called `REDIS_PORT`, and it works perfectly with `docker run`. On Kubernetes it crashes within a second, with an error about `REDIS_PORT`. She searches her YAML: the word `REDIS_PORT` is nowhere in it. Nobody set it. So who did? 👻
 
+![Diagram: the setup for K15, who talks to whom and what your mission is](../images/k15-context.svg)
+
 ## 🧠 The concept: why, what, how
 Long before DNS names were common in clusters, Docker's old "links" feature told one container about another by putting variables in its environment. Kubernetes kept the habit and calls it **service links**.
 

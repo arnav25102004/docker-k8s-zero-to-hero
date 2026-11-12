@@ -11,6 +11,8 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Lakshmi runs the **Exam Week Board** (the college notice board for exam season), a page that lists exam timetables, hall allocations and where to get help. It is exam week, so everyone is looking at it. Last week the security team made the board run as a normal user, and Ravi fixed it (that story is [K21](../21-notice-board-runasnonroot/README.md)). This week the security team is back with "the next step" for every app on the cluster, and Ravi adds it to the notice board's Deployment before lunch. The Pods now start, stop, start, stop, and the whole college is staring at an empty board again.
 
+![Diagram: the setup for K22, who talks to whom and what your mission is](../images/k22-context.svg)
+
 ## 🧠 The concept: why, what, how
 A container's filesystem is the image's files, plus a thin writable layer on top. By default a running program can change anything in there. That is convenient, but it also means an attacker who hijacks the program can drop in tools, edit config files or plant scripts.
 
