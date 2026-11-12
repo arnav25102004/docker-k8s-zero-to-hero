@@ -7,7 +7,9 @@ CHECK37="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/37-p
 broken() {
   assert_eq "$([ -n "$(kubectl get pod old-stall -n k-37-stuck-pod -o jsonpath='{.metadata.deletionTimestamp}' 2>&1)" ] && echo yes || echo no)" "yes" "the Pod has been asked to delete (it has a deletionTimestamp)"
   assert_contains "$(kubectl get pod old-stall -n k-37-stuck-pod -o jsonpath='{.metadata.finalizers}' 2>&1)" "cleanup-lock" "a finalizer is holding it"
-  assert_contains "$(kubectl get pods -n k-37-stuck-pod 2>&1)" "Terminating" "kubectl shows it as Terminating"
+  # Not the STATUS word: it reads Terminating while the container runs, but Completed or Error once it
+  # has stopped (current kubectl). The reliable signs are the deletionTimestamp and the finalizer above.
+  assert_contains "$(kubectl get pods -n k-37-stuck-pod 2>&1)" "old-stall" "the Pod is still listed, long after the delete"
   # The tempting wrong fix: a force delete does not lift a finalizer.
   # --wait=false: by default kubectl waits for the object to be gone, and a finalizer means it never is.
   kubectl delete pod old-stall -n k-37-stuck-pod --grace-period=0 --force --wait=false >/dev/null 2>&1

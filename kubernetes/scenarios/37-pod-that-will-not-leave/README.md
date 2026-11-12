@@ -2,7 +2,7 @@
 
 *You said delete. Kubernetes said yes. The Pod did not get the message.*
 
-⏱ 12 min · beginner · An old stall (`hashicorp/http-echo`, about 17 MB) · deletion, `Terminating`, finalizers, why a force delete does not always work
+⏱ 12 min · beginner · An old stall (`hashicorp/http-echo`, about 17 MB) · deletion, `deletionTimestamp`, finalizers, why a force delete does not always work
 
 ⬇️ First run downloads about 17 MB (the stall). A slow first download is normal: do it on good Wi-Fi, before the session.
 
@@ -13,7 +13,7 @@ Output columns and wording can differ a little between kubectl versions and clus
 ## 📖 The story
 Priya closed the old tea stall for good and ran `kubectl delete pod old-stall`. Kubernetes answered "deleted", very politely, an hour ago.
 
-The Pod is still on the list. Its status says `Terminating`. It is a bit like a guest who said goodbye at the door twenty minutes ago and is still standing in the hallway, holding their coat, looking at you.
+The Pod is still on the list, with a status that looks like it is on its way out (`Terminating`, or `Completed` once its container has stopped). It is a bit like a guest who said goodbye at the door twenty minutes ago and is still standing in the hallway, holding their coat, looking at you.
 
 ![Diagram: the setup for K37, who talks to whom and what your mission is](../images/k37-context.svg)
 
@@ -29,7 +29,7 @@ If the controller that owns the note is gone (uninstalled, crashed, or buggy), n
 ```
  kubectl delete ──▶ deletionTimestamp set ──▶ any finalizers left?
                                                  no  ──▶ object removed ✔
-                                                 yes ──▶ wait… (status: Terminating)
+                                                 yes ──▶ wait… (still listed)
 ```
 
 
@@ -40,7 +40,7 @@ You deleted a Pod an hour ago.
 
 <details><summary>Check your prediction</summary>
 
-1. `Terminating`: the delete was accepted, but something is stopping it from finishing.
+1. It is **still listed**. The `STATUS` may say `Terminating`, or, on current kubectl once the container has stopped, `Completed` or `Error`. Either way the delete was accepted and something is stopping it from finishing. (Notice that `STATUS` is not a reliable guide here: the `deletionTimestamp` below is.)
 2. Keep your guess: you will test it for real in a few minutes.
 </details>
 
@@ -52,7 +52,7 @@ It starts a Pod, then deletes it, and finishes. Now watch:
 ```bash
 kubectl get pods -n k-37-stuck-pod -w
 ```
-The `STATUS` column says `Terminating`, and it stays that way. (Ctrl+C to stop.) Nothing is red, nothing is crashing. It is just stuck.
+The Pod stays on the list. Its `STATUS` is `Terminating` while the container is shutting down, and on current kubectl it changes to `Completed` or `Error` once the container has stopped. Don't be fooled either way: the Pod is not gone, and it is not going to go on its own. (Ctrl+C to stop.) Nothing is red, nothing is crashing. It is just stuck.
 
 ## 🔍 Investigate: you drive
 **Q1. Has the delete actually been accepted?**
@@ -115,7 +115,7 @@ A green message means the Pod is really gone.
 
 ## 🎯 Key takeaways
 - **Deleting is a request.** The object goes away only when its finalizers are empty.
-- **`Terminating` for a long time almost always means a finalizer.** Look at `metadata.finalizers`.
+- **A Pod that stays listed long after a delete almost always has a finalizer.** Look at `metadata.deletionTimestamp` and `metadata.finalizers`, not just `STATUS`: it reads `Terminating` while the container runs, and `Completed` or `Error` after.
 - **A force delete does not remove a finalizer.**
 - **Find the owner first, then remove the note.** Removing it skips the cleanup.
 - The same thing happens to **namespaces, volumes and custom resources**: a namespace stuck `Terminating` is usually an object inside it with a finalizer whose controller is gone.
