@@ -98,6 +98,7 @@ in_cluster_http_wait() {
   while [ "$i" -lt "$max" ]; do
     got=$(in_cluster_http "$ns" "$url")
     [ "$got" = "$want" ] && break
+    [ "$got" = "ERR" ] && break   # the helper Pod cannot run: more attempts only waste minutes
     i=$((i + 1))
     [ "$i" -lt "$max" ] && sleep 2
   done
