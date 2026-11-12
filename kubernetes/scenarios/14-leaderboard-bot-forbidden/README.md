@@ -40,6 +40,17 @@ cd break && ./break.sh
 ```
 What the room should see: the script says the bot is running, but the leaderboard stays empty. There is **no web page and no port to open** in this scenario (the bot is not a web app), so everything we do happens in the terminal with `logs` and `kubectl auth can-i`.
 
+## 🔮 Predict first (60 seconds)
+The bot has a valid identity but no permissions. Before you look:
+1. Will the error be 401 or 403?
+2. Which objects would grant it permission?
+
+<details><summary>Check your prediction</summary>
+
+1. 403: the API server knows exactly who it is, and the answer is no. (401 would mean "I don't know who you are".)
+2. A Role (what is allowed) and a RoleBinding (who gets it).
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -86,6 +97,10 @@ kubectl get role,rolebinding -n k-14-forbidden
 No resources found in k-14-forbidden namespace.
 ```
 No Role, no RoleBinding. Nobody ever granted this ServiceAccount anything. (The ServiceAccount itself does exist: `kubectl get serviceaccount -n k-14-forbidden` shows `leaderboard-bot` next to `default`.)
+
+## 🪤 The tempting wrong fix: give it cluster-admin
+"Just give the bot admin rights."
+That would make the 403 disappear, and it would also let the bot read every Secret and delete every workload in the cluster, to fix a bot that only needed to list Pods. (Text only: a cluster-wide binding is the kind of thing you should not leave behind.) Least privilege means granting exactly what the error message asked for: `list` on `pods`.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -201,6 +216,18 @@ rolebinding.rbac.authorization.k8s.io/leaderboard-bot-reads-pods   Role/pod-read
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between a 401 and a 403?
+2. Which three objects make a permission work?
+3. What does `kubectl auth can-i` do?
+
+<details><summary>Answers</summary>
+
+1. 401: unknown identity. 403: known identity, action not allowed.
+2. A ServiceAccount (who), a Role (what), and a RoleBinding (connecting them).
+3. It asks the API server whether an identity may do something, without trying it.
+</details>
 
 ## Next →
 [K15](../15-mystery-redis-port/README.md): Nobody set REDIS_PORT. Kubernetes did.

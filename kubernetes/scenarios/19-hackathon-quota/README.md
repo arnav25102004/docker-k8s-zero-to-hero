@@ -47,6 +47,17 @@ kubectl logs -f visitor -n k-19-hackathon
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things. (The visitor itself *does* run: it declares its own numbers, and we'll see why.)
 
+## 🔮 Predict first (60 seconds)
+The namespace has a quota, and the Pod template declares no resources. Before you look:
+1. Does the Deployment have any Pods?
+2. Where will the error appear?
+
+<details><summary>Check your prediction</summary>
+
+1. No: it shows `0/2`.
+2. On the **ReplicaSet**, not the Deployment: the refusal happens when the ReplicaSet tries to create a Pod.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
 
@@ -116,6 +127,14 @@ requests.cpu     10m   500m
 requests.memory  8Mi   256Mi
 ```
 There is plenty of budget left. Only the visitor uses a little (`Used`): so it is **not** about running out. It is about the Pods not stating their numbers. (And look: the visitor stated its own numbers, which is why it was allowed in. Check with `kubectl get pod visitor -n k-19-hackathon -o yaml | grep -A8 resources`.)
+
+## 🪤 The tempting wrong fix: restart the rollout
+"Kick it again."
+```bash
+kubectl rollout restart deployment dashboard -n k-19-hackathon
+kubectl get deployment,rs -n k-19-hackathon
+```
+A new ReplicaSet appears and is refused for exactly the same reason. A restart does not change what the Pod template says, and the quota still demands requests and limits.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -240,6 +259,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Why are there no Pods at all?
+2. Where do you look when a Deployment shows `0/2`?
+3. What does the Pod template need?
+
+<details><summary>Answers</summary>
+
+1. The quota's admission check refused to create them.
+2. One level up: `kubectl describe rs` (the ReplicaSet's events).
+3. `requests` and `limits` for the resources the quota covers.
+</details>
 
 ## Next →
 [K20](../20-surprise-limitrange-oom/README.md): "Nobody set a memory limit. The app still got killed for exceeding it."

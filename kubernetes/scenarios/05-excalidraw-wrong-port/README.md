@@ -45,6 +45,17 @@ kubectl logs -f visitor -n k-05-wrong-port
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The Service has endpoints and the Pods are Ready. Before you look:
+1. Will a request to the Service work?
+2. Which single field do you suspect?
+
+<details><summary>Check your prediction</summary>
+
+1. No: it will be refused. The Service finds the Pods but knocks on the wrong port.
+2. `targetPort`.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: requests fail.
 
@@ -112,6 +123,14 @@ pod k-05-wrong-port/tmp terminated (Error)
 There it is: **refused** on 8080 (the exact wording of the last two lines varies by kubectl version). The Pod is healthy; the Service is knocking on the wrong door.
 
 An extra clue, if you have a minute to spare: `kubectl port-forward -n k-05-wrong-port svc/draw 9205:80` also follows the Service's `targetPort`. It starts happily, but the first time you open the page it fails (the terminal prints something like `Forwarding from 127.0.0.1:9205 -> 8080`, then `an error occurred forwarding 9205 -> 8080 … connection refused` and `error: lost connection to pod`; the wording varies by version). Notice the `-> 8080` in the first line. Press Ctrl+C to stop it.
+
+## 🪤 The tempting wrong fix: scale it up
+"More Pods, more chances."
+```bash
+kubectl scale deployment draw -n k-05-wrong-port --replicas=4
+kubectl get endpointslices -n k-05-wrong-port
+```
+Four endpoints now, and every one of them refuses the connection. Each Pod listens on the right port and the Service knocks on the wrong one, so more Pods are just more refusals. (Scale back to 1 afterwards.)
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -202,6 +221,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between `port` and `targetPort`?
+2. Endpoints exist but connections are refused: which field do you check?
+3. How do you test layer by layer?
+
+<details><summary>Answers</summary>
+
+1. `port` is the Service's front door. `targetPort` is the door on the container.
+2. The Service's `targetPort`, against the port the container really listens on.
+3. Test the Pod directly first, then the Service. The layer where it stops working is where the bug lives.
+</details>
 
 ## Next →
 [K06](../06-kanboard-never-ready/README.md): It's running. It's healthy. It just never gets any visitors.

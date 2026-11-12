@@ -52,6 +52,17 @@ kubectl logs visitor -n k-29-sidecar --tail=3
 ```
 (Times will differ.) You can follow it live with `kubectl logs -f visitor -n k-29-sidecar` and stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+A helper container waits for a log file with the wrong name. Before you look:
+1. What will `READY` show for the Pod?
+2. Will the web page work?
+
+<details><summary>Check your prediction</summary>
+
+1. `1/2`: one container is Ready, the other is not.
+2. No: a Pod is only Ready when *all* its containers are, so the Service sends it nothing.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
 
@@ -149,6 +160,14 @@ kubectl get deploy notice -n k-29-sidecar -o jsonpath='{.spec.template.spec.cont
 [{"name":"LOG_FILE","value":"/logs/acess.log"}]
 ```
 The helper is told to follow `/logs/acess.log`. Read it slowly against `access.log`.
+
+## 🪤 The tempting wrong fix: ignore the helper
+"The web server is fine. The helper is just logging, so leave it."
+```bash
+kubectl delete pods -n k-29-sidecar -l app=notice
+kubectl get pods -n k-29-sidecar
+```
+A new Pod comes up `1/2` again. The helper is not optional: one unready container keeps the whole Pod out of the Service, however healthy the web container is.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -280,6 +299,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `READY 1/2` mean?
+2. How do you read the logs of one container in a multi-container Pod?
+3. Why does one unready container stop the whole Pod?
+
+<details><summary>Answers</summary>
+
+1. One of the Pod's two containers is Ready.
+2. `kubectl logs <pod> -c <container name>`.
+3. Readiness is per Pod: the Service only uses a Pod when all of its containers are Ready.
+</details>
 
 ## Next →
 [K30](../30-friday-5pm-outage/README.md): Friday, 5 PM. Three things broke. Nobody knows that yet.

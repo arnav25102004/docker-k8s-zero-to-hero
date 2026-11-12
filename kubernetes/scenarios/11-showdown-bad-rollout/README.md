@@ -48,6 +48,17 @@ kubectl logs -f visitor -n k-11-bad-rollout
 ```
 (Press Ctrl+C to stop.) It stays green and on **v1.0.0**: that is the point. The release is broken, and the users have not noticed.
 
+## 🔮 Predict first (60 seconds)
+Release v2 crashes at startup. Before you look:
+1. Will visitors see errors during the release?
+2. How many Pods will be Ready?
+
+<details><summary>Check your prediction</summary>
+
+1. No. The old version keeps answering.
+2. The old Pods stay Ready (`maxUnavailable: 0` protects them), and the one new Pod never becomes Ready.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -133,6 +144,10 @@ kubectl rollout history deployment/showdown -n k-11-bad-rollout --revision=1 | g
     Mounts:
 ```
 (The `Mounts:` line is just the next line of the output.) v2 ships `APP_VERSION 2.0.0` and `PORT eighty`; v1 had `1.0.0` and `8080`.
+
+## 🪤 The tempting wrong fix: just wait for it
+"It is a rollout. It will sort itself out."
+It will not. The rollout waits for the new Pod to become Ready, and a Pod that crashes at startup never does. After `progressDeadlineSeconds` (10 minutes by default) Kubernetes stops waiting and reports that the deadline was exceeded, with the release still stuck. Deleting the crashing Pod does not help either: its ReplicaSet creates another one, which crashes the same way. A crashing release needs to be rolled back or fixed, not waited on.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -229,6 +244,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Which settings protected the visitors?
+2. Which command puts the old version back?
+3. What does `kubectl rollout history` show?
+
+<details><summary>Answers</summary>
+
+1. `maxUnavailable: 0` and the readiness probe: no Ready Pod is removed until a new one is Ready.
+2. `kubectl rollout undo`.
+3. The revisions of the Deployment, so you can see what changed and roll back to one.
+</details>
 
 ## Next →
 [K12](../12-showdown-dns-namespaces/README.md): The Redis is running. The app is running. And the app swears Redis does not exist.

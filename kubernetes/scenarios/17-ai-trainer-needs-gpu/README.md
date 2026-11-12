@@ -44,6 +44,17 @@ cd break && ./break.sh
 ```
 What the room should see: the script says it is starting the AI trainer, and then finishes. The training never starts. There is **no web page and no port to open** in this scenario (it isn't a web app), so everything we do, finding the problem and checking the fix, happens in the terminal.
 
+## 🔮 Predict first (60 seconds)
+The Deployment requires a node label that no node has. Before you look:
+1. Will the Pod crash or stay `Pending`?
+2. Which field in the Deployment is responsible?
+
+<details><summary>Check your prediction</summary>
+
+1. `Pending`: it never gets a node.
+2. `nodeSelector`, a required rule.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -94,6 +105,10 @@ z2h-test-worker          Ready    <none>          45m   v1.33.1
 z2h-test-worker2         Ready    <none>          45m   v1.33.1   
 ```
 (Your node names and versions will differ.) The `ACCELERATOR` column is empty on every node. The Pod waits for something that does not exist, and nothing in Kubernetes will ever create it on its own.
+
+## 🪤 The tempting wrong fix: label a node
+"Just tell Kubernetes one of the nodes has a GPU."
+Labelling a node `accelerator=nvidia-gpu` would satisfy the scheduler, and the Pod would start. The node would still have no GPU, so the "GPU" trainer would run, badly, on a machine that cannot do the job. (Text only.) A label is a statement of fact: do not make it a lie to get a Pod scheduled.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -200,6 +215,18 @@ The word `preferred` is the whole fix. (The Pod's own `Node-Selectors:` line in 
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between a `nodeSelector` and node affinity?
+2. What is the difference between `required` and `preferred`?
+3. How do you see a node's labels?
+
+<details><summary>Answers</summary>
+
+1. Both match node labels. Affinity is more expressive and can be soft.
+2. Required must be met or the Pod stays `Pending`. Preferred is a wish: the scheduler tries, but will place the Pod anyway.
+3. `kubectl get nodes --show-labels`.
+</details>
 
 ## Next →
 [K18](../18-whoami-anti-affinity/README.md): One replica too many. "Never two on the same node" just met reality.

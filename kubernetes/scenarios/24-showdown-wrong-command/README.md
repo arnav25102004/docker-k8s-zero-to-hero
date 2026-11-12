@@ -48,6 +48,17 @@ kubectl logs -f visitor -n k-24-never-ran
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The command in the Deployment has a typo and the app never runs. Before you look:
+1. Will `kubectl logs` show anything?
+2. Where will you find the clue?
+
+<details><summary>Check your prediction</summary>
+
+1. Nothing: the app never ran, so it never wrote a line.
+2. In the Pod's Events: the runtime could not find the executable.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -126,6 +137,14 @@ kubectl get deploy showdown -n k-24-never-ran -o yaml | grep -A2 'command:'
         - /app/app.py
 ```
 The Deployment tells the container to start by running `pyhton`. The image has `python`. One letter swapped.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"A new Pod might work."
+```bash
+kubectl delete pods -n k-24-never-ran -l app=showdown
+kubectl get pods -n k-24-never-ran
+```
+The new Pod gets the same misspelled command from the same Deployment and fails the same way, still with empty logs.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -220,6 +239,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Why are the logs empty?
+2. How do `kubectl logs` and Events differ as clues?
+3. What error does a missing executable produce?
+
+<details><summary>Answers</summary>
+
+1. The app never started.
+2. Logs are what the *app* said. Events are what *Kubernetes* did.
+3. "executable file not found in $PATH".
+</details>
 
 ## Next →
 [K25](../25-showdown-hpa-not-scaling/README.md): Traffic is pouring in. The autoscaler shrugs: "unknown".

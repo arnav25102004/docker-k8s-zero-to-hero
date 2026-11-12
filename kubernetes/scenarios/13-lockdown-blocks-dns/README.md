@@ -47,6 +47,17 @@ kubectl logs -f visitor -n k-13-lockdown
 ```
 (One line about every 7 seconds: each failed check takes 5 seconds to give up.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+A policy allows Redis on port 6379 and nothing else outbound. Before you look:
+1. Is Redis reachable by its IP address?
+2. Why can the app still not find it?
+
+<details><summary>Check your prediction</summary>
+
+1. Yes: that exact rule is allowed.
+2. The app uses a *name*, and the lookup (DNS on port 53) is dropped, because the policy does not list it.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -134,6 +145,10 @@ spec:
   - Egress
 ```
 (Key order can differ.) `policyTypes: Egress` plus a single rule: "to Redis Pods, port 6379". Nothing for port 53. That is the whole guest list.
+
+## 🪤 The tempting wrong fix: delete the policy
+"Security broke it, so remove the lockdown."
+That does bring the app back: with the policy gone, nothing blocks DNS any more. But you have just removed the protection the security team asked for, to fix a problem that only needed one more rule. (This one is text only: running it would undo the scenario.) The policy was right. It was incomplete.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -247,6 +262,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What is the difference between ingress and egress rules?
+2. What happens to outbound traffic once a policy selects Pods for egress?
+3. What must an egress rule allow so that name-based access works?
+
+<details><summary>Answers</summary>
+
+1. Ingress controls traffic coming *in* to the Pods. Egress controls traffic going *out*.
+2. Everything not listed is blocked.
+3. DNS (port 53, UDP and TCP, to CoreDNS in `kube-system`) as well as the destination itself.
+</details>
 
 ## Next →
 [K14](../14-leaderboard-bot-forbidden/README.md): The bot has a valid ID card. The API still says: not allowed.

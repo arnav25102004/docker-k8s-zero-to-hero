@@ -38,6 +38,17 @@ cd break && ./break.sh
 ```
 What the room should see: the script finishes and says Redis is running while the score worker keeps crashing and restarting. Nothing has been published or exposed, so there is no web page here, only Pods and logs.
 
+## 🔮 Predict first (60 seconds)
+Nobody set `REDIS_PORT` in the YAML. Before you look:
+1. Where could the variable come from?
+2. Which Pods get it?
+
+<details><summary>Check your prediction</summary>
+
+1. Kubernetes injects variables for every Service in the namespace into new Pods. The Service `redis` produced `REDIS_PORT`.
+2. Pods that start after the Service exists.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -101,6 +112,14 @@ NAME    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
 redis   ClusterIP   10.96.234.78   <none>        6379/TCP   30s
 ```
 The `CLUSTER-IP` is the same address. The Service called `redis` caused a variable called `REDIS_PORT`.
+
+## 🪤 The tempting wrong fix: restart the worker
+"A fresh Pod will have a fresh environment."
+```bash
+kubectl delete pods -n k-15-mystery-env -l app=score-worker
+kubectl logs -n k-15-mystery-env -l app=score-worker --tail=3
+```
+The Service `redis` still exists, so the new Pod gets the same injected variable and fails the same way. The environment is rebuilt from the Services, every time.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -178,6 +197,18 @@ kubectl exec -n k-15-mystery-env deploy/score-worker -- env | grep -c REDIS
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does the injected variable look like?
+2. Why did the worker fail on it?
+3. How do you stop Kubernetes injecting these variables?
+
+<details><summary>Answers</summary>
+
+1. Something like `tcp://<cluster IP>:6379`, a URL, not a port number.
+2. The worker read it as a number and could not parse a URL.
+3. Set `enableServiceLinks: false` in the Pod spec.
+</details>
 
 ## Next →
 [K16](../16-game-server-vip-node/README.md): The nodes are up. The game is ready. Kubernetes says: you're not on the list.

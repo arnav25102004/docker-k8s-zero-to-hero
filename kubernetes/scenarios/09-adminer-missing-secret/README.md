@@ -46,6 +46,17 @@ kubectl logs -f visitor -n k-09-missing-secret
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The Deployment asks for a Secret that does not exist. Before you look:
+1. Will there be any logs?
+2. What will `STATUS` say?
+
+<details><summary>Check your prediction</summary>
+
+1. No. No container was ever created, so there is nothing to log.
+2. `CreateContainerConfigError`.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody is served.
 
@@ -106,6 +117,14 @@ kubectl get secrets -n k-09-missing-secret
 No resources found in k-09-missing-secret namespace.
 ```
 The namespace has no Secrets at all. (Adminer itself shows you a login page and never reads `DB_PASSWORD`. In this demo the variable stands for any app that needs a password at start-up.)
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Maybe it will find the Secret on a second try."
+```bash
+kubectl delete pods -n k-09-missing-secret -l app=adminer
+kubectl get pods -n k-09-missing-secret
+```
+The new Pod asks for the same missing Secret and stops at the same place. Restarting cannot create a Secret that nobody created.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -215,6 +234,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. Why are there no logs?
+2. When does the kubelet resolve a container's environment from a Secret?
+3. After you create the missing Secret, must you restart the Pod?
+
+<details><summary>Answers</summary>
+
+1. The container was never created.
+2. Before it creates the container.
+3. No. The kubelet keeps retrying, so the existing Pod picks the Secret up on its own.
+</details>
 
 ## Next →
 [K10](../10-kanboard-pvc-pending/README.md): The Pod isn't crashing. It isn't even starting. It's waiting for a disk that doesn't exist.

@@ -48,6 +48,17 @@ kubectl logs -f visitor -n k-21-nonroot
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The Deployment requires the container to run as a non-root user, and the image starts as root. Before you look:
+1. What will `STATUS` say?
+2. Will there be logs?
+
+<details><summary>Check your prediction</summary>
+
+1. `CreateContainerConfigError`.
+2. No: Kubernetes checks the rule before it creates the container.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: nobody answers.
 
@@ -89,6 +100,10 @@ kubectl get deploy board -n k-21-nonroot -o jsonpath='{.spec.template.spec.secur
 {"runAsNonRoot":true}
 ```
 There is the guard: the Pod must not run as root. And the image? The official `nginx` image declares no other user, so its main process starts as root (it writes into root-owned folders such as `/var/cache/nginx`, and listens on port 80). The guard and the image disagree, so the container is never created.
+
+## 🪤 The tempting wrong fix: turn the rule off
+"Remove `runAsNonRoot` and be done."
+The page would come back, and so would the risk the security team was trying to close. (Text only.) The rule is right: the *image* does not fit it. A policy you switch off whenever it is inconvenient is not a policy.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -212,6 +227,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. When does Kubernetes check `runAsNonRoot`?
+2. Why are there no logs?
+3. What is the right fix?
+
+<details><summary>Answers</summary>
+
+1. Before it creates the container.
+2. The container never exists.
+3. Use an image built to run as a normal user (here, the unprivileged nginx image), not weaken the rule.
+</details>
 
 ## Next →
 [K22](../22-notice-board-readonly-fs/README.md): Locked down perfectly. Now it can't even start.

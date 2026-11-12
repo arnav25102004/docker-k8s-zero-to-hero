@@ -42,6 +42,17 @@ kubectl logs -f visitor -n k-23-dark-mode
 ```
 (Times will differ.) You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+Dark mode is set in the ConfigMap after the Pod started. Before you look:
+1. Will the running Pod pick up the change?
+2. How does the Pod receive the setting?
+
+<details><summary>Check your prediction</summary>
+
+1. No.
+2. As environment variables, copied once when the container starts. A running process never sees a later change.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The symptom: the config says dark, the site says light.
 
@@ -121,6 +132,10 @@ Container started: 2026-11-09T00:02:02Z
 ConfigMap changed:  2026-11-09T00:02:03Z
 ```
 (The second command only reads *when* the patch happened from the ConfigMap's bookkeeping; it changes nothing.) (Times will differ, and the gap is only a couple of seconds here because `break.sh` patches the ConfigMap right after the page is ready; in real life it is often days.) The container started **before** the ConfigMap changed. The Pod is older than the change.
+
+## 🪤 The tempting wrong fix: wait a bit longer
+"Config changes take a moment to arrive."
+Not this kind. Environment variables are copied into the container once, when it starts, and are never refreshed. You can wait an hour and the old value will still be there. The Pod has to be *replaced* to see a new value.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -229,6 +244,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. When are environment variables read from a ConfigMap?
+2. Which command replaces the Pods so they pick up the change?
+3. Would a mounted file behave differently?
+
+<details><summary>Answers</summary>
+
+1. Once, when the container starts.
+2. `kubectl rollout restart`.
+3. Yes: files from a mounted ConfigMap are refreshed in place (after a delay), unless they are mounted with `subPath`.
+</details>
 
 ## Next →
 [K24](../24-showdown-wrong-command/README.md): No crash log. No error from the app. The app never even ran.

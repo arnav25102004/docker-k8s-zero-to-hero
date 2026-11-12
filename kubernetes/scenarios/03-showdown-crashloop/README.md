@@ -46,6 +46,17 @@ kubectl logs -f visitor -n k-03-crashloop
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The app crashes at startup. Before you look:
+1. Will `RESTARTS` go up?
+2. Will `kubectl logs` show anything?
+
+<details><summary>Check your prediction</summary>
+
+1. Yes, and `STATUS` cycles between `Error` and `CrashLoopBackOff`.
+2. Yes: the app prints its error before dying. For a container that has already died and been replaced, use `kubectl logs --previous`.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**.
 
@@ -101,6 +112,14 @@ kubectl get deploy showdown -n k-03-crashloop -o yaml | grep -A1 'name: PORT'
           value: eighty
 ```
 The Deployment sets `PORT` to the word `eighty`. The app needs digits.
+
+## 🪤 The tempting wrong fix: delete the Pod
+"Give it a fresh start."
+```bash
+kubectl delete pods -n k-03-crashloop -l app=showdown
+kubectl get pods -n k-03-crashloop
+```
+The new Pod gets exactly the same setting from the same Deployment, so it crashes in exactly the same way. A fresh start with the same input gives the same result.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -191,6 +210,18 @@ Press Ctrl+C in the port-forward terminal first, then:
 ```bash
 cd .. && ./cleanup.sh
 ```
+
+## 🧪 Quick recap (3 questions)
+1. What does `CrashLoopBackOff` mean?
+2. How do you read the last words of a container that already died?
+3. Why is restarting not a fix here?
+
+<details><summary>Answers</summary>
+
+1. The container keeps dying, and Kubernetes waits longer and longer between restarts.
+2. `kubectl logs --previous`.
+3. A restart reuses the same configuration, so the same mistake happens again.
+</details>
 
 ## Next →
 [K04](../04-it-tools-no-endpoints/README.md): Every Pod is Running. Every request fails.
