@@ -173,12 +173,7 @@ Two LimitRange details worth knowing. In its YAML, the key `default` means the d
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1,2
-< # K20 break: Cats vs Dogs with no resources section. The start command preloads a 40 MiB "vote history" (demo filler) before the app starts.
----
-> # K20 fix: the same Deployment, now with an explicit resources section (the app team's fix).
-> # Explicit values always win over the LimitRange defaults, which only fill in each missing value.
-37a39,43
+37a38,42
 >           resources:
 >             requests:
 >               memory: 64Mi

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K27 break: deploy the Campus quick links dashboard with its settings from a ConfigMap.
+# K27 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

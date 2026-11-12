@@ -1,4 +1,4 @@
-# K04 break: the Pods are labelled tier: backend, but the Service looks for tier: frontend.
+# K04: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,7 +34,7 @@ metadata:
 spec:
   selector:
     app: tools
-    tier: frontend    # the Pods say "backend"
+    tier: frontend
   ports:
     - port: 80
       targetPort: 80

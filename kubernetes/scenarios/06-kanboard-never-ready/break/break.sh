@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K06 break: the readiness probe checks /healthz.php (404), so the Pod runs but never becomes Ready.
+# K06 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

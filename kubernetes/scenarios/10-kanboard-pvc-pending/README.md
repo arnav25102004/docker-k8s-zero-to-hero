@@ -110,6 +110,8 @@ standard (default)   rancher.io/local-path   Delete          WaitForFirstConsume
 <details><summary>Reveal after the room guesses</summary>
 
 The PVC `board-data` asks for `storageClassName: fast-ssd`, a class that exists in the company's cloud cluster but not in this one. With no such class, no provisioner will ever create the disk, so the PVC stays `Pending` forever, and a Pod that needs the PVC can never be scheduled. Nothing is wrong with Kanboard, the image or the cluster. The chain Pod → PVC → StorageClass stops at the StorageClass.
+
+![Diagram: the claim asks for StorageClass fast-ssd, which does not exist, so no volume is created](../images/k10-pvc-storageclass.svg)
 </details>
 
 ## 🔧 Fix it
@@ -133,12 +135,8 @@ Within about twenty seconds once Kanboard is downloaded (the first time, up to a
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K10 break: the PVC asks for StorageClass "fast-ssd" (copied from another cluster). This cluster has no such class.
----
-> # K10 fix: no storageClassName, so the cluster's default StorageClass is used.
 10d9
-<   storageClassName: fast-ssd    # does not exist here
+<   storageClassName: fast-ssd
 ```
 One line of config is gone (plus the header comment): with no `storageClassName`, the cluster's default class is used. But you can't just `kubectl apply` that: a PVC's spec is **immutable** (Kubernetes refuses to change the class of an existing PVC). So `fix.sh` deletes the Deployment (a PVC that a Pod uses is protected and would hang in `Terminating`), then deletes the PVC, then applies the corrected file, which creates a new PVC and a new Pod. If your default class uses WaitForFirstConsumer (as on kind), the new PVC may show `Pending` for a moment: that is normal, it binds as soon as the Pod is scheduled.
 

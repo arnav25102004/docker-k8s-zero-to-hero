@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K01 break: the Excalidraw Deployment requests 64Gi of memory per Pod, so no node can take it.
+# K01 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

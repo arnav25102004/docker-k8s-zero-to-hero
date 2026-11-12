@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K20 break: deploys the Cats vs Dogs app (no resources section) and a visitor; the app starts crashing.
+# K20 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

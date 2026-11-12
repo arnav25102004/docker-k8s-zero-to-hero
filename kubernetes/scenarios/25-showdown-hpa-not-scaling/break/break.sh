@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K25 break: installs metrics-server if the cluster has none, deploys the Cats vs Dogs app, an autoscaler and a load Pod.
+# K25 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

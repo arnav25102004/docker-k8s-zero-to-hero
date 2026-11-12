@@ -122,6 +122,8 @@ A **required** anti-affinity: never two `app=whoami` Pods on the same node.
 The Deployment has a **required** pod anti-affinity on `kubernetes.io/hostname` ("never two whoami Pods on one node"), and `break.sh` asked for **one more replica than there are nodes that accept Pods**. The scheduler placed one Pod per node, then had no node left that satisfied the rule. It recorded `didn't match pod anti-affinity rules` and left the last Pod `Pending`. Because the other Pods serve traffic, the Service never went down: the only symptoms are fewer copies than you asked for (`2/3` ready) and the visitor counting fewer answering Pods.
 
 The rule is fine for 2 replicas on 2 nodes. It is a time bomb for "scale to 3", or for a cluster that loses a node.
+
+![Diagram: the scheduler filters out every node, so the Pod stays Pending](../images/pending-scheduler-filters.svg)
 </details>
 
 ## 🔧 Fix it

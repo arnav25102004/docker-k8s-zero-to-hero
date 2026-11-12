@@ -1,4 +1,4 @@
-# K08 fix: the same trainer with room to finish: memory limit 256Mi (request 200Mi).
+# K08: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,4 +1,4 @@
-# K03 break: PORT is set to the word "eighty" instead of the number 8080, so the app crashes at start.
+# K03: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,7 +20,7 @@ spec:
           command: ["python", "/app/app.py"]
           env:
             - name: PORT
-              value: "eighty"    # a word, not a number
+              value: "eighty"
           ports:
             - containerPort: 8080
           readinessProbe:

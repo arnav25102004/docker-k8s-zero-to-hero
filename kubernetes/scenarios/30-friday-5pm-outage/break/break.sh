@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# K30 break: deploys the Friday release of Cats vs Dogs (app, database, Service) and a
-# visitor, then waits until every Pod has settled into what the room will investigate.
+# K30 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

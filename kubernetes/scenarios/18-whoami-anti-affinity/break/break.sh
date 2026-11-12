@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K18 break: scales whoami up for the open house.
+# K18 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

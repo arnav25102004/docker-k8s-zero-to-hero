@@ -1,4 +1,4 @@
-# K15 fix: same worker, but Kubernetes is told NOT to inject Docker-link-style variables.
+# K15: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

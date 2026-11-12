@@ -130,12 +130,7 @@ The script waits for the new Pod, which takes about 25 seconds because the app r
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,2c1
-< # K07 break: the app needs about 20 s to wake up, but the liveness probe starts checking after 5 s
-< # and gives up after ONE failure, so the app is killed before it is ever ready.
----
-> # K07 fix: a startupProbe gives the app up to 60 s (12 x 5 s) to wake up; liveness only starts after it passes.
-30a30,35
+29a30,35
 >           startupProbe:
 >             httpGet:
 >               path: /healthz

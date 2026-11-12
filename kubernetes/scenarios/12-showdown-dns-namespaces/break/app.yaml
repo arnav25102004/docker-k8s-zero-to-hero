@@ -1,6 +1,4 @@
-# K12 break: the app lives in k-12-dns-app but Redis lives in k-12-dns-data.
-# REDIS_HOST=redis is a SHORT name, so DNS looks for it only in the app's own namespace.
-# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+# K12: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

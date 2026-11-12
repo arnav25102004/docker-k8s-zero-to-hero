@@ -1,5 +1,4 @@
-# K20 break: settings for the namespace, set by the "platform team".
-# (In this YAML, `default` is the default LIMIT and `defaultRequest` is the default request.)
+# K20: scenario manifest
 apiVersion: v1
 kind: LimitRange
 metadata:

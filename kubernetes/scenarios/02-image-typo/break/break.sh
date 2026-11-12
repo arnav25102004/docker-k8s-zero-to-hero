@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K02 break: the Excalidraw Deployment points at an image name with a typo, so the node can't pull it.
+# K02 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

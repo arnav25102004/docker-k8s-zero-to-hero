@@ -115,12 +115,7 @@ What changed? Compare the two worker files (the only difference besides the firs
 diff ../break/worker.yaml worker.yaml
 ```
 ```
-1,2c1
-< # K15 break: the "score worker" reads REDIS_PORT as a number. Nobody sets it in this YAML,
-< # but Kubernetes injects REDIS_PORT=tcp://<ClusterIP>:6379 because a Service called "redis" exists.
----
-> # K15 fix: same worker, but Kubernetes is told NOT to inject Docker-link-style variables.
-17a17
+16a17
 >       enableServiceLinks: false      # no more REDIS_PORT=tcp://... from the "redis" Service
 ```
 `enableServiceLinks: false` in the Pod spec tells Kubernetes: don't inject the Service variables into this Pod. It is a change to the Pod template, so the Deployment starts a **new** Pod (a rollout) and retires the crashing one. Redis and its Service are untouched; DNS (`redis`) still works, which is how the worker finds Redis.

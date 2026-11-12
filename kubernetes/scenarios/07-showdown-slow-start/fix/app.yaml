@@ -1,4 +1,4 @@
-# K07 fix: a startupProbe gives the app up to 60 s (12 x 5 s) to wake up; liveness only starts after it passes.
+# K07: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

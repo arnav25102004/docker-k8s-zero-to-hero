@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K23 break: deploy the Campus Today page, then the design team switches dark mode on in the config.
+# K23 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

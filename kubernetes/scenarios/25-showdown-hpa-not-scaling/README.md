@@ -112,6 +112,8 @@ Empty. No CPU request (and no limit) anywhere.
 <details><summary>Reveal after the room guesses</summary>
 
 The HPA's `Utilization` target is "a percentage of the Pod's CPU **request**". The Deployment has no `resources.requests.cpu`, so there is nothing to divide by: the percentage cannot be computed, the HPA reports `<unknown>`, and it never scales. metrics-server was fine all along (`kubectl top` showed the app at about one full core). The fix is not in the HPA or in metrics-server: it is in the Deployment.
+
+![Diagram: the HPA computes usage divided by CPU request, and with no request it shows unknown](../images/k25-hpa-needs-requests.svg)
 </details>
 
 ## 🔧 Fix it

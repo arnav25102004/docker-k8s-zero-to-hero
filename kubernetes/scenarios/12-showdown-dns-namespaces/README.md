@@ -121,6 +121,8 @@ The full name finds it right away.
 <details><summary>Reveal after the room guesses</summary>
 
 The app's setting is `REDIS_HOST=redis`, a **short name**. Short names are expanded with the search domains in the Pod's `/etc/resolv.conf`, and the first one is the Pod's own namespace: `redis.k-12-dns-app.svc.cluster.local`. The Redis Service lives in another namespace, `k-12-dns-data`, so DNS answers "no such name". Nothing is broken in Redis or in the network. The fix is to use the full name `redis.k-12-dns-data.svc.cluster.local`.
+
+![Diagram: the short name redis is searched only in the app's own namespace; the full name reaches the other namespace](../images/k12-dns-namespaces.svg)
 </details>
 
 ## 🔧 Fix it
@@ -137,13 +139,7 @@ The log flips from ❌ to ✅ lines within about ten seconds of the new Pod star
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,3c1
-< # K12 break: the app lives in k-12-dns-app but Redis lives in k-12-dns-data.
-< # REDIS_HOST=redis is a SHORT name, so DNS looks for it only in the app's own namespace.
-< # (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
----
-> # K12 fix: same app, one changed line: REDIS_HOST is now the FULL name (service.namespace.svc.cluster.local).
-25c23
+23c23
 <               value: "redis"
 ---
 >               value: "redis.k-12-dns-data.svc.cluster.local"

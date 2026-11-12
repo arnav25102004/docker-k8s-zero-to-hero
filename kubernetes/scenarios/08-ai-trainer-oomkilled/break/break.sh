@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K08 break: an "AI trainer" needs 150 MB, but its memory limit is 64Mi, so the kernel kills it.
+# K08 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

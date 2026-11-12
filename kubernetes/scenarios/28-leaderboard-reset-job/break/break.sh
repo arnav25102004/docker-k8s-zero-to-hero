@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K28 break: Redis gets some scores, then the nightly reset Job runs, fails, retries, and gives up.
+# K28 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

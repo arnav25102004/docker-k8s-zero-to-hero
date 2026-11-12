@@ -1,4 +1,4 @@
-# K01 fix: ask for what a whiteboard really needs, and cap it.
+# K01: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,7 +1,4 @@
-# K13 break: Cats vs Dogs plus a "security hardening" NetworkPolicy called lockdown.
-# Once a policy selects Pods for Egress, everything not listed is blocked.
-# lockdown lists only Redis on 6379, so the DNS lookup of "redis" (port 53) is dropped.
-# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+# K13: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,5 +1,4 @@
-# K15 break: the "score worker" reads REDIS_PORT as a number. Nobody sets it in this YAML,
-# but Kubernetes injects REDIS_PORT=tcp://<ClusterIP>:6379 because a Service called "redis" exists.
+# K15: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

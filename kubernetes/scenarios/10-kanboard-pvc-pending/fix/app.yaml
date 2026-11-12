@@ -1,4 +1,4 @@
-# K10 fix: no storageClassName, so the cluster's default StorageClass is used.
+# K10: scenario manifest
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

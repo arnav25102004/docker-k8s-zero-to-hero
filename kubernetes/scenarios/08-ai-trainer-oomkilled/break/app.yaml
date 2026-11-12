@@ -1,5 +1,4 @@
-# K08 break: the "AI trainer" loads 150 MB in 6 epochs (25 MB each), but its memory limit is only 64Mi.
-# The kernel kills it part-way through epoch 3. No Service: this app has no web page.
+# K08: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

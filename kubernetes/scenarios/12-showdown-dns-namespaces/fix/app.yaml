@@ -1,4 +1,4 @@
-# K12 fix: same app, one changed line: REDIS_HOST is now the FULL name (service.namespace.svc.cluster.local).
+# K12: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

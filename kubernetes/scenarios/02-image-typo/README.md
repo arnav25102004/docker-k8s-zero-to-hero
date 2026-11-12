@@ -109,12 +109,8 @@ Within a few seconds once Excalidraw is downloaded (the first time, up to a minu
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K02 break: one missing letter in the image name (excalidrw instead of excalidraw).
----
-> # K02 fix: the correct image name.
 19c19
-<           image: excalidraw/excalidrw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9    # typo: "excalidrw"
+<           image: excalidraw/excalidrw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
 ---
 >           image: excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
 ```

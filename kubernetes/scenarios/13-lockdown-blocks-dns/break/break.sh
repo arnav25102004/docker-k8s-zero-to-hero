@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K13 break: a "security hardening" NetworkPolicy blocks the app's DNS lookups.
+# K13 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

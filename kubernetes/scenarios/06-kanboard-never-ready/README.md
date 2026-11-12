@@ -143,12 +143,8 @@ Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it)
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K06 break: the readiness probe checks /healthz.php, a path Kanboard doesn't have (404).
----
-> # K06 fix: the readiness probe checks /healthcheck.php, which Kanboard really serves (200).
 24c24
-<               path: /healthz.php    # Kanboard has no such file
+<               path: /healthz.php
 ---
 >               path: /healthcheck.php
 ```

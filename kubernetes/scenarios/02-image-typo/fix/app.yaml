@@ -1,4 +1,4 @@
-# K02 fix: the correct image name.
+# K02: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

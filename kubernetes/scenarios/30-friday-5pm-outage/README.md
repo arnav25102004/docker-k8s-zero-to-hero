@@ -30,6 +30,8 @@ Every track climbs the same **debugging ladder** you've used since K01, one rung
 
 Think of a doctor whose patient arrives with three symptoms. A good doctor doesn't prescribe three medicines in one go: one treatment, watch the patient, then the next. Otherwise, when the patient feels better (or worse), nobody knows why.
 
+![Diagram: the debugging ladder (running, reachable, right) and the incident roles](../images/k30-debugging-ladder.svg)
+
 ## 🏢 Where you'll meet this at work
 - **A release train** where several teams' changes ship in one deploy, and the outage turns out to be more than one bug at once (developer, release manager).
 - **An on-call page at 5 PM on a Friday** (or 3 AM on a Sunday): the SRE runs the incident, hands out tracks, and keeps a timeline of every change (SRE, on-call engineer).

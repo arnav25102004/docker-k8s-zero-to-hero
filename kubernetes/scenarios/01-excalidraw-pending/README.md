@@ -109,6 +109,8 @@ z2h-test-worker2         4     8125288Ki
 <details><summary>Reveal after the room guesses</summary>
 
 The Deployment's `resources.requests.memory` is `64Gi`, far more than any node has. The scheduler can't find a node that fits, so the Pod stays `Pending` and the Events say `Insufficient memory`. Nothing is wrong with the image, the app, or the cluster: it is one number in the YAML.
+
+![Diagram: the scheduler filters out every node, so the Pod stays Pending](../images/pending-scheduler-filters.svg)
 </details>
 
 ## 🔧 Fix it
@@ -125,12 +127,8 @@ Within a few seconds once Excalidraw is downloaded (the first time, up to a minu
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K01 break: the whiteboard asks for 64 GiB of memory per Pod ("for the whole university").
----
-> # K01 fix: ask for what a whiteboard really needs, and cap it.
-28,29c28,31
-<               memory: 64Gi    # a reservation: the scheduler must find a node with this much free
+29,30c29,32
+<               memory: 64Gi
 <               cpu: 100m
 ---
 >               memory: 64Mi    # a small, honest reservation

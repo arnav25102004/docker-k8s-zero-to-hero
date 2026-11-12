@@ -99,6 +99,8 @@ z2h-test-worker2         Ready    <none>          45m   v1.33.1
 The Deployment has `nodeSelector: {accelerator: nvidia-gpu}`, a **required** rule, and **no node in the cluster has that label** (the cluster has no GPU nodes at all). The scheduler can't place the Pod anywhere, so it records a `FailedScheduling` event (`didn't match Pod's node affinity/selector`) and the Pod stays `Pending`. It will wait forever, and it will start the moment *some* node gets that label, which is the other way to fix this.
 
 The lab cluster has only ordinary CPU nodes, so no node can ever match. The deeper point: this little script doesn't even need a GPU (it only "trains" a tiny model). The word "GPU" was a hard requirement where, at most, a *preference* was meant.
+
+![Diagram: the scheduler filters out every node, so the Pod stays Pending](../images/pending-scheduler-filters.svg)
 </details>
 
 ## 🔧 Fix it

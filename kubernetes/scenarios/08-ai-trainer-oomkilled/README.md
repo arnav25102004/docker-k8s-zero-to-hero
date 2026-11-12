@@ -116,12 +116,7 @@ The script waits for the new Pod and for the training to finish (about 10 second
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,2c1
-< # K08 break: the "AI trainer" loads 150 MB in 6 epochs (25 MB each), but its memory limit is only 64Mi.
-< # The kernel kills it part-way through epoch 3. No Service: this app has no web page.
----
-> # K08 fix: the same trainer with room to finish: memory limit 256Mi (request 200Mi).
-34,35c33,34
+33,34c33,34
 <             requests: { memory: 64Mi }
 <             limits: { memory: 64Mi }
 ---

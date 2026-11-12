@@ -137,6 +137,8 @@ spec:
 <details><summary>Reveal after the room guesses</summary>
 
 The `lockdown` NetworkPolicy selects the app Pods for **Egress**, so everything outbound that isn't listed is dropped. It lists Redis on 6379 but not DNS. Before the app can connect to `redis` it must ask CoreDNS (in `kube-system`, port 53, UDP and TCP) for the address, and that question is silently dropped. The lookup times out after 5 seconds ("Try again"), and `/readyz` answers 503. Redis, the Service and the network path to Redis are all fine (connecting by IP works). The fix is to add a rule that allows DNS.
+
+![Diagram: the lockdown policy allows Redis on 6379 but drops the DNS lookup on port 53](../images/k13-lockdown-blocks-dns.svg)
 </details>
 
 ## 🔧 Fix it
@@ -153,13 +155,7 @@ The log flips from ❌ to ✅ lines within about fifteen seconds (Ctrl+C to stop
 diff ../break/app.yaml app.yaml
 ```
 ```
-1,3c1
-< # K13 break: Cats vs Dogs plus a "security hardening" NetworkPolicy called lockdown.
-< # Once a policy selects Pods for Egress, everything not listed is blocked.
-< # lockdown lists only Redis on 6379, so the DNS lookup of "redis" (port 53) is dropped.
----
-> # K13 fix: same app, same lockdown policy, plus one new egress rule: DNS (port 53) to kube-system.
-73a72,80
+70a71,79
 >     - to:
 >         - namespaceSelector:
 >             matchLabels:

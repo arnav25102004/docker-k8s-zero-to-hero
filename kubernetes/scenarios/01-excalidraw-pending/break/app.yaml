@@ -1,4 +1,4 @@
-# K01 break: the whiteboard asks for 64 GiB of memory per Pod ("for the whole university").
+# K01: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +26,7 @@ spec:
               port: 80
           resources:
             requests:
-              memory: 64Gi    # a reservation: the scheduler must find a node with this much free
+              memory: 64Gi
               cpu: 100m
 ---
 apiVersion: v1
