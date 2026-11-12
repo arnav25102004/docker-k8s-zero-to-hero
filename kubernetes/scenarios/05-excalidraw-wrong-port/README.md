@@ -115,6 +115,8 @@ An extra clue, if you have a minute to spare: `kubectl port-forward -n k-05-wron
 <details><summary>Reveal after the room guesses</summary>
 
 The Service `draw` has `port: 80` and `targetPort: 8080`. Excalidraw listens on port **80**, so nothing is listening on 8080 inside the Pods, and every connection is refused. The Pods are healthy, the labels match and the endpoints exist: only the single number `targetPort` is wrong. Nothing is wrong with the app, the image or the cluster.
+
+![Diagram: the Service forwards to targetPort 8080 but the container listens on 80](../images/k05-port-vs-targetport.svg)
 </details>
 
 ## 🔧 Fix it
@@ -137,12 +139,8 @@ Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it)
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K05 break: the Service forwards to port 8080, but Excalidraw listens on port 80.
----
-> # K05 fix: the Service forwards to the port the container really listens on (80).
-37c37
-<       targetPort: 8080    # the container listens on 80
+38c38
+<       targetPort: 8080
 ---
 >       targetPort: 80
 ```

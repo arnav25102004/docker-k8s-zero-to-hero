@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K29 break: deploy the Hostel Notice Board (one Pod, two containers) and a visitor.
+# K29 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

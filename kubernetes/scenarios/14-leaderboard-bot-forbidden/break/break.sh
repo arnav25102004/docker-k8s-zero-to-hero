@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K14 break: the leaderboard bot is deployed with a ServiceAccount that has no permissions at all.
+# K14 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

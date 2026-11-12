@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K24 break: deploys the Cats vs Dogs app and waits for its Pod to settle.
+# K24 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

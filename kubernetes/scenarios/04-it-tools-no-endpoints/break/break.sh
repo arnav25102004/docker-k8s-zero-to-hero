@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K04 break: the Service selects tier: frontend, but the Pods are labelled tier: backend. Pods run fine, the Service has no endpoints.
+# K04 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

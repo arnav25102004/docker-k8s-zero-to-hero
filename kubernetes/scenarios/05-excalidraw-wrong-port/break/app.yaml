@@ -1,4 +1,4 @@
-# K05 break: the Service forwards to port 8080, but Excalidraw listens on port 80.
+# K05: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,4 +35,4 @@ spec:
     app: draw
   ports:
     - port: 80
-      targetPort: 8080    # the container listens on 80
+      targetPort: 8080

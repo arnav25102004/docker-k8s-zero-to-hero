@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K07 break: the Cats vs Dogs app takes 20 s to wake up, but its liveness probe kills it after 5 s.
+# K07 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

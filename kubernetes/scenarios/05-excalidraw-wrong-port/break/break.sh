@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K05 break: the Service forwards to targetPort 8080, but Excalidraw listens on 80. Endpoints exist, connections are refused.
+# K05 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

@@ -1,5 +1,4 @@
-# K13 fix: same app, same lockdown policy, plus one new egress rule: DNS (port 53) to kube-system.
-# (No readinessProbe on purpose: the Service keeps sending visitors to the Pod, and /readyz answers 503.)
+# K13: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

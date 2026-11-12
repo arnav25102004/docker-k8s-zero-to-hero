@@ -152,6 +152,8 @@ The helper is told to follow `/logs/acess.log`. Read it slowly against `access.l
 <details><summary>Reveal after the room guesses</summary>
 
 The `log-shipper` container's setting `LOG_FILE` has a typo: `acess.log` instead of `access.log`. The web container writes `access.log`, so the helper's `tail -F` waits for a file that never appears, and its readiness check (`test -f` on the same wrong name) keeps failing. One unready container makes the whole Pod `1/2`, the Pod is not Ready, and the Service has no endpoints. nginx was fine all along.
+
+![Diagram: the web container is Ready, the log-shipper is not, so the Pod is 1/2 and the Service has no endpoints](../images/k29-half-ready-pod.svg)
 </details>
 
 ## 🔧 Fix it

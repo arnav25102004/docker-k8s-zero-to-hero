@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K09 break: the Pod needs Secret "adminer-db", which is missing, so its container is never created.
+# K09 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

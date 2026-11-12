@@ -89,6 +89,8 @@ No Role, no RoleBinding. Nobody ever granted this ServiceAccount anything. (The 
 <details><summary>Reveal after the room guesses</summary>
 
 The bot authenticates fine as the ServiceAccount `leaderboard-bot`, but RBAC **denies by default**. No Role grants `list` on `pods`, and no RoleBinding connects such a Role to the ServiceAccount, so the API server answers **403 Forbidden** to every request. The message told us everything: who (`system:serviceaccount:k-14-forbidden:leaderboard-bot`), the verb (`list`), the resource (`pods`) and the namespace (`k-14-forbidden`).
+
+![Diagram: the ServiceAccount exists but there is no RoleBinding or Role, so the API server answers 403 Forbidden](../images/k14-rbac-chain.svg)
 </details>
 
 ## 🔧 Fix it

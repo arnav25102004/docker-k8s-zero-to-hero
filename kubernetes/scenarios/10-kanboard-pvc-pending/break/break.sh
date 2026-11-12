@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K10 break: the PVC wants StorageClass "fast-ssd", which doesn't exist here, so the PVC and the Pod stay Pending.
+# K10 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

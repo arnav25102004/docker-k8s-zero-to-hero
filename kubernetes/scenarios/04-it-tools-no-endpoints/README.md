@@ -104,10 +104,18 @@ Zero Pods match, so zero endpoints.
 
 An extra clue, if you have a minute to spare: `kubectl port-forward -n k-04-no-endpoints svc/tools 9204:80` has no Pod to connect to, so it hangs for about a minute and then gives up (here with `error: timed out waiting for the condition`; the exact wording varies by version). Press Ctrl+C if you don't want to wait.
 
+**5. Do the Pods ever hear the visitor?** The strongest evidence is what the app itself never sees. In a **second terminal**, follow one of the `tools` Pods' own logs, and keep the visitor's log open next to it:
+```bash
+kubectl logs -f deploy/tools -n k-04-no-endpoints
+```
+IT-Tools is an nginx web server, and nginx prints one log line for every request it receives. While the visitor keeps asking every 2 seconds and failing, **nothing new appears here**: the requests are not reaching the Pods at all. A client that fails while the server stays silent points at the road between them (the Service), not at the app. Press Ctrl+C when you've seen enough. We'll come back to this log after the fix.
+
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
 The Service `tools` selects Pods labelled `app=tools` **and** `tier=frontend`. The Pods are labelled `tier=backend`. Nothing matches, so the Service has no endpoints and every request to `http://tools` has nowhere to go. The Pods are healthy; they're just invisible to the Service. Nothing is wrong with the app, the image or the cluster.
+
+![Diagram: the Service selector asks for tier=frontend but the Pods carry tier=backend, so there are no endpoints](../images/k04-selector-mismatch.svg)
 </details>
 
 ## 🔧 Fix it
@@ -124,12 +132,8 @@ Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it)
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K04 break: the Pods are labelled tier: backend, but the Service looks for tier: frontend.
----
-> # K04 fix: the Service selects the same labels the Pods carry (tier: backend).
 37c37
-<     tier: frontend    # the Pods say "backend"
+<     tier: frontend
 ---
 >     tier: backend
 ```
@@ -173,6 +177,8 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9204
 ```
 200
 ```
+Look back at the Pod log from step 5: with the endpoints filled in, the visitor's requests now arrive and new request lines appear every few seconds (the two Pods share the visitor's requests). The Pods were never the problem, they were just never asked.
+
 Or open http://localhost:9204 in your browser and try a tool, like the token generator. Press Ctrl+C in the second terminal to stop the port-forward.
 
 ## 🎯 Key takeaways

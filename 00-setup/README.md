@@ -48,6 +48,12 @@ kubectl get nodes
 ```
 Delete it when you're done: `kind delete cluster --name z2h`
 
+> **If `kubectl get nodes` never shows the nodes as Ready (or `kind create cluster` fails with a kubelet error).** The course pins Kubernetes **v1.37**, and the v1.37 kubelet refuses to start on a host that uses **cgroup v1**. Check yours:
+> ```bash
+> docker info --format '{{.CgroupVersion}}'     # 2 is fine; 1 means an older Linux setup
+> ```
+> Recent Docker Desktop (macOS, Windows/WSL2) and current Linux distributions use cgroup v2 and need nothing. If you see `1`, either switch the host to cgroup v2 or run the course on an older Kubernetes: replace `kindest/node:v1.37.0` with `kindest/node:v1.34.8` in `00-setup/kind-cluster.yaml` (three lines), then create the cluster again. The labs behave the same.
+
 ## Option C: minikube
 ```bash
 minikube start --cpus 4 --memory 6g

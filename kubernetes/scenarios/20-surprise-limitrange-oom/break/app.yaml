@@ -1,4 +1,4 @@
-# K20 break: Cats vs Dogs with no resources section. The start command preloads a 40 MiB "vote history" (demo filler) before the app starts.
+# K20: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

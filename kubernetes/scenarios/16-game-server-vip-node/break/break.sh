@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K16 break: changes every node, then deploys the game.
+# K16 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

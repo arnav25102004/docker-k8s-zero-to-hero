@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K11 break: release a good v1, wait until it is fully rolled out, then ship a broken v2 (PORT="eighty").
+# K11 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

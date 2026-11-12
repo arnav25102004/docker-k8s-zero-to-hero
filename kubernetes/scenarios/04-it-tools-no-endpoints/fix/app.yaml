@@ -1,4 +1,4 @@
-# K04 fix: the Service selects the same labels the Pods carry (tier: backend).
+# K04: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

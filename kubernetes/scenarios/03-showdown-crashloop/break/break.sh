@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K03 break: the Cats vs Dogs app gets PORT="eighty" (a word), so it crashes on every start.
+# K03 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

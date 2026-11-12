@@ -109,6 +109,8 @@ It prints **nothing**. There is no `tolerations:` section at all: the game is no
 <details><summary>Reveal after the room guesses</summary>
 
 Every node carries the taint `z2h-vip=true:NoSchedule` ("reserved for VIP workloads"). The `game` Deployment has no toleration for it, so the scheduler refuses to place its Pods on any node and they stay `Pending` with a `FailedScheduling` event. Nothing is wrong with the image, the code, the Service or the capacity. Taints repel; only a toleration in the Pod can get past them.
+
+![Diagram: the scheduler filters out every node, so the Pod stays Pending](../images/pending-scheduler-filters.svg)
 </details>
 
 ## 🔧 Fix it

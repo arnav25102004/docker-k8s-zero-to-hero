@@ -1,4 +1,4 @@
-# K05 fix: the Service forwards to the port the container really listens on (80).
+# K05: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

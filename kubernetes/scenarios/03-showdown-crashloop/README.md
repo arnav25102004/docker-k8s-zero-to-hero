@@ -120,12 +120,8 @@ Within a few seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it). It
 diff ../break/app.yaml app.yaml
 ```
 ```
-1c1
-< # K03 break: PORT is set to the word "eighty" instead of the number 8080, so the app crashes at start.
----
-> # K03 fix: PORT is the number 8080.
 23c23
-<               value: "eighty"    # a word, not a number
+<               value: "eighty"
 ---
 >               value: "8080"
 ```

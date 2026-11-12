@@ -1,4 +1,4 @@
-# K06 break: the readiness probe checks /healthz.php, a path Kanboard doesn't have (404).
+# K06: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +21,7 @@ spec:
             - containerPort: 80
           readinessProbe:
             httpGet:
-              path: /healthz.php    # Kanboard has no such file
+              path: /healthz.php
               port: 80
             periodSeconds: 5
 ---

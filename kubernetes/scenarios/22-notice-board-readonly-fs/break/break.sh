@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# K22 break: deploy the Exam Week Board with the security team's new policy.
+# K22 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

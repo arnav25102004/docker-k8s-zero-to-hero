@@ -1,4 +1,4 @@
-# K06 fix: the readiness probe checks /healthcheck.php, which Kanboard really serves (200).
+# K06: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# K15 break: the Service "redis" exists BEFORE the worker Pod starts, so Kubernetes injects
-# REDIS_PORT=tcp://<ip>:6379 into it and int() of that crashes the worker.
+# K15 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null

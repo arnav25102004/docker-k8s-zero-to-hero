@@ -1,4 +1,4 @@
-# K14 break: the leaderboard bot has a ServiceAccount (an ID card) but no Role (no permissions).
+# K14: scenario manifest
 apiVersion: v1
 kind: ServiceAccount
 metadata: { name: leaderboard-bot, namespace: k-14-forbidden }

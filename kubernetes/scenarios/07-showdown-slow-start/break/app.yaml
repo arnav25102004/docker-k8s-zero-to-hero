@@ -1,5 +1,4 @@
-# K07 break: the app needs about 20 s to wake up, but the liveness probe starts checking after 5 s
-# and gives up after ONE failure, so the app is killed before it is ever ready.
+# K07: scenario manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
