@@ -10,7 +10,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
   🐱🐶 Build & ship a live voting app the whole room uses from their phones
   💀 Delete every server and watch Kubernetes bring them back
   🦄 "One more thing…": release a new version mid-vote with 0 failed requests
-  🔥 Break things on purpose, 38 times, and fix them like a pro
+  🔥 Break things on purpose, 53 times, and fix them like a pro
 ```
 
 ---
@@ -109,7 +109,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 Docker and Kubernetes scenarios are run by hand from their folders: see [docker/scenarios/README.md](docker/scenarios/README.md) and [kubernetes/scenarios/README.md](kubernetes/scenarios/README.md). `./labs.sh docker clean` and `./labs.sh k8s clean` reset them all.
 
-38 real-world incidents: committed secrets, rejected pushes and lost commits in Git; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+53 real-world incidents (8 Git, 15 Docker, 30 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
 
 ## 📁 Repository layout
 ```

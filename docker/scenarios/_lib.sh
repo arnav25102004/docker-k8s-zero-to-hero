@@ -134,56 +134,85 @@ prepare_work() {
   say "\$ rm -rf work && cp -R $(basename "$src") work"
 }
 
+# _cl_rm KIND NAME COMMAND...: run COMMAND (a docker remove), show one line for what
+# it removed, or the reason it could not. Counts both in _Z2H_REMOVED / _Z2H_FAILED.
+_cl_rm() {
+  local kind="$1" name="$2" out
+  shift 2
+  if out=$("$@" 2>&1); then
+    printf '   removed %s %s\n' "$kind" "$name"
+    _Z2H_REMOVED=$((_Z2H_REMOVED + 1))
+  else
+    printf '   \033[1;33m⚠ could not remove %s %s:\033[0m %s\n' "$kind" "$name" "$out"
+    _Z2H_FAILED=$((_Z2H_FAILED + 1))
+  fi
+}
+
 # scenario_cleanup ID [SCENARIO_DIR] (ID e.g. d06): remove everything labelled
-# z2h.scenario=ID, plus <scenario>/work/. SCENARIO_DIR defaults to
-# docker/scenarios/<NN>-* for ID dNN. The compose project is taken down by name
-# (-p ID), never by file, so an edited or deleted work/compose.yaml cannot block it.
-# Silent, idempotent, never fails.
+# z2h.scenario=ID, everything named "ID-..." / "ID_...", and <scenario>/work/.
+# SCENARIO_DIR defaults to docker/scenarios/<NN>-* for ID dNN. The compose project
+# is taken down by name (-p ID), never by file, so an edited or deleted
+# work/compose.yaml cannot block it. Idempotent. It prints each thing it removes and
+# warns about anything it could not, so a "cleaned up" line means it really is.
 scenario_cleanup() {
   local id="$1" x scen="${2:-}"
   local label="z2h.scenario=$id"
+  _Z2H_REMOVED=0
+  _Z2H_FAILED=0
   if [ -z "$scen" ]; then
     for x in "$_Z2H_LIB_DIR/${id#d}"-*/; do
       [ -d "$x" ] && scen="${x%/}"
     done
   fi
-  if [ -n "$scen" ] && [ -d "$scen/work" ]; then
-    rm -rf "${scen:?}/work"
-  fi
   # compose first: "down -v" also removes the anonymous volumes of its containers.
-  docker compose -p "$id" down -v --remove-orphans >/dev/null 2>&1
-  # rm -fv: also remove the anonymous volumes (postgres, redis ... declare VOLUME).
-  for x in $(docker ps -aq --filter "label=$label" 2>/dev/null); do
-    docker rm -fv "$x" >/dev/null 2>&1
+  if docker compose version >/dev/null 2>&1; then
+    x=$(docker compose -p "$id" down -v --remove-orphans 2>&1) \
+      || printf '   \033[1;33m⚠ docker compose down -p %s failed:\033[0m %s\n' "$id" "$x"
+  fi
+  # Containers (rm -fv also removes their anonymous volumes: postgres, redis ... declare VOLUME).
+  # Found by label, by compose project, and by name ("ID-..." / "ID_..."), because
+  # a learner typing the README by hand does not add labels. tr strips any CR that
+  # a Windows docker.exe could add to the end of a line.
+  for x in $( { docker ps -a --filter "label=$label" --format '{{.Names}}'
+                docker ps -a --filter "label=com.docker.compose.project=$id" --format '{{.Names}}'
+                docker ps -a --filter "name=$id" --format '{{.Names}}' | grep -E "^${id}[-_]"
+              } 2>/dev/null | tr -d '\r' | sort -u); do
+    _cl_rm container "$x" docker rm -fv "$x"
   done
-  for x in $(docker ps -aq --filter "label=com.docker.compose.project=$id" 2>/dev/null); do
-    docker rm -fv "$x" >/dev/null 2>&1
+  for x in $( { docker network ls --filter "label=$label" --format '{{.Name}}'
+                docker network ls --filter "name=$id" --format '{{.Name}}' | grep -E "^${id}[-_]"
+              } 2>/dev/null | tr -d '\r' | sort -u); do
+    _cl_rm network "$x" docker network rm "$x"
   done
-  for x in $(docker network ls -q --filter "label=$label" 2>/dev/null); do
-    docker network rm "$x" >/dev/null 2>&1
+  for x in $( { docker volume ls --filter "label=$label" --format '{{.Name}}'
+                docker volume ls --filter "name=$id" --format '{{.Name}}' | grep -E "^${id}[-_]"
+              } 2>/dev/null | tr -d '\r' | sort -u); do
+    _cl_rm volume "$x" docker volume rm -f "$x"
   done
-  for x in $(docker volume ls -q --filter "label=$label" 2>/dev/null); do
-    docker volume rm -f "$x" >/dev/null 2>&1
+  # Images: labelled ones, plus every tag of "ID-..." built by hand (d01-mine, d03-api ...).
+  for x in $( { docker images --filter "label=$label" --format '{{.Repository}}:{{.Tag}}'
+                docker images --format '{{.Repository}}:{{.Tag}}' | grep "^${id}-"
+              } 2>/dev/null | tr -d '\r' | sort -u); do
+    _cl_rm image "$x" docker rmi -f "$x"
   done
-  # Also catch things made by hand (no label): anything named "ID-..." or "ID_..."
-  # (compose names networks and volumes ID_default, ID_data). The name filter is a
-  # substring match, so keep only names that really start with "ID-" or "ID_".
-  for x in $(docker ps -a --filter "name=${id}" --format '{{.Names}}' 2>/dev/null | grep -E "^${id}[-_]"); do
-    docker rm -fv "$x" >/dev/null 2>&1
+  # A labelled image can be untagged (<none>): remove those by ID.
+  for x in $(docker images -q --filter "label=$label" 2>/dev/null | tr -d '\r' | sort -u); do
+    _cl_rm image "$x" docker rmi -f "$x"
   done
-  for x in $(docker network ls --filter "name=${id}" --format '{{.Name}}' 2>/dev/null | grep -E "^${id}[-_]"); do
-    docker network rm "$x" >/dev/null 2>&1
-  done
-  for x in $(docker volume ls --filter "name=${id}" --format '{{.Name}}' 2>/dev/null | grep -E "^${id}[-_]"); do
-    docker volume rm -f "$x" >/dev/null 2>&1
-  done
-  for x in $(docker images -q --filter "label=$label" 2>/dev/null); do
-    docker rmi -f "$x" >/dev/null 2>&1
-  done
-  # Images built by hand from a README (no label): every tag of "ID-..." (d01-mine, d03-api ...).
-  for x in $(docker images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null | grep "^${id}-"); do
-    docker rmi -f "$x" >/dev/null 2>&1
-  done
+  # work/ goes last, once nothing is running that could still write into it.
+  if [ -n "$scen" ] && [ -d "$scen/work" ]; then
+    if rm -rf "${scen:?}/work" 2>/dev/null && [ ! -e "$scen/work" ]; then
+      printf '   removed folder work/\n'
+      _Z2H_REMOVED=$((_Z2H_REMOVED + 1))
+    else
+      printf '   \033[1;33m⚠ could not remove %s/work (files owned by another user?). Try: sudo rm -rf %s/work\033[0m\n' "$scen" "$scen"
+      _Z2H_FAILED=$((_Z2H_FAILED + 1))
+    fi
+  fi
+  if [ "$_Z2H_FAILED" -gt 0 ]; then
+    printf '\033[1;33m⚠ Scenario %s: %s removed, %s could NOT be removed (see above). Check with: docker ps -a\033[0m\n' "$id" "$_Z2H_REMOVED" "$_Z2H_FAILED"
+    return 1
+  fi
   printf '✅ Scenario %s cleaned up\n' "$id"
   return 0
 }

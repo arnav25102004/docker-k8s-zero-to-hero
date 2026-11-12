@@ -16,4 +16,4 @@ All are pinned to an exact tag (or digest) and published for linux/amd64 and lin
 | `traefik/whoami:v1.10.4` | about 6 MB | K18 (the app that tells you which Pod answered) |
 | `b4bz/homer:v25.10.1` | about 7 MB | K19, K27 (the Homer dashboard) |
 | `nginxinc/nginx-unprivileged:1.27.5-alpine` | about 22 MB | K21 (the fix), K22, K29 (the notice board pages) |
-| `registry.k8s.io/metrics-server/metrics-server:v0.8.0` | about 22 MB | K25 (a cluster add-on, installed only if your cluster has none yet) |
+| `registry.k8s.io/metrics-server/metrics-server:v0.9.1` | about 22 MB | K25 (a cluster add-on, installed only if your cluster has none yet) |

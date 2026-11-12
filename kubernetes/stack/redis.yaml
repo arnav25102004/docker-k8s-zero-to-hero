@@ -16,7 +16,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: redis
-          image: redis:7-alpine
+          image: redis:7.4.12-alpine
           ports:
             - containerPort: 6379
           readinessProbe:

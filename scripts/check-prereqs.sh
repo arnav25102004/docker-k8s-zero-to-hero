@@ -30,7 +30,7 @@ IMAGES=(
   # Kubernetes break/fix scenarios (exact pins; the full list is kubernetes/scenarios/IMAGES.md)
   kanboard/kanboard:v1.2.57 adminer:5.4.1
   traefik/whoami:v1.10.4 b4bz/homer:v25.10.1 nginxinc/nginx-unprivileged:1.27.5-alpine
-  registry.k8s.io/metrics-server/metrics-server:v0.8.0
+  registry.k8s.io/metrics-server/metrics-server:v0.9.1
 )
 
 head1 "🧰 Tools"

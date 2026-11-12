@@ -34,7 +34,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: redis
-          image: redis:7-alpine
+          image: redis:7.4.12-alpine
           args: ["--appendonly", "yes", "--save", "60", "1"]
           ports:
             - name: redis

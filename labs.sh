@@ -59,11 +59,22 @@ git_clean() { rm -rf "${Z2H_GIT_TS:-/tmp/z2h-git-ts}"; ok "Git scenario sandboxe
 
 # ---------------------------------------------------------------- docker --
 docker_clean() {
-  local c
+  local c out rc bad=0 n=0
+  if ! docker info >/dev/null 2>&1; then
+    warn "Docker isn't running, so nothing was cleaned. Start Docker and run this again."
+    return 1
+  fi
   for c in "$DOCKER_DIR"/[0-9]*/cleanup.sh; do
-    [ -f "$c" ] && bash "$c" >/dev/null 2>&1
+    [ -f "$c" ] || continue
+    out=$(bash "$c" 2>&1); rc=$?
+    n=$((n + 1))
+    # show what was removed or what went wrong; skip the "already clean" lines
+    printf '%s\n' "$out" | grep -E 'removed|could not|⚠' || true
+    [ "$rc" -eq 0 ] || bad=$((bad + 1))
   done
-  ok "Docker scenario resources removed"
+  if [ "$bad" -eq 0 ]; then ok "All $n Docker scenarios are clean"
+  else warn "$bad of $n Docker scenarios could not be fully cleaned (see the lines above). Check: docker ps -a"; return 1
+  fi
 }
 
 # ------------------------------------------------------------------- k8s --
