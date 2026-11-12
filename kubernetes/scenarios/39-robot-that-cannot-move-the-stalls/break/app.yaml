@@ -1,0 +1,51 @@
+# K39 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idli
+  namespace: k-39-idli-robot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: idli
+  template:
+    metadata:
+      labels:
+        app: idli
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🍚 Soft idli, hot sambar."]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: idli
+  namespace: k-39-idli-robot
+spec:
+  selector:
+    app: idli
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: idli-pdb
+  namespace: k-39-idli-robot
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: idli

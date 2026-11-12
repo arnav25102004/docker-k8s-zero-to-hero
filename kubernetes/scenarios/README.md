@@ -1,8 +1,8 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-36 stage demos: 30 main scenarios and two 3-problem practice lanes (K31 to K36). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+39 stage demos: 30 main scenarios, two 3-problem practice lanes (K31 to K36) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K36 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K39 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
 
 ## The lineup
 
@@ -44,6 +44,9 @@
 | K34 | [The doorbell on the wrong door](34-doorbell-on-the-wrong-door/README.md) | Dosa counter (practice) | *The counter is open and the cook is ready. The doorbell is wired to the house next door.* | `9234` | 17 MB |
 | K35 | [The biryani that needs 20 seconds](35-biryani-that-needs-20-seconds/README.md) | Biryani counter (practice) | *Good things come to those who wait. Kubernetes did not get the memo.* | `9235` | 4 MB |
 | K36 | [Two probes, two mistakes](36-two-probes-two-mistakes/README.md) | Thali counter (boss) | *Two managers who disagree about everything. One closed stall.* | `9236` | 4 MB |
+| K37 | [The Pod that will not leave](37-pod-that-will-not-leave/README.md) | an old stall (terminal only) | *You said delete. Kubernetes said yes. The Pod did not get the message.* | - | 17 MB |
+| K38 | [Applied here, looking there](38-applied-here-looking-there/README.md) | Night canteen | *The deploy said "created". The cluster says "No resources found". Both are telling the truth.* | `9238` | 21 MB |
+| K39 | [The robot that cannot move the stalls](39-robot-that-cannot-move-the-stalls/README.md) | Idli stall | *Every night the maintenance robot asks to move one Pod. Every night the answer is no.* | `9239` | 21 MB |
 
 ### 🏋️ Practice lanes
 Reading about a fix is not the same as finding one alone. A **practice lane** takes one idea from a scenario you have already done (the *worked example*) and gives you more problems on the same idea, each with less help than the last. K31 to K33 are the first lane: **"Services find Pods"**, after [K04](04-it-tools-no-endpoints/README.md).
@@ -105,6 +108,9 @@ Things to know before you start:
 - **K16 changes every node, not just a namespace.** It puts a taint (`z2h-vip`) on the nodes, so always run its `cleanup.sh` (it removes the taint again; `break.sh` also starts clean). Do not skip it, or the next scenario sees a tainted cluster.
 - **K25 installs metrics-server only if your cluster has none**, and removes it again afterwards only if it installed it. Run K25 on its own (not alongside other scenarios): adding or removing metrics-server briefly changes the cluster's API list.
 - **K30 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the others, when the class has seen each kind of fault on its own.
+- **K37 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.sh` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
+- **K38 changes your kubeconfig's current namespace** (that is its fix). `./cleanup.sh` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
+- **K39 sends one eviction request, not a drain.** A real `kubectl drain` would cordon a whole node, which is unsafe on a one-node Docker Desktop or minikube. The robot asks for one Pod only, so it is safe everywhere.
 - **Scenarios behave the same on 1 node and 3 nodes** (minikube and Docker Desktop are one node; the course's kind config is three).
 
 Scripts need only `bash`, `kubectl`, `curl` and ordinary Unix tools. No `jq`, no `helm`.
@@ -218,6 +224,9 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K34 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K35 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K36 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K37 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K38 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K39 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
