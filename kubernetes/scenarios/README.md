@@ -1,8 +1,8 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-33 stage demos: 30 main scenarios and a 3-problem practice lane (K31 to K33). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+36 stage demos: 30 main scenarios and two 3-problem practice lanes (K31 to K36). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K33 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K36 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
 
 ## The lineup
 
@@ -41,6 +41,9 @@
 | K31 | [Two stalls, one signboard](31-two-stalls-one-signboard/README.md) | Chai stall (practice) | *Some customers get hot chai. Some get… yesterday's.* | `9231` | 17 MB |
 | K32 | [The label on the wrong object](32-label-on-the-wrong-object/README.md) | Samosa stall (practice) | *The label is right there. Kubernetes is looking somewhere else.* | `9232` | 17 MB |
 | K33 | [Two bugs in one trench coat](33-canteen-two-bugs/README.md) | Canteen counter (boss) | *You fixed it. It is still broken. Welcome to the boss level.* | `9233` | 17 MB |
+| K34 | [The doorbell on the wrong door](34-doorbell-on-the-wrong-door/README.md) | Dosa counter (practice) | *The counter is open and the cook is ready. The doorbell is wired to the house next door.* | `9234` | 17 MB |
+| K35 | [The biryani that needs 20 seconds](35-biryani-that-needs-20-seconds/README.md) | Biryani counter (practice) | *Good things come to those who wait. Kubernetes did not get the memo.* | `9235` | 4 MB |
+| K36 | [Two probes, two mistakes](36-two-probes-two-mistakes/README.md) | Thali counter (boss) | *Two managers who disagree about everything. One closed stall.* | `9236` | 4 MB |
 
 ### 🏋️ Practice lanes
 Reading about a fix is not the same as finding one alone. A **practice lane** takes one idea from a scenario you have already done (the *worked example*) and gives you more problems on the same idea, each with less help than the last. K31 to K33 are the first lane: **"Services find Pods"**, after [K04](04-it-tools-no-endpoints/README.md).
@@ -51,6 +54,15 @@ Reading about a fix is not the same as finding one alone. A **practice lane** ta
 | Guided | [K31](31-two-stalls-one-signboard/README.md) | questions and a hint ladder |
 | Mostly solo | [K32](32-label-on-the-wrong-object/README.md) | questions only |
 | Boss | [K33](33-canteen-two-bugs/README.md) | no hints for the first 5 minutes |
+
+A second lane, **"Ready or alive?"**, follows the same pattern after [K06](06-kanboard-never-ready/README.md) and [K07](07-showdown-slow-start/README.md):
+
+| Step | Scenario | You get |
+|---|---|---|
+| Worked examples | [K06](06-kanboard-never-ready/README.md), [K07](07-showdown-slow-start/README.md) | every step explained |
+| Guided | [K34](34-doorbell-on-the-wrong-door/README.md) | questions and a hint ladder |
+| Mostly solo | [K35](35-biryani-that-needs-20-seconds/README.md) | questions only |
+| Boss | [K36](36-two-probes-two-mistakes/README.md) | no hints for the first 5 minutes |
 
 Every practice scenario has a `./check.sh` in its folder. Run it whenever you like: it only looks, never changes anything, and tells you whether you are done.
 
@@ -203,6 +215,9 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K31 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K32 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K33 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K34 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K35 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K36 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 
