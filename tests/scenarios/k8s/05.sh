@@ -15,7 +15,7 @@ broken() {
 fixed() {
   kubectl rollout status deployment/draw -n k-05-wrong-port --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "draw Deployment rolled out"
-  assert_eq "$(in_cluster_http k-05-wrong-port http://draw)" "200" "draw answers 200 inside the cluster"
+  assert_eq "$(in_cluster_http_wait k-05-wrong-port http://draw 200)" "200" "draw answers 200 inside the cluster"
   local i seen=""
   for i in 1 2 3 4 5; do
     if kubectl logs visitor -n k-05-wrong-port --tail=3 2>/dev/null | grep -q "✅"; then seen=yes; break; fi

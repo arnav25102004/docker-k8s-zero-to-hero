@@ -23,7 +23,7 @@ fixed() {
   local r1 r2
   kubectl rollout status deployment/showdown -n k-07-slow-start --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out (Ready 1/1)"
-  assert_eq "$(in_cluster_http k-07-slow-start http://showdown/healthz)" "200" "showdown answers 200 via the Service"
+  assert_eq "$(in_cluster_http_wait k-07-slow-start http://showdown/healthz 200)" "200" "showdown answers 200 via the Service"
   r1="$(restarts)"
   sleep 30
   r2="$(restarts)"

@@ -15,5 +15,5 @@ broken() {
 fixed() {
   kubectl rollout status deployment/board -n k-22-readonly-fs --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "board Deployment rolled out"
-  assert_eq "$(in_cluster_http k-22-readonly-fs http://board)" "200" "board answers 200 inside the cluster"
+  assert_eq "$(in_cluster_http_wait k-22-readonly-fs http://board 200)" "200" "board answers 200 inside the cluster"
 }

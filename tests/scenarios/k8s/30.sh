@@ -29,7 +29,7 @@ fixed() {
   assert_eq "$?" "0" "redis Deployment rolled out"
   kubectl rollout status deployment/showdown -n "$NS30" --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out"
-  assert_eq "$(in_cluster_http "$NS30" http://showdown/healthz)" "200" "showdown answers 200 on /healthz through the Service"
+  assert_eq "$(in_cluster_http_wait "$NS30" http://showdown/healthz 200)" "200" "showdown answers 200 on /healthz through the Service"
   assert_contains "$(in_cluster_sh "$NS30" "curl -s --max-time 5 http://showdown/api/info")" '"storage": "redis"' "/api/info says storage redis"
   # Persistence across the 2 replicas: vote for cats once, then read the count 6 times
   # through the Service (spread over both Pods). The visitor only ever votes for dogs.

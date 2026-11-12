@@ -14,12 +14,17 @@ case "$1" in
   run) n=$(cat "$FAKE_DIR/runs" 2>/dev/null || echo 0); echo $((n + 1)) >"$FAKE_DIR/runs" ;;
   get) n=$(cat "$FAKE_DIR/runs")
     case "$FAKE_MODE" in
-      ok) printf Succeeded ;;
+      ok | warmup) printf Succeeded ;;
       refused) printf Failed ;;
       stuck) printf Pending ;;
       flaky) [ "$n" -ge 2 ] && printf Succeeded || printf Pending ;;
     esac ;;
-  logs) case "$FAKE_MODE" in refused) printf 000 ;; *) printf '%s' "${FAKE_OUT:-}" ;; esac ;;
+  logs) n=$(cat "$FAKE_DIR/runs")
+    case "$FAKE_MODE" in
+      refused) printf 000 ;;
+      warmup) [ "$n" -ge 3 ] && printf 200 || printf 000 ;;
+      *) printf '%s' "${FAKE_OUT:-}" ;;
+    esac ;;
 esac
 exit 0
 FAKE
@@ -49,6 +54,11 @@ chk "@NAME@ is replaced in the overrides" "$(grep -c '"name":"ic-' "$WORK/log")"
 reset
 in_cluster_pod ns '' sh -c 'echo hi' >/dev/null
 chk "the command follows --command --" "$(grep -c -- '--command -- sh -c echo hi' "$WORK/log")" 1
+
+reset; export FAKE_MODE=warmup
+chk "in_cluster_http_wait waits until the app answers" "$(in_cluster_http_wait ns http://x 200 6 2>/dev/null)" 200
+reset; export FAKE_MODE=refused
+chk "in_cluster_http_wait gives up and reports the last answer" "$(in_cluster_http_wait ns http://x 200 2 2>/dev/null)" 000
 
 # a failing scenario must still get its cleanup.sh run, so it leaves nothing behind
 # shellcheck source=lib.sh

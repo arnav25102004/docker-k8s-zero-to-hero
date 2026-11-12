@@ -15,7 +15,7 @@ broken() {
 fixed() {
   kubectl rollout status deployment/showdown -n "$NS26" --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "showdown Deployment rolled out"
-  assert_eq "$(in_cluster_http "$NS26" http://showdown/readyz)" "200" "showdown answers 200 on /readyz"
+  assert_eq "$(in_cluster_http_wait "$NS26" http://showdown/readyz 200)" "200" "showdown answers 200 on /readyz"
   local before after
   before="$(in_cluster_pod "$NS26" "" curl -s --max-time 5 http://showdown/api/results)"
   in_cluster_pod "$NS26" "" curl -s --max-time 5 "http://showdown/api/vote?option=cats" >/dev/null 2>&1

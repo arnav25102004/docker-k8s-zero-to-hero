@@ -18,7 +18,7 @@ fixed() {
   local addrs
   addrs="$(kubectl get endpointslices -n k-04-no-endpoints -l kubernetes.io/service-name=tools -o jsonpath='{..addresses}' 2>&1)"
   assert_eq "$([ -n "$addrs" ] && echo yes || echo no)" "yes" "the Service now has endpoint addresses"
-  assert_eq "$(in_cluster_http k-04-no-endpoints http://tools)" "200" "tools answers 200 inside the cluster"
+  assert_eq "$(in_cluster_http_wait k-04-no-endpoints http://tools 200)" "200" "tools answers 200 inside the cluster"
   local i seen=""
   for i in 1 2 3 4 5; do
     if kubectl logs visitor -n k-04-no-endpoints --tail=3 2>/dev/null | grep -q "✅"; then seen=yes; break; fi

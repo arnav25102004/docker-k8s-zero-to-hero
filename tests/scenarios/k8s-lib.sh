@@ -79,6 +79,22 @@ in_cluster_http() {
   printf '%s\n' "${code:-000}"
 }
 
+# in_cluster_http_wait NS URL WANT [ATTEMPTS]: like in_cluster_http, but keeps asking (2 s apart)
+# until the answer is WANT, then prints it; after ATTEMPTS tries (default 8) it prints the last
+# answer. For checks right after a fix: a Deployment without a readiness probe counts as rolled
+# out the moment its container starts, a few seconds before the app listens. A learner watches
+# the visitor turn green; this does the same.
+in_cluster_http_wait() {
+  local ns="$1" url="$2" want="$3" max="${4:-8}" i=0 got=""
+  while [ "$i" -lt "$max" ]; do
+    got=$(in_cluster_http "$ns" "$url")
+    [ "$got" = "$want" ] && break
+    i=$((i + 1))
+    [ "$i" -lt "$max" ] && sleep 2
+  done
+  printf '%s\n' "$got"
+}
+
 # wait_ready NS SELECTOR SECONDS: wait until the selected Pods are Ready.
 wait_ready() {
   local i=0

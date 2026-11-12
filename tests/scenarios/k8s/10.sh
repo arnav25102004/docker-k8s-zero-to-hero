@@ -13,7 +13,7 @@ fixed() {
   kubectl rollout status deployment/board -n k-10-pvc-pending --timeout=180s >/dev/null 2>&1
   assert_eq "$?" "0" "board Deployment rolled out (Ready 1/1)"
   assert_eq "$(kubectl get pvc board-data -n k-10-pvc-pending -o jsonpath='{.status.phase}' 2>&1)" "Bound" "PVC board-data is Bound"
-  assert_eq "$(in_cluster_http k-10-pvc-pending http://board/healthcheck.php)" "200" "board answers 200 via the Service"
+  assert_eq "$(in_cluster_http_wait k-10-pvc-pending http://board/healthcheck.php 200)" "200" "board answers 200 via the Service"
   local i seen=""
   for i in 1 2 3 4 5; do
     if kubectl logs visitor -n k-10-pvc-pending --tail=3 2>/dev/null | grep -q "✅"; then seen=yes; break; fi
