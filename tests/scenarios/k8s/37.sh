@@ -9,7 +9,8 @@ broken() {
   assert_contains "$(kubectl get pod old-stall -n k-37-stuck-pod -o jsonpath='{.metadata.finalizers}' 2>&1)" "cleanup-lock" "a finalizer is holding it"
   assert_contains "$(kubectl get pods -n k-37-stuck-pod 2>&1)" "Terminating" "kubectl shows it as Terminating"
   # The tempting wrong fix: a force delete does not lift a finalizer.
-  kubectl delete pod old-stall -n k-37-stuck-pod --grace-period=0 --force >/dev/null 2>&1
+  # --wait=false: by default kubectl waits for the object to be gone, and a finalizer means it never is.
+  kubectl delete pod old-stall -n k-37-stuck-pod --grace-period=0 --force --wait=false >/dev/null 2>&1
   sleep 3
   assert_eq "$(kubectl get pod old-stall -n k-37-stuck-pod -o name 2>/dev/null)" "pod/old-stall" "a force delete did NOT remove it (the finalizer still holds)"
   assert_cmd_fails "check.sh says: not done yet" bash "$CHECK37"
