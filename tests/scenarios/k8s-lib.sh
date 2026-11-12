@@ -122,7 +122,17 @@ nothing_left_k8s() {
 
 # run_cycle_k8s DIR ID NS...: cleanup -> break -> broken -> fix -> fixed -> cleanup
 # -> nothing left. Twice. broken() and fixed() must be defined by the caller.
+# If any step fails, the scenario's cleanup.sh runs before returning, so a failed
+# scenario cannot leave things behind for the next one (K16 taints every node, and a
+# leftover taint made every later scenario fail).
 run_cycle_k8s() {
+  local dir="$1"
+  _run_cycle_k8s "$@" && return 0
+  bash "$dir/cleanup.sh" >/dev/null 2>&1
+  return 1
+}
+
+_run_cycle_k8s() {
   local dir="$1" id="$2" n
   shift 2
   for n in 1 2; do

@@ -21,6 +21,10 @@ source "$REPO/tests/scenarios/k8s-lib.sh"
 
 require_test_cluster || exit 1
 
+# A stop in the middle of an earlier run (Ctrl+C, a crash) can leave K16's node taint behind,
+# and then every scenario's Pods sit Pending. This cluster is the throwaway one, so clear it.
+kubectl taint nodes --all z2h-vip- >/dev/null 2>&1 || true
+
 if [ "$#" -gt 0 ]; then
   NUMS="$*"
 else

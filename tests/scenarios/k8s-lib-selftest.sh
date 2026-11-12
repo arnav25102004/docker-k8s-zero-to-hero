@@ -50,5 +50,16 @@ reset
 in_cluster_pod ns '' sh -c 'echo hi' >/dev/null
 chk "the command follows --command --" "$(grep -c -- '--command -- sh -c echo hi' "$WORK/log")" 1
 
+# a failing scenario must still get its cleanup.sh run, so it leaves nothing behind
+# shellcheck source=lib.sh
+source "$REPO/tests/scenarios/lib.sh" 2>/dev/null || true
+SC="$WORK/scenario"; mkdir -p "$SC/break" "$SC/fix"
+printf '#!/bin/bash\necho x >> "%s/cleanups"\n' "$WORK" >"$SC/cleanup.sh"
+printf '#!/bin/bash\nexit 1\n' >"$SC/break/break.sh"
+: >"$WORK/cleanups"
+run_cycle_k8s "$SC" k99 >/dev/null 2>&1; rc=$?
+chk "a failing scenario makes run_cycle_k8s fail" "$rc" 1
+chk "its cleanup ran again after the failure (initial + after)" "$(wc -l <"$WORK/cleanups" | tr -d ' ')" 2
+
 printf '\n%s\n' "$([ "$FAILS" -eq 0 ] && echo 'all passed' || echo "$FAILS failed")"
 [ "$FAILS" -eq 0 ]
