@@ -122,6 +122,8 @@ The app is perfectly healthy. Only the probe's path is wrong.
 <details><summary>Reveal after the room guesses</summary>
 
 The Deployment's readiness probe asks for `/healthz.php`, which Kanboard doesn't have, so every check returns **404** and the Pod is never marked Ready. A Pod that isn't Ready is left out of the Service's endpoints, so no visitor is ever served. A failing *readiness* probe never restarts anything (`RESTARTS` stays 0), which is why this failure is so quiet. Nothing is wrong with Kanboard, the image or the cluster.
+
+![Diagram: the readiness probe asks for /healthz.php, gets a 404, so the Pod is never Ready and the Service leaves it out](../images/k06-readiness-probe.svg)
 </details>
 
 ## 🔧 Fix it

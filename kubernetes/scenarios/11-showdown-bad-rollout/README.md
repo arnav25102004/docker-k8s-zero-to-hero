@@ -138,6 +138,8 @@ kubectl rollout history deployment/showdown -n k-11-bad-rollout --revision=1 | g
 <details><summary>Reveal after the room guesses</summary>
 
 Release v2 set `PORT: "eighty"`, so every v2 Pod crashes at startup and never passes its readiness probe. Because the Deployment uses `maxUnavailable: 0`, Kubernetes refuses to remove any Ready v1 Pod until a v2 Pod is Ready, and with `maxSurge: 1` it only ever starts one extra. So 3 v1 Pods keep serving, 1 v2 Pod crash-loops, and the rollout waits (up to `progressDeadlineSeconds`, 10 minutes by default, then it reports a deadline error). The users are fine; only the release is stuck.
+
+![Diagram: three v1 Pods keep serving while the one extra v2 Pod crash-loops, so the visitors are fine and only the rollout is stuck](../images/k11-rollout-stuck-safely.svg)
 </details>
 
 ## 🔧 Fix it

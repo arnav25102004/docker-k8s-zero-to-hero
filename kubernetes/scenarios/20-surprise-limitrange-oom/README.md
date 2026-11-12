@@ -146,6 +146,8 @@ The visitor got the same defaults. Busybox needs only a few MiB, so it is perfec
 <details><summary>Reveal after the room guesses</summary>
 
 The namespace has a **LimitRange** that gives every container without its own `resources` a default memory request of 16Mi and a default limit of 32Mi. Our Deployment sets no `resources`, so the API server quietly filled in 32Mi when it created each Pod. The app needs more than that at start (about 16 MiB plus the demo's 40 MiB preload), so the kernel kills it the moment it crosses 32Mi, over and over (CrashLoopBackOff). Nobody wrote the limit in the YAML, and nothing in the YAML showed it: it only appears in the Pod that actually ran.
+
+![Diagram: the LimitRange fills in a 32Mi limit the YAML never had, and the app needs more, so it is OOMKilled](../images/k20-hidden-limitrange.svg)
 </details>
 
 ## 🔧 Fix it
