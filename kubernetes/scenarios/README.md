@@ -1,8 +1,8 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-30 stage demos. Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+33 stage demos: 30 main scenarios and a 3-problem practice lane (K31 to K33). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K30 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K33 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
 
 ## The lineup
 
@@ -38,6 +38,21 @@
 | K28 | [The nightly reset that gave up](28-leaderboard-reset-job/README.md) | a reset Job + Redis (terminal only) | *The midnight reset ran. Three times. Then gave up.* | - | 78 MB |
 | K29 | [Half ready](29-log-sidecar-half-ready/README.md) | Hostel Notice Board | *Half ready. Fully confusing.* | `9229` | 26 MB |
 | K30 | [The Friday 5 PM outage (the finale)](30-friday-5pm-outage/README.md) | Cats vs Dogs + Redis | *Friday, 5 PM. Three things broke. Nobody knows that yet.* | `9230` | 82 MB |
+| K31 | [Two stalls, one signboard](31-two-stalls-one-signboard/README.md) | Chai stall (practice) | *Some customers get hot chai. Some get… yesterday's.* | `9231` | 17 MB |
+| K32 | [The label on the wrong object](32-label-on-the-wrong-object/README.md) | Samosa stall (practice) | *The label is right there. Kubernetes is looking somewhere else.* | `9232` | 17 MB |
+| K33 | [Two bugs in one trench coat](33-canteen-two-bugs/README.md) | Canteen counter (boss) | *You fixed it. It is still broken. Welcome to the boss level.* | `9233` | 17 MB |
+
+### 🏋️ Practice lanes
+Reading about a fix is not the same as finding one alone. A **practice lane** takes one idea from a scenario you have already done (the *worked example*) and gives you more problems on the same idea, each with less help than the last. K31 to K33 are the first lane: **"Services find Pods"**, after [K04](04-it-tools-no-endpoints/README.md).
+
+| Step | Scenario | You get |
+|---|---|---|
+| Worked example | [K04](04-it-tools-no-endpoints/README.md) | every step explained |
+| Guided | [K31](31-two-stalls-one-signboard/README.md) | questions and a hint ladder |
+| Mostly solo | [K32](32-label-on-the-wrong-object/README.md) | questions only |
+| Boss | [K33](33-canteen-two-bugs/README.md) | no hints for the first 5 minutes |
+
+Every practice scenario has a `./check.sh` in its folder. Run it whenever you like: it only looks, never changes anything, and tells you whether you are done.
 
 Scenario `NN` uses local port `92NN` (the apps you can open in a browser). Each scenario lives in its own namespace named `k-NN-<slug>` (K12 uses two, K13 also creates a short-lived `k-13-probe`), so nothing touches your lab work. Logins: Kanboard (K06, K10) uses the default `admin` / `admin`; the other apps need no login (Adminer in K09 only shows its login form, and there is no database behind it). All images and sizes are in [IMAGES.md](IMAGES.md).
 
@@ -185,6 +200,9 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K28 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K29 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K30 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K31 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K32 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| K33 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

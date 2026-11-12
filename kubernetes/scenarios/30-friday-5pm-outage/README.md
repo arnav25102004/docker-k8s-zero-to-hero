@@ -473,7 +473,7 @@ cd .. && ./cleanup.sh
 ```
 
 ## Next →
-There is no K31. **That was the finale: you've finished all 30 Kubernetes scenarios.** 🏆
+**That was the finale: you've finished the 30 main Kubernetes scenarios.** 🏆 Want more reps? The [practice lane](../31-two-stalls-one-signboard/README.md) (K31 to K33) turns one idea, "Services find Pods", into three more problems, ending in a boss.
 
 Think back to K01: a whiteboard stuck in `Pending`, and one question, "why won't it start?". Since then you've chased image typos, crash loops, wrong ports, impatient probes, out-of-memory kills, missing secrets and disks, DNS across namespaces, locked-down networks, forbidden bots, taints, quotas, security rules, stale config, stuck init containers, failing Jobs and half-ready sidecars. Today you handled three at once, calmly, one change at a time. That's what on-call engineers do for a living.
 

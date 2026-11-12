@@ -1,0 +1,40 @@
+# K33 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canteen
+  namespace: k-33-canteen
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cantene
+  template:
+    metadata:
+      labels:
+        app: cantene
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🍛 Today's special: lemon rice. Limited, like all good things."]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: canteen
+  namespace: k-33-canteen
+spec:
+  selector:
+    app: canteen
+  ports:
+    - port: 80
+      targetPort: 8080

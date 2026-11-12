@@ -25,7 +25,7 @@ By the end of this track you can deploy, expose, update, scale, secure, and debu
 | K16 | [Pod Security](16-pod-security/README.md) | 40m | 🟡→🔴 |
 | K17 | [Scheduling & Availability](17-scheduling/README.md) | 60m | 🔴 |
 | K18 | [🏆 Capstone: The Showdown Goes to Production](18-capstone/README.md) | 2h | 🔴 |
-| 🔥 | [Break-and-fix scenarios K01 … K30](scenarios/README.md) (separate from the labs above) | ~5–6h | 🟢→🔴 |
+| 🔥 | [Break-and-fix scenarios K01 … K33](scenarios/README.md) (separate from the labs above) | ~6h | 🟢→🔴 |
 
 [`stack/`](stack/README.md) holds the shared frontend + Redis manifests used by K04–K13.
 

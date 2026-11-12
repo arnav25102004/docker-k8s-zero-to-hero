@@ -46,6 +46,16 @@ kubectl logs -f visitor -n k-04-no-endpoints
 ```
 You can stop it with Ctrl+C. We'll watch it again live when we fix things.
 
+## 🔮 Predict first (60 seconds)
+The Pods say `Running` and `1/1`. Before you type a single command, say out loud:
+1. Is the *app* broken?
+2. If not, which object would you suspect first, and why?
+
+<details><summary>Check your prediction</summary>
+
+The app is fine: a Pod that is `Running` and `1/1` Ready is doing its job. Suspect the thing *between* the visitor and the Pods: the Service. It is the only piece whose whole job is to find Pods, and finding is where this story goes wrong.
+</details>
+
 ## 🔍 Investigate
 Guess first, then run these **in order**. The visitor's log already told us the symptom: requests fail.
 
@@ -111,6 +121,20 @@ An extra clue, if you have a minute to spare: `kubectl port-forward -n k-04-no-e
 kubectl logs -f deploy/tools -n k-04-no-endpoints
 ```
 IT-Tools is an nginx web server, and nginx prints one log line for every request it receives. While the visitor keeps asking every 2 seconds and failing, **nothing new appears here**: the requests are not reaching the Pods at all. A client that fails while the server stays silent points at the road between them (the Service), not at the app. Press Ctrl+C when you've seen enough. We'll come back to this log after the fix.
+
+**6. (A new tool) What does `selector` even mean?** You do not need to leave the terminal to find out. Kubernetes can explain any field of any object:
+```bash
+kubectl explain service.spec.selector
+```
+It prints the documentation for that exact field, straight from your cluster's own API. Try `kubectl explain pod.metadata.labels` too. When you meet a field you do not know, `kubectl explain` beats searching the web, because it describes the version you are really running.
+
+## 🪤 The tempting wrong fix: restart the Pods
+"Have you tried turning it off and on again?" Try it:
+```bash
+kubectl delete pods -n k-04-no-endpoints -l app=tools
+kubectl get pods -n k-04-no-endpoints --show-labels
+```
+Two brand-new Pods appear, with exactly the same labels as before, so the Service *still* finds nothing. Restarting is great for a stuck process and useless for wrong wiring. The Pods were never the problem.
 
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
@@ -198,5 +222,29 @@ Press Ctrl+C in the port-forward terminal first, then:
 cd .. && ./cleanup.sh
 ```
 
+## 🧪 Quick recap (3 questions)
+Answer from memory, then peek.
+1. A Service has no endpoints but all its Pods are Ready. What do you compare?
+2. Does a Service find Pods by their Deployment, or by their labels?
+3. You delete a Pod and the Service still finds nothing. Why?
+
+<details><summary>Answers</summary>
+
+1. The Service's `selector` against the Pods' labels (`kubectl get svc -o wide` and `kubectl get pods --show-labels`).
+2. By labels only. It has no idea which Deployment made a Pod.
+3. The replacement Pod gets the same labels from the same Deployment, so nothing changed.
+</details>
+
+## 🏋️ Now you try: the "Services find Pods" practice lane
+You have seen the idea once, with every step explained. Now lock it in with three more problems, each with less help than the last:
+
+| # | Practice | What is new | Hand-holding |
+|---|----------|-------------|--------------|
+| [K31](../31-two-stalls-one-signboard/README.md) | Two stalls, one signboard | a Service that matches *too many* Pods | guided questions + hint ladder |
+| [K32](../32-label-on-the-wrong-object/README.md) | The label on the wrong object | labels on a Deployment are not on its Pods | questions only |
+| [K33](../33-canteen-two-bugs/README.md) | Two bugs in one trench coat | two stacked faults (boss) | no hints for 5 minutes |
+
+Each one has a `./check.sh` that tells you, any time, whether you are done.
+
 ## Next →
-[K05](../05-excalidraw-wrong-port/README.md): Endpoints exist. The Pod is fine. Still: connection refused.
+Finish the lane above, then [K05](../05-excalidraw-wrong-port/README.md): Endpoints exist. The Pod is fine. Still: connection refused.
