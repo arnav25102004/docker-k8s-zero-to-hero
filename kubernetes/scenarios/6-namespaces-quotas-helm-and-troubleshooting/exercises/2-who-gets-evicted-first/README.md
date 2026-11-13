@@ -105,7 +105,7 @@ It prints the class of each workload's newest Pod and whether it is the right on
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

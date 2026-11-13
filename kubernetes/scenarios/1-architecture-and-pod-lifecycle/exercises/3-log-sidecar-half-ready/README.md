@@ -210,7 +210,7 @@ diff ../break/app.yaml app.yaml
 ```
 One letter. The Deployment replaces the old Pod with a new one.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -306,7 +306,7 @@ One series per container: the app container reads 1, the sidecar reads 0. The Po
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

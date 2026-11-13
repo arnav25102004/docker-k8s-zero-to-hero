@@ -102,7 +102,7 @@ It checks that the route's references resolve and that the visitor sees ✅ on b
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

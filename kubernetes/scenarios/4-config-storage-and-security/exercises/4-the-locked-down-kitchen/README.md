@@ -104,7 +104,7 @@ It checks that the guard is still `restricted` and both Pods are Ready.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

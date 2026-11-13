@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-"""Sets the scene for this scenario. Run it from this folder:  python3 run.py
+"""S5.x2 break: sets up the scene. Working out what is wrong is the exercise; start with the README.
 
-It just runs break.sh next to it (bash is needed; on Windows use Git Bash or WSL)."""
+Run it from this folder:  python3 run.py"""
 import os
-import shutil
-import subprocess
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
-bash = shutil.which("bash")
-if not bash:
-    sys.exit("bash was not found. On Windows, open Git Bash (or WSL) and try again.")
-sys.exit(subprocess.call([bash, os.path.join(here, "break.sh")], cwd=here))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..", "..")))
+import scenario_lib as z  # noqa: E402
+
+SCENARIO = os.path.dirname(HERE)
+
+NS = "k-35-slow-biryani"
+
+z.start_break(SCENARIO, [NS], port=9235)
+z.say("Opening the stall and sending in a visitor…")
+z.apply_dir(HERE)
+z.must_wait("the stall's Pods to be created (the first download can take a minute)", 180,
+            lambda: z.pods_exist(NS, "app=biryani"), "The Pods were not created. Run cleanup.py and try again.")
+z.wait_visitor(NS)
+z.scene_set()

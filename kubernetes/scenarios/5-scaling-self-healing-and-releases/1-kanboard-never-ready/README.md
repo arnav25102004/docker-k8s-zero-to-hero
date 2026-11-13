@@ -172,7 +172,7 @@ diff ../break/app.yaml app.yaml
 >               path: /healthcheck.php
 ```
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file, then wait for the new Pod.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file, then wait for the new Pod.
 ```bash
 kubectl apply -f app.yaml
 kubectl rollout status deployment/board -n k-06-never-ready --timeout=180s
@@ -236,7 +236,7 @@ It stays 0 while the Pod is `Running`. That gap, running but not ready, is exact
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

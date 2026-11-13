@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
-"""Applies the fix for this scenario. Run it from this folder:  python3 run.py
+"""S6.5 fix: the same Deployment, now with an explicit resources section (requests 64Mi, limits 128Mi).
 
-It just runs fix.sh next to it (bash is needed; on Windows use Git Bash or WSL)."""
+Run it from this folder:  python3 run.py"""
 import os
-import shutil
-import subprocess
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
-bash = shutil.which("bash")
-if not bash:
-    sys.exit("bash was not found. On Windows, open Git Bash (or WSL) and try again.")
-sys.exit(subprocess.call([bash, os.path.join(here, "fix.sh")], cwd=here))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
+import scenario_lib as z  # noqa: E402
+
+NS = "k-20-limitrange"
+
+z.need_cluster()
+z.say("Giving the app its own memory request (64Mi) and limit (128Mi)…")
+z.apply_files(os.path.join(HERE, "app.yaml"))
+if z.kubectl_show("rollout", "status", "deployment/showdown", "-n", NS, "--timeout=180s") != 0:
+    z.die("The app didn't become Ready. Check: kubectl get pods -n " + NS)
+# The old crash-looping Pods are removed shortly after the new ones are Ready: wait until only the 2 new ones are left.
+z.must_wait("the old crashing Pods to be removed", 60, lambda: z.pod_count(NS, "app=showdown") == 2,
+            "Extra Pods are still there. Check: kubectl get pods -n " + NS)
+z.show_next("✅ Fixed. Now verify it yourself:",
+            "kubectl get pods -n " + NS,
+            z.forward_hint(NS, "showdown", 9220))

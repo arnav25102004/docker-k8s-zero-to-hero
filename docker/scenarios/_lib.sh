@@ -65,6 +65,8 @@ refuse_if_in_work() {
 wait_for() {
   local desc="$1" secs="$2" i=0
   shift 2
+  # Test hook (tests/scenarios/compare-py-sh.py): look once, never wait.
+  if [ -n "${Z2H_CHECK_ONCE:-}" ]; then "$@" >/dev/null 2>&1; return 0; fi
   printf '⏳ Waiting for %s ' "$desc"
   while [ "$i" -lt "$secs" ]; do
     if "$@" >/dev/null 2>&1; then

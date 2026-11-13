@@ -19,7 +19,7 @@
 
 Thirty scenarios, grouped into **six sections of five**. Open a section folder and the scenarios are numbered 1 to 5, in teaching order. Each is a **4-minute live demo**: about 20 seconds of story, 40 seconds to break it, 90 seconds to find the cause with the class, 40 seconds to fix it, 30 seconds for the one-line lesson. Six sections × five scenarios × four minutes = **two hours, non-stop**. The exercises, the finale and the two projects fit the second two-hour slot.
 
-> 🕐 **Four minutes only works if the next scenario is already broken.** Open a second terminal and run the *next* `break.sh` while you talk through the current lesson (each scenario has its own namespace). Scenarios marked ⏳ take longer to set up or to fix: start those one scenario early.
+> 🕐 **Four minutes only works if the next scenario is already broken.** Open a second terminal and run the *next* `break/run.py` while you talk through the current lesson (each scenario has its own namespace). Scenarios marked ⏳ take longer to set up or to fix: start those one scenario early.
 
 **How to read an id:** `S2.3` is Section 2, scenario 3, in `kubernetes/scenarios/2-workloads/3-…`. `S5.x1` is Section 5, exercise 1, in that section's `exercises/` folder (`5-…/exercises/1-…`). Every section has at least five exercises.
 
@@ -161,36 +161,36 @@ Each scenario lives in its own namespace, named after its original code (for exa
 
 ## The short way: open the folder, run `run.py`
 
-Every scenario folder has a `break/run.py` and a `fix/run.py`. No ids to remember: open the section, open the scenario, run it.
+Every scenario folder has a `break/run.py` and a `fix/run.py`, plus a `cleanup.py` and a `check.sh`. No ids to remember: open the section, open the scenario, run it.
 
 ```bash
 cd kubernetes/scenarios/1-architecture-and-pod-lifecycle/2-image-typo
 python3 break/run.py     # set the scene
 python3 fix/run.py       # later: apply the fix
 ./check.sh               # any time: "am I done?" (read-only)
-python3 z2h.py cleanup S1.2   # or: ./cleanup.sh in the scenario folder
+python3 cleanup.py       # remove everything it created
 ```
 
-`run.py` is plain Python 3 with no packages; it simply runs the `break.sh` or `fix.sh` next to it (the old `cd break && ./break.sh` still works). `break` ends with one line, "the scene is set", and says nothing about the cause: finding it is the exercise.
+These are plain Python 3 (no packages): they run the same `kubectl` commands you would type, and read top to bottom like a recipe (open one to see). `break` ends with one line, "the scene is set", and says nothing about the cause: finding it is the exercise. All the shared helpers live in [`scenario_lib.py`](scenario_lib.py).
 
-If you prefer one launcher from the repo root, `python3 z2h.py list` shows every scenario and `python3 z2h.py break S1.2` runs one.
+From the repo root, `python3 z2h.py list` shows every scenario and `python3 z2h.py break S1.2` runs one.
 
 ## How a session runs
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
 2. **Break it**: `cd break && python3 run.py`
-3. **Predict, then investigate by hand.** Every scenario opens its investigation with a **predict-first** box (a few seconds in a 4-minute demo, a full minute in an exercise): say what you expect before you type anything. Then the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (most of them; the README says when) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (S5.3 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
+3. **Predict, then investigate by hand.** Every scenario opens its investigation with a **predict-first** box (a few seconds in a 4-minute demo, a full minute in an exercise): say what you expect before you type anything. Then the class types the commands from the README. `break/run.py` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (most of them; the README says when) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (S5.3 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
 4. **Meet the tempting wrong fix.** Each scenario names the fix everyone reaches for first (restart it, scale it up, switch the rule off) and shows why it does not work. Then **fix it**: `cd ../fix && python3 run.py`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
-5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
+5. **Verify by hand**: the class checks it really works. `fix/run.py` does not verify for you. To open an app, use a **second terminal**:
    ```bash
    kubectl port-forward -n <namespace> svc/<service> 92NN:<port>
    ```
    The scenario README prints the exact line (for example S5.2: `kubectl port-forward -n k-07-slow-start svc/showdown 9207:80`). Then open `http://localhost:92NN` on a laptop. On a playground, add `--address 0.0.0.0` and open the URL for port `92NN`. Press **Ctrl+C** in that terminal to stop it. Several scenarios (for example S5.5, S4.4, S2.3, S2.5 and S2.4) have no web page: you verify them in the terminal.
 
-   **Why the laptop command has no `--address 0.0.0.0`:** without it, `port-forward` listens on `localhost` only. With it, anyone on the same network (venue Wi-Fi) could open your app, and Kanboard's default login is `admin` / `admin`. A playground needs `--address 0.0.0.0` because its URL proxy reaches the app from outside the terminal. Keep `-n <namespace>` right after `port-forward`: `cleanup.sh` finds leftovers by that text.
-6. **Clean up**: `cd .. && ./cleanup.sh`
+   **Why the laptop command has no `--address 0.0.0.0`:** without it, `port-forward` listens on `localhost` only. With it, anyone on the same network (venue Wi-Fi) could open your app, and Kanboard's default login is `admin` / `admin`. A playground needs `--address 0.0.0.0` because its URL proxy reaches the app from outside the terminal. Keep `-n <namespace>` right after `port-forward`: `cleanup.py` finds leftovers by that text.
+6. **Clean up**: `cd .. && python3 cleanup.py`
 
-Every `break.sh` cleans up first, so you can run it again and again. Every script works from any folder.
+Every `break/run.py` cleans up first, so you can run it again and again.
 
 ## Platform notes
 
@@ -199,23 +199,23 @@ Every `break.sh` cleans up first, so you can run it again and again. Every scrip
 | kind | Works. The default network add-on of recent kind versions enforces NetworkPolicy, so S3.5 runs. The default StorageClass is `standard`. |
 | minikube | Works with a default StorageClass (`standard`). A plain `minikube start` may **not enforce NetworkPolicy**, so S3.5 stops with a clear message: start it with `minikube start --cni=calico` for S3.5. |
 | Docker Desktop (Kubernetes enabled) | Works. The StorageClass is called `hostpath`. NetworkPolicy is often **not enforced**, so S3.5 may stop with its message (that is the check working, not a bug). |
-| Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `92NN`. Both should enforce NetworkPolicy (S3.5's `break.sh` checks before it breaks anything). |
+| Killercoda, iximiuz | Supported. Open the apps through the platform's "traffic / ports" link for `92NN`. Both should enforce NetworkPolicy (S3.5's `break/run.py` checks before it breaks anything). |
 | Windows | Use **WSL2** (Ubuntu) and run everything inside it. Git Bash is not enough: the scripts use `pkill` and `pgrep`, which it lacks. |
 | Play with Docker | **No Kubernetes there.** Use the Docker scenarios instead, or a Kubernetes playground. |
 
 Things to know before you start:
 
-- **Check your cluster first.** `kubectl config current-context` shows which cluster you are about to break. The scenarios create things in their own `k-NN-...` namespaces, with two exceptions: S2.3 (a taint on the nodes) and S5.3 (metrics-server, only if missing). Their `cleanup.sh` reverts exactly that. Break the right cluster on purpose.
+- **Check your cluster first.** `kubectl config current-context` shows which cluster you are about to break. The scenarios create things in their own `k-NN-...` namespaces, with two exceptions: S2.3 (a taint on the nodes) and S5.3 (metrics-server, only if missing). Their `cleanup.py` reverts exactly that. Break the right cluster on purpose.
 - **S4.3 needs a default StorageClass.** `kubectl get storageclass` must show one marked `(default)`. S4.3's fix is to stop asking for the missing `fast-ssd` class and use that default.
 - **S1.1, S1.2 and S4.3 download their app at fix time**, because the Pod never starts while it is broken (S1.1, S1.2: Excalidraw; S4.3: Kanboard). On a cold cluster the fix waits on that download (the first time it can take up to a minute or two): preload it or run the scenario once before class (see the checklist below).
 - **S3.5 needs a cluster that enforces NetworkPolicy**, and checks it first (a throwaway `k-13-probe` namespace, deleted straight after). If your cluster ignores policies, it stops with a clear message instead of showing a fake outage.
-- **S2.3 changes a node, not just a namespace.** It puts a taint (`z2h-vip`) on one node, so always run its `cleanup.sh` (it removes the taint again; `break.sh` also starts clean). Do not skip it, or the next scenario sees a tainted cluster. On a one-node cluster the taint lands on that node and the watchman is missing everywhere; the lesson is the same.
+- **S2.3 changes a node, not just a namespace.** It puts a taint (`z2h-vip`) on one node, so always run its `cleanup.py` (it removes the taint again; `break/run.py` also starts clean). Do not skip it, or the next scenario sees a tainted cluster. On a one-node cluster the taint lands on that node and the watchman is missing everywhere; the lesson is the same.
 - **S5.3 installs metrics-server only if your cluster has none**, and removes it again afterwards only if it installed it. Run S5.3 on its own (not alongside other scenarios): adding or removing metrics-server briefly changes the cluster's API list.
 - **S6.3 needs Helm** (`helm version` must work). **S3.4 needs a Gateway controller**: install it once with `./scripts/install-gateway.sh` (about 1 GB of memory). Both say so and stop if they are missing.
 - **S2.5 takes up to a minute and a half to show its fix**, because a CronJob only fires on the minute. Start the fix, then talk while you wait.
 - **S6.x5 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the six sections, when the class has seen each kind of fault on its own.
-- **S1.5 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.sh` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
-- **S6.1 changes your kubeconfig's current namespace** (that is its fix). `./cleanup.sh` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
+- **S1.5 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.py` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
+- **S6.1 changes your kubeconfig's current namespace** (that is its fix). `python3 cleanup.py` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
 - **S4.x2 to S4.x4 label their namespace with a Pod Security level.** Pod Security Admission is built into Kubernetes 1.25 and later, so it needs nothing installed. S4.x4 also pulls two small nginx images.
 - **S6.x2 only reads Pod classes.** It never starves the node, so it is safe on a one-node cluster.
 - **S5.x5 needs no metrics-server.** The autoscaler's complaint is about its target, which every cluster can show.
@@ -228,12 +228,12 @@ Scripts need only `bash`, `kubectl`, `curl` and ordinary Unix tools. No `jq`. He
 
 Stay calm. Everything lives in the `k-NN-...` namespaces, except S2.3's node taint and S5.3's metrics-server (see above). In this order:
 
-1. **Reset the scenario:** `./cleanup.sh` (from the scenario folder). It is safe at any time, even if nothing is running, and it waits until the namespace is really gone.
+1. **Reset the scenario:** `python3 cleanup.py` (from the scenario folder). It is safe at any time, even if nothing is running, and it waits until the namespace is really gone.
 2. **Look at what is left:** `kubectl get ns | grep '^k-'`. Anything listed is a scenario namespace; delete one with `kubectl delete ns <name>`.
 3. **Port already in use?** An old port-forward is still running: `pkill -f "port-forward -n k-"` (or press Ctrl+C in its terminal).
-4. **Run it again:** `./break.sh` again. It starts clean every time.
-5. **Pods stuck in Pending in every scenario?** Look for a leftover S2.3 taint: `kubectl describe nodes | grep -A2 Taints`. If you see `z2h-vip`, run `kubernetes/scenarios/2-workloads/3-watchman-skipped-a-gate/cleanup.sh` (or `kubectl taint nodes --all z2h-vip-`).
-6. **Still odd? Reset everything:** `./labs.sh k8s clean` from the repo root. It runs every scenario's `cleanup.sh` against your current cluster.
+4. **Run it again:** `python3 run.py` again. It starts clean every time.
+5. **Pods stuck in Pending in every scenario?** Look for a leftover S2.3 taint: `kubectl describe nodes | grep -A2 Taints`. If you see `z2h-vip`, run `kubernetes/scenarios/2-workloads/3-watchman-skipped-a-gate/cleanup.py` (or `kubectl taint nodes --all z2h-vip-`).
+6. **Still odd? Reset everything:** `./labs.sh k8s clean` from the repo root. It runs every scenario's `cleanup.py` against your current cluster.
 
 `The connection to the server ... was refused` or `no cluster`? Start Docker Desktop / minikube / kind, check `kubectl config current-context`, then step 4.
 

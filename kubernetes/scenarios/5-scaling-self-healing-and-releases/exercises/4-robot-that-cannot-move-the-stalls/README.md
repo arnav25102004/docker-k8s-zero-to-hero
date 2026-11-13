@@ -134,7 +134,7 @@ The checker looks at the rule. Then send the robot in again: this time it should
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

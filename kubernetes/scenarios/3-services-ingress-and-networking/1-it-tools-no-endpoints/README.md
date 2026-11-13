@@ -164,7 +164,7 @@ diff ../break/app.yaml app.yaml
 >     tier: backend
 ```
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -221,7 +221,7 @@ Or open http://localhost:9204 in your browser and try a tool, like the token gen
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

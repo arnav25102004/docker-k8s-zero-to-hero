@@ -8,7 +8,7 @@
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> 🧭 **New topic: where am I?** The most common beginner mistake, and the most dangerous expert one. Heads up: this scenario's fix changes your kubeconfig's *current namespace*. `./cleanup.sh` puts it back, and only if this scenario was the one that changed it.
+> 🧭 **New topic: where am I?** The most common beginner mistake, and the most dangerous expert one. Heads up: this scenario's fix changes your kubeconfig's *current namespace*. `python3 cleanup.py` puts it back, and only if this scenario was the one that changed it.
 
 ## 📖 The story
 Lakshmi runs the late-night canteen's website. She copies a manifest from a teammate and runs `kubectl apply`. The answer: `deployment.apps/night-canteen created`. Lovely.
@@ -139,7 +139,7 @@ Run the plain `kubectl get pods` again. This time you see the canteen's two Pods
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 It also puts your context's namespace back, but only if it was left pointing at this scenario's namespace.
 

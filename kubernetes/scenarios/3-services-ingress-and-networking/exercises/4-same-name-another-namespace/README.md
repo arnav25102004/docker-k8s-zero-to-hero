@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · intermediate · cluster DNS, search domains, namespaces, FQDN
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 Two classes both have a "shop" Service. Each works fine for its own Pods, but a Pod from the other class cannot reach it by the short name. The reason is a tiny file inside every Pod, `/etc/resolv.conf`.

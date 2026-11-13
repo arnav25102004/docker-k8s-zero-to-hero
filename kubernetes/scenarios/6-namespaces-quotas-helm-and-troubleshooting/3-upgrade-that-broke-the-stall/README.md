@@ -106,7 +106,7 @@ It checks that the Deployment runs the good image again, every Pod is Ready, and
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

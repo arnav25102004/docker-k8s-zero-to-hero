@@ -157,7 +157,7 @@ ls
 cat secret.yaml
 ```
 ```
-fix.sh
+fix/run.py
 secret.yaml
 # S4.2 fix: create the Secret the Pod was waiting for. The existing Pod needs no change.
 apiVersion: v1
@@ -169,9 +169,9 @@ type: Opaque
 stringData:
   password: change-me-123
 ```
-Look at the Pod: it is the **same Pod** as before, with the same name and `RESTARTS 0`. The kubelet keeps retrying while a Pod waits for its Secret, so once the Secret appeared it simply built the container and started it. No new ReplicaSet and no rollout were needed, which is why `fix.sh` checks the Pod itself and not `kubectl rollout status`.
+Look at the Pod: it is the **same Pod** as before, with the same name and `RESTARTS 0`. The kubelet keeps retrying while a Pod waits for its Secret, so once the Secret appeared it simply built the container and started it. No new ReplicaSet and no rollout were needed, which is why `fix/run.py` checks the Pod itself and not `kubectl rollout status`.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): create the Secret, then watch the same Pod start.
+By hand (this replaces `python3 run.py`, so you don't need to run both): create the Secret, then watch the same Pod start.
 ```bash
 kubectl apply -f secret.yaml
 kubectl get pods -n k-09-missing-secret -w
@@ -244,7 +244,7 @@ No restarts and no logs, only this waiting reason. It is the monitoring way of s
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

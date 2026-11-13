@@ -98,7 +98,7 @@ It checks that the number of watchmen Ready equals the number of nodes.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

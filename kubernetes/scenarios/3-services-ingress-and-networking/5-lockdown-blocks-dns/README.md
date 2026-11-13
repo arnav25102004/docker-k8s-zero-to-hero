@@ -6,7 +6,7 @@
 
 ⬇️ First run downloads about 19 MB (Python), about 59 MB (Redis) and a tiny 4 MB visitor image. A slow first download is normal: do it on good Wi-Fi, before the session.
 
-⚠️ This scenario needs a cluster that **enforces** NetworkPolicy: kind, Killercoda or iximiuz. `break.sh` checks this first (a throwaway test in a namespace called `k-13-probe`, deleted straight after). Some clusters (often Docker Desktop or a default minikube) accept NetworkPolicy objects but ignore them: the script checks yours first, and if policies aren't enforced it stops with a clear message.
+⚠️ This scenario needs a cluster that **enforces** NetworkPolicy: kind, Killercoda or iximiuz. `break/run.py` checks this first (a throwaway test in a namespace called `k-13-probe`, deleted straight after). Some clusters (often Docker Desktop or a default minikube) accept NetworkPolicy objects but ignore them: the script checks yours first, and if policies aren't enforced it stops with a clear message.
 
 Output columns and wording can differ a little between kubectl, container runtimes and clusters. The ideas never change.
 
@@ -185,7 +185,7 @@ diff ../break/app.yaml app.yaml
 ```
 One real change: a second egress rule that lets the app reach `kube-system` (where CoreDNS lives) on port 53, UDP and TCP. (The first lines are only comments.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both; `cd ../fix` first if you are not already there): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both; `cd ../fix` first if you are not already there): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -262,7 +262,7 @@ Or open http://localhost:9213 in your browser and vote. Notice the policy only r
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

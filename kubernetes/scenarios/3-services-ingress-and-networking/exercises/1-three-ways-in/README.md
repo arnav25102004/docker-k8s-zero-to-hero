@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · beginner · ClusterIP, port-forward, NodePort, port vs targetPort
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A Service gives a stable address to a changing set of Pods. But "stable address" can mean three different things depending on who is asking. From another Pod, use the ClusterIP and its DNS name. From your laptop, `kubectl port-forward` is the quickest. And to open it to the outside world, the Service type changes.

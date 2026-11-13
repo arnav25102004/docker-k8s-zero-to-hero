@@ -158,7 +158,7 @@ diff ../break/app.yaml app.yaml
 >               memory: 128Mi   # a cap: the Pod is stopped if it goes beyond this
 ```
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -221,7 +221,7 @@ The Pod shows up as Pending. Now compare what it asks for with what a node has: 
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

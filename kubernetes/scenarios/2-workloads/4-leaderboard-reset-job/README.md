@@ -202,7 +202,7 @@ diff ../break/job.yaml job.yaml
 ```
 The host is now `redis`, the name of the Service. You can't simply `kubectl edit` this: a Job's Pod template is **immutable**, because Pods that already ran should not pretend they ran something else. So the fix is to delete the Job (its failed Pods go with it) and create it again.
 
-By hand (this replaces `./fix.sh`: run `./fix.sh` or these, not both):
+By hand (this replaces `python3 run.py`: run `python3 run.py` or these, not both):
 ```bash
 kubectl delete job leaderboard-reset -n k-28-job
 kubectl apply -f job.yaml
@@ -263,7 +263,7 @@ Arjun
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

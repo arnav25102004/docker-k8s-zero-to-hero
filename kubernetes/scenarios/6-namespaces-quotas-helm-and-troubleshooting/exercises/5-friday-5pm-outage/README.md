@@ -330,7 +330,7 @@ Track B hid Track C: while nobody could reach the app, nobody could see that it 
 </details>
 
 ## 🔧 Fix it
-The three by-hand fixes above together replace `./fix.sh`. You don't need both, but `fix.sh` is safe to run any time. It applies the same three fixes **one at a time, in the same order**, and waits wherever a fix needs Pods to roll. Each fix is applied whatever its current state, so it works whether you've fixed zero, one, two or all three tracks by hand. It's the safety net when a demo goes sideways. We ran it right after Track C, with everything already fixed:
+The three by-hand fixes above together replace `python3 run.py`. You don't need both, but `fix/run.py` is safe to run any time. It applies the same three fixes **one at a time, in the same order**, and waits wherever a fix needs Pods to roll. Each fix is applied whatever its current state, so it works whether you've fixed zero, one, two or all three tracks by hand. It's the safety net when a demo goes sideways. We ran it right after Track C, with everything already fixed:
 ```bash
 cd ../fix && python3 run.py
 ```
@@ -347,7 +347,7 @@ cd ../fix && python3 run.py
    kubectl logs visitor -n k-30-friday --tail=3
    kubectl port-forward -n k-30-friday svc/showdown 9230:80   (in a second terminal; then open http://localhost:9230; on a playground add --address 0.0.0.0 and open the URL for port 9230)
 ```
-It changed nothing, because nothing needed changing: no new Pods, and the visitor stayed ✅. Short on time on stage? Skip the by-hand fixes, keep `kubectl logs -f visitor -n k-30-friday` open in the second terminal, and run `./fix.sh` straight after the triage. The ❌ lines turn ✅ within about 20 seconds (longer the first time, while the Redis image downloads). The three fixes land so close together that you may not see the ⚠️ stage at all.
+It changed nothing, because nothing needed changing: no new Pods, and the visitor stayed ✅. Short on time on stage? Skip the by-hand fixes, keep `kubectl logs -f visitor -n k-30-friday` open in the second terminal, and run `python3 run.py` straight after the triage. The ❌ lines turn ✅ within about 20 seconds (longer the first time, while the Redis image downloads). The three fixes land so close together that you may not see the ⚠️ stage at all.
 
 What changed, one line per track:
 ```bash
@@ -471,7 +471,7 @@ What went well: one shared triage, three tracks in parallel, one pair of hands o
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal (and the visitor log, if it's still running) first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## Next →

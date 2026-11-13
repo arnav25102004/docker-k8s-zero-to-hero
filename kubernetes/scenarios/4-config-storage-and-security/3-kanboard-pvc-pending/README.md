@@ -159,9 +159,9 @@ diff ../break/app.yaml app.yaml
 10d9
 <   storageClassName: fast-ssd
 ```
-One line of config is gone (plus the header comment): with no `storageClassName`, the cluster's default class is used. But you can't just `kubectl apply` that: a PVC's spec is **immutable** (Kubernetes refuses to change the class of an existing PVC). So `fix.sh` deletes the Deployment (a PVC that a Pod uses is protected and would hang in `Terminating`), then deletes the PVC, then applies the corrected file, which creates a new PVC and a new Pod. If your default class uses WaitForFirstConsumer (as on kind), the new PVC may show `Pending` for a moment: that is normal, it binds as soon as the Pod is scheduled.
+One line of config is gone (plus the header comment): with no `storageClassName`, the cluster's default class is used. But you can't just `kubectl apply` that: a PVC's spec is **immutable** (Kubernetes refuses to change the class of an existing PVC). So `fix/run.py` deletes the Deployment (a PVC that a Pod uses is protected and would hang in `Terminating`), then deletes the PVC, then applies the corrected file, which creates a new PVC and a new Pod. If your default class uses WaitForFirstConsumer (as on kind), the new PVC may show `Pending` for a moment: that is normal, it binds as soon as the Pod is scheduled.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder,
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder,
 ```bash
 kubectl delete deployment board -n k-10-pvc-pending
 kubectl delete pvc board-data -n k-10-pvc-pending
@@ -237,7 +237,7 @@ The claim is Pending and the Pod waits for it. `kube_persistentvolumeclaim_info`
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

@@ -4,7 +4,7 @@
 
 ⏱ about 12 min · advanced · NetworkPolicy, default deny, podSelector, allow rules
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A cluster is an open campus: any Pod can call any other Pod. A NetworkPolicy is a gate. The usual recipe is "deny everything into this namespace, then allow only the callers you name". The vault is a web server; the guard is allowed in; the thief is not.

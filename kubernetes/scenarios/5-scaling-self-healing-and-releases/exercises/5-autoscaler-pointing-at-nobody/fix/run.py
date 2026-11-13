@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-"""Applies the fix for this scenario. Run it from this folder:  python3 run.py
+"""S5.x5 fix: the autoscaler now points at the Deployment that really exists.
 
-It just runs fix.sh next to it (bash is needed; on Windows use Git Bash or WSL)."""
+Run it from this folder:  python3 run.py"""
 import os
-import shutil
-import subprocess
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
-bash = shutil.which("bash")
-if not bash:
-    sys.exit("bash was not found. On Windows, open Git Bash (or WSL) and try again.")
-sys.exit(subprocess.call([bash, os.path.join(here, "fix.sh")], cwd=here))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..", "..")))
+import scenario_lib as z  # noqa: E402
+
+NS = "k-41-hpa-target"
+ABLE = 'jsonpath={.status.conditions[?(@.type=="AbleToScale")].status}'
+
+z.need_cluster()
+z.say("Pointing the autoscaler at the right Deployment…")
+z.apply_dir(HERE)
+z.must_wait("the autoscaler to find its target", 180,
+            lambda: z.kubectl_out("get", "hpa", "lassi", "-n", NS, "-o", ABLE) == "True",
+            "It did not settle. Check: kubectl get pods -n " + NS)
+z.show_next("✅ Fixed. Now check it yourself:",
+            "./check.sh   ·   kubectl describe hpa lassi -n k-41-hpa-target")

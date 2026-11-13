@@ -82,7 +82,7 @@ Events:
   ----     ------            ----  ----               -------
   Warning  FailedScheduling  1s    default-scheduler  0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 node(s) didn't match Pod's node affinity/selector. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
 ```
-(Shortened to the part that matters; the exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector.`) The scheduler looked at every node and refused all of them. The clue is **`didn't match Pod's node affinity/selector`**: the Pod is picky about *which* node. (If the event names `node.kubernetes.io/not-ready` instead, the cluster was created moments ago and is still starting: wait a minute and run `break.sh` again.) (The other part, a `control-plane` taint, is the usual "keep ordinary apps off the control-plane node" rule from [S2.3](../../../2-workloads/3-watchman-skipped-a-gate/README.md); it only appears on clusters with a separate control-plane node.)
+(Shortened to the part that matters; the exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector.`) The scheduler looked at every node and refused all of them. The clue is **`didn't match Pod's node affinity/selector`**: the Pod is picky about *which* node. (If the event names `node.kubernetes.io/not-ready` instead, the cluster was created moments ago and is still starting: wait a minute and run `break/run.py` again.) (The other part, a `control-plane` taint, is the usual "keep ordinary apps off the control-plane node" rule from [S2.3](../../../2-workloads/3-watchman-skipped-a-gate/README.md); it only appears on clusters with a separate control-plane node.)
 
 **3. What is the Pod asking for?** The Pod's spec shows what it insisted on.
 ```bash
@@ -155,7 +155,7 @@ The hard `nodeSelector` becomes a **preferred** node affinity: "I'd love a GPU n
 
 **The other fix (not used here): give a node the label.** You could instead tell Kubernetes "this node counts as a GPU node" with `kubectl label node <node-name> accelerator=nvidia-gpu`, and the Pending Pod would start on it at once. That is the right move when a node really has a GPU. Here it would be a lie, and it changes a shared node, so we don't do it. (If you ever try it on your own practice cluster, undo it with `kubectl label node <node-name> accelerator-`.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -215,7 +215,7 @@ The word `preferred` is the whole fix. (The Pod's own `Node-Selectors:` line in 
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

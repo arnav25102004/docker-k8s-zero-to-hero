@@ -24,6 +24,6 @@ Deployments and ReplicaSets, StatefulSets, DaemonSets, Jobs and CronJobs: the ri
 | **S2.x4** | [Six tasks, two hands](exercises/4-six-tasks-two-hands/README.md) | Job, completions, parallelism, restartPolicy |
 | **S2.x5** | [Run the nightly job right now](exercises/5-run-the-nightly-job-right-now/README.md) | CronJob, create job --from, suspend, concurrencyPolicy |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · beginner · Job, completions, parallelism, restartPolicy
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A Job runs a Pod until it finishes successfully. Ask for `completions: 6` and the Job needs six successful Pods. Add `parallelism: 2` and it runs two at a time. This is how batch work, like resizing 6,000 photos, is spread over a cluster.

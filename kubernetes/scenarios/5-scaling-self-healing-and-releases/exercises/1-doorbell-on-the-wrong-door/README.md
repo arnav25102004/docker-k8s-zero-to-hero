@@ -138,7 +138,7 @@ A green message means both Pods are Ready and the Service has endpoints. The vis
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

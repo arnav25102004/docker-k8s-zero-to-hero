@@ -24,6 +24,6 @@ How a Pod comes to life, and which component notices when it does not: scheduler
 | **S1.x4** | [Follow a Pod's birth](exercises/4-follow-a-pods-birth/README.md) | the scheduler, the kubelet and the container runtime, read from Events |
 | **S1.x5** | [Read the cluster you are standing on](exercises/5-read-the-cluster-you-stand-on/README.md) | control-plane components, node components, DaemonSets in kube-system, kubelet and runtime versions |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

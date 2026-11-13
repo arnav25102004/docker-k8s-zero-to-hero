@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · beginner · PersistentVolumeClaim, volumes, StorageClass, data outliving a Pod
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A container's own filesystem disappears with the container. For data that has to survive, a Pod asks for storage with a **PersistentVolumeClaim** (a request: "I need 100 MB") and mounts it. The cluster's default StorageClass makes the actual disk.

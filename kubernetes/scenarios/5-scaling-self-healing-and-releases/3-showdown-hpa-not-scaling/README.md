@@ -4,11 +4,11 @@
 
 ⏱ 15 min · intermediate · Cats vs Dogs voting app (`python:3.12-alpine`, about 19 MB) plus metrics-server (about 22 MB) · autoscaling (HPA), metrics-server, `kubectl top`, resource requests
 
-⬇️ First run downloads about 19 MB (Python), a tiny 4 MB load image (`busybox`) and, only if your cluster has no metrics-server yet, about 22 MB for metrics-server. A slow first download is normal: do it on good Wi-Fi, before the session. Expect `break.sh` to take about a minute on a warm cluster, and several minutes on a cold one.
+⬇️ First run downloads about 19 MB (Python), a tiny 4 MB load image (`busybox`) and, only if your cluster has no metrics-server yet, about 22 MB for metrics-server. A slow first download is normal: do it on good Wi-Fi, before the session. Expect `break/run.py` to take about a minute on a warm cluster, and several minutes on a cold one.
 
 Output columns and wording can differ a little between kubectl versions, container runtimes and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> **Installs something cluster-wide.** To measure CPU, Kubernetes needs *metrics-server*. If your cluster already has one (say the minikube `metrics-server` addon is enabled, or your playground provides it), `break.sh` installs nothing and `cleanup.sh` never removes it. If not, `break.sh` installs it into `kube-system` (every object is labelled `z2h.scenario=k25-installed`) and `cleanup.sh` removes exactly that. Run this scenario alone, not alongside other scenarios.
+> **Installs something cluster-wide.** To measure CPU, Kubernetes needs *metrics-server*. If your cluster already has one (say the minikube `metrics-server` addon is enabled, or your playground provides it), `break/run.py` installs nothing and `cleanup.py` never removes it. If not, `break/run.py` installs it into `kube-system` (every object is labelled `z2h.scenario=k25-installed`) and `cleanup.py` removes exactly that. Run this scenario alone, not alongside other scenarios.
 
 ## 📖 The story
 Meera's team launches the campus-fest voting poll at noon, and the whole college opens it at once. Lakshmi set up an autoscaler the night before: "if the app gets busy, add more copies". Now the load is real, the one app Pod is flat out, and Ravi checks the autoscaler. It has not added a single copy, and instead of a number it says `<unknown>`. The metrics are there. The traffic is there. Why does the autoscaler shrug?
@@ -142,7 +142,7 @@ Then, in the first terminal:
 ```bash
 cd ../fix && python3 run.py
 ```
-`fix.sh` applies the change, waits for the new Pod, then waits (up to 240 seconds) until the autoscaler shows a real number and has added replicas. Expect roughly 1 to 3 minutes: the new Pod's first CPU readings take about a minute, and the autoscaler looks every ~15 seconds. In the watch you will see `<unknown>` turn into a percentage, then `REPLICAS` jump:
+`fix/run.py` applies the change, waits for the new Pod, then waits (up to 240 seconds) until the autoscaler shows a real number and has added replicas. Expect roughly 1 to 3 minutes: the new Pod's first CPU readings take about a minute, and the autoscaler looks every ~15 seconds. In the watch you will see `<unknown>` turn into a percentage, then `REPLICAS` jump:
 ```
 NAME       REFERENCE             TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
 showdown   Deployment/showdown   cpu: <unknown>/50%   1         4         1          69s
@@ -174,7 +174,7 @@ diff ../break/app.yaml app.yaml
 ```
 (Run it from the `fix` folder; the first lines are only the comment, the real change is the five new lines.) The **request** (100m) is what the HPA divides by. The **limit** (200m) caps how much CPU one copy may use, so one busy copy can never read more than 200m ÷ 100m = 200%, which is why the first reading was about 190%. A CPU limit *throttles* (the container is slowed down); it never kills the container, unlike a memory limit. If a copy stays `Pending` on a small cluster, the node is out of CPU room: that is the request being honoured, not a bug.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both):
+By hand (this replaces `python3 run.py`, so you don't need to run both):
 ```bash
 kubectl apply -f app.yaml
 kubectl rollout status deployment/showdown -n k-25-hpa --timeout=180s
@@ -271,9 +271,9 @@ With the fix, desired replicas rises under load and current follows it. Before t
 ## 🧹 Clean up
 Press Ctrl+C in any terminal still running the port-forward, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
-This deletes the namespace and, only if this scenario installed it, metrics-server. If you press Ctrl+C in the middle of `break.sh`, just run `cleanup.sh`: it is safe at any point.
+This deletes the namespace and, only if this scenario installed it, metrics-server. If you press Ctrl+C in the middle of `break/run.py`, just run `cleanup.py`: it is safe at any point.
 
 ## 🧪 Quick recap (3 questions)
 1. What is a utilisation percentage a percentage of?

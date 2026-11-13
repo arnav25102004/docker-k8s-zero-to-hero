@@ -101,7 +101,7 @@ It checks that the rule is still in place and both Pods are Ready.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

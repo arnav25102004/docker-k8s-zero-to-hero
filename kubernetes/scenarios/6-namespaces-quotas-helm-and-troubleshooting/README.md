@@ -24,6 +24,6 @@ Namespaces and resource quotas, Helm releases, labels and annotations, and the h
 | **S6.x4** | [Find it by label](exercises/4-find-it-by-label/README.md) | labels, selectors (equality and set-based), annotations, kubectl -l |
 | **S6.x5** | [The Friday 5 PM outage (the finale)](exercises/5-friday-5pm-outage/README.md) | three faults at once |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

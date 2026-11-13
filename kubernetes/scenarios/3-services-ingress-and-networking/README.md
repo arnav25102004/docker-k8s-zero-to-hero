@@ -24,6 +24,6 @@ How traffic finds Pods: Services, DNS, ingress routing and Network Policies.
 | **S3.x4** | [Same name, another namespace](exercises/4-same-name-another-namespace/README.md) | cluster DNS, search domains, namespaces, FQDN |
 | **S3.x5** | [Lock the vault, then give one friend the key](exercises/5-lock-the-vault/README.md) | NetworkPolicy, default deny, podSelector, allow rules |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

@@ -150,7 +150,7 @@ diff ../break/app.yaml app.yaml
 >               value: "8080"
 ```
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -220,7 +220,7 @@ The restart counter climbs in steps. `kube_pod_container_status_waiting_reason{r
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

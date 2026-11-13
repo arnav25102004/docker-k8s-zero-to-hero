@@ -106,7 +106,7 @@ It checks that the guard is still on `baseline` and both Pods are Ready.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →
