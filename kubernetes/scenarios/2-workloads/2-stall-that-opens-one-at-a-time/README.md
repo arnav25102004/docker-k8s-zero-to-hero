@@ -43,7 +43,7 @@ One. A StatefulSet will not create `stall-1` until `stall-0` is Ready, so the ot
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get statefulset,pods -n k-15-statefulset
@@ -80,7 +80,7 @@ The readiness probe checks the wrong port, so `stall-0` is Running but never Rea
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix corrects the probe port to `5678` and deletes `stall-0`. By hand: `kubectl edit statefulset stall -n k-15-statefulset`, then `kubectl delete pod stall-0 -n k-15-statefulset`. Watch the three stalls open one after another.
 

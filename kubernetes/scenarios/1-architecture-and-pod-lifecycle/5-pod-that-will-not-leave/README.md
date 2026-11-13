@@ -49,7 +49,7 @@ You deleted a Pod an hour ago.
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 It starts a Pod, then deletes it, and finishes. Now watch:
 ```bash
@@ -100,7 +100,7 @@ The Pod carries a finalizer, `z2h.example/cleanup-lock`, added by a cleanup job 
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 That removes the finalizer. By hand, it is one command:
 ```bash

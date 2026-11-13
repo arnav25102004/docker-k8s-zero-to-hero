@@ -41,11 +41,11 @@ docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.0
 ```
 Or use the one-line shortcut, which prints (`▶ $`) every command it runs, the same ones as above:
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 The room should see: open http://localhost:8103 (playground: the port 8103 URL), press a vote button, and the status bar blinks and the feed shows "Request failed: [Errno 111] Connection refused".
 
-The real run, from `./break/break.sh` (shortened; the build prints more lines the first time because nothing is cached):
+The real run, from `python3 break/run.py` (shortened; the build prints more lines the first time because nothing is cached):
 ```
 ✅ Scenario d03 cleaned up
 ▶ $ rm -rf work && cp -R break work
@@ -169,7 +169,7 @@ By hand: remove the old API container and start a new one with the flag. The ima
 docker rm -f d03-api
 docker run -d --name d03-api --network d03-net -p 8103:8080 -e REDIS_HOST=d03-redis d03-api:1.0
 ```
-Or run `./fix/fix.sh`, which does the same two commands and prints them.
+Or run `python3 fix/run.py`, which does the same two commands and prints them.
 
 ## ✅ Verify it yourself
 ```bash

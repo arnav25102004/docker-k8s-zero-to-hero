@@ -30,7 +30,7 @@ service_healthy         db starts ─▶ health check… healthy ─▶ app star
 
 ## 💥 Break it
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 The script runs `docker compose up -d` and waits a moment. The room should see Compose's own output, ending with both containers started and no error (shortened; the exact look depends on your Compose version):
 ```
@@ -98,7 +98,7 @@ Same code, same files, now it works. That is the "run it again and it works?!" m
 
 ## 🔧 Fix it
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 What changed: `break/` and `fix/` hold the same `app.py`. Only `compose.yaml` differs:
 ```bash
@@ -120,7 +120,7 @@ diff break/compose.yaml fix/compose.yaml
 >       db:
 >         condition: service_healthy
 ```
-The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool; `-h 127.0.0.1` makes it knock on the network door the app will use), and the app waits for `service_healthy`. By hand, this replaces `./fix/fix.sh`:
+The database now reports *ready* (`pg_isready` is Postgres's own "are you open?" tool; `-h 127.0.0.1` makes it knock on the network door the app will use), and the app waits for `service_healthy`. By hand, this replaces `python3 fix/run.py`:
 ```bash
 docker compose -p d15 -f fix/compose.yaml up -d
 ```

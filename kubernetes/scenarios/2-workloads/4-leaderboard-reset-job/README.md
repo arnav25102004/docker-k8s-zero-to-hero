@@ -40,7 +40,7 @@ A **Deployment** keeps something running forever. A **Job** is for work that sho
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script puts five players on a Redis leaderboard, runs the reset Job, waits about half a minute while it retries, and finishes saying the scores were meant to be reset and the Job has stopped trying. There is no web page here, only a Job, Pods and logs.
 
@@ -173,7 +173,7 @@ The Job's `REDIS_HOST` was set to `leaderbord`. The only Service in the namespac
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 ```
 ▶ Deleting the failed Job (its Pod template is immutable) and creating it again…

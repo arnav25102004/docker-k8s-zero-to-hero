@@ -42,7 +42,7 @@ Think of seating at a wedding: "no two cousins at one table" works until you hav
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script scales `whoami` for the open house and finishes. The site still answers. Then in a **second terminal**, start the visitor and leave it running:
 ```bash
@@ -149,7 +149,7 @@ The rule is fine for 2 replicas on 2 nodes. It is a time bomb for "scale to 3", 
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The script waits for the rollout (a few seconds; the image is already on the nodes). What changed:
 ```bash

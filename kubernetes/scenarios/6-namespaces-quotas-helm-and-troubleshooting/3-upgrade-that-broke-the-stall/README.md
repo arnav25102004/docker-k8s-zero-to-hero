@@ -43,7 +43,7 @@ Not necessarily. "Deployed" means Kubernetes accepted the new objects. Here a ne
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 helm list -n k-27-helm
@@ -81,7 +81,7 @@ The upgrade changed `image.tag` to `9.9.9`, an image that does not exist. `helm 
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix is `helm rollback stall 1 -n k-27-helm --wait`. Helm creates revision 3 with revision 1's settings. `helm history` now shows the whole story. Next time use `helm upgrade --wait --timeout 2m`, so a bad release says so at once.
 

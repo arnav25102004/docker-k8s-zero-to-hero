@@ -46,7 +46,7 @@ The Deployment is created, the Pods are not. PSA checks Pods, not Deployments, s
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get deployment,pods -n k-43-van
@@ -82,7 +82,7 @@ The container sets `privileged: true`, and the namespace enforces `baseline`, wh
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix removes `privileged: true` from the container. A chai van needs no master key. By hand: `kubectl edit deployment van -n k-43-van`.
 

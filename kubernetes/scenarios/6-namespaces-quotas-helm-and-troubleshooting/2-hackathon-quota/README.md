@@ -38,7 +38,7 @@ A shared cluster is like a shared hostel kitchen: if one team switches on every 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script sets up the namespace, deploys the dashboard and finishes without any error. A small `visitor` Pod, which asks for the page every few seconds, gets no answer:
 ```bash
@@ -152,7 +152,7 @@ kubectl logs -f visitor -n k-19-hackathon
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about half a minute the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

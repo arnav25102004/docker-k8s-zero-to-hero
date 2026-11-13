@@ -34,7 +34,7 @@ bind mount: dev-notes/ ──────────────▶ covers it �
 
 ## 💥 Break it
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 The script builds the image (website inside) and starts it the way Ravi suggested, with a live-edit folder mounted. The room should see the script finish happily, with no error. Now open http://localhost:8113 (playground: the port 8113 URL): the browser shows **403 Forbidden**, with the word nginx at the bottom.
 
@@ -102,7 +102,7 @@ The bind mount `dev-notes/ → /usr/share/nginx/html` **covers** the image's fol
 
 ## 🔧 Fix it
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 What changed: the image and the page are identical in `break/` and `fix/`. Only the `docker run` differs: the `-v` line is gone.
 ```bash
@@ -111,7 +111,7 @@ grep -n -- '-v "' break/break.sh fix/fix.sh
 ```
 break/break.sh:24:  -v "$HERE/dev-notes:/usr/share/nginx/html" d13-site:1.0 >/dev/null \
 ```
-`fix.sh` has no such line. By hand, this replaces `./fix/fix.sh`: remove the old container and run the same image without the mount.
+`fix.sh` has no such line. By hand, this replaces `python3 fix/run.py`: remove the old container and run the same image without the mount.
 ```bash
 docker rm -f d13-site
 docker run -d --name d13-site -p 8113:80 d13-site:1.0

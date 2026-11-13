@@ -39,7 +39,7 @@ By default, a container in Kubernetes runs as whatever user its image says, and 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script deploys the notice board and finishes. Two `board` Pods are not running. A small `visitor` Pod, which asks for the board every few seconds, gets no answer:
 ```bash
@@ -121,7 +121,7 @@ kubectl logs -f visitor -n k-21-nonroot
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about twenty seconds once the new image is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

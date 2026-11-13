@@ -49,7 +49,7 @@ Two idli Pods, and a rule that says `minAvailable: 2`.
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 The idli stall is up and the visitor is happy. Now send the robot in. It lives one folder up:
 ```bash
@@ -103,7 +103,7 @@ The PDB says `minAvailable: 2`, and the Deployment has exactly 2 Pods. So the nu
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix loosens the rule to `minAvailable: 1`: keep at least one stall open, and allow one to move. There are other good answers, and which one you pick is a real design decision:
 - **`maxUnavailable: 1`**: say it the other way round. Same effect here.

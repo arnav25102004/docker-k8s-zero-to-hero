@@ -28,7 +28,7 @@ A **HorizontalPodAutoscaler (HPA)** watches a number and adds or removes Pod cop
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script makes sure metrics-server is available (installing it if the cluster has none), deploys the Cats vs Dogs app (1 replica), an autoscaler that targets 50% CPU with 1 to 4 replicas, and a small `load` Pod that keeps asking the app to work hard. It waits until the autoscaler has reported, then stops. Open a **second terminal** and watch the autoscaler (Ctrl+C to stop):
 ```bash
@@ -140,7 +140,7 @@ kubectl get hpa -n k-25-hpa -w
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 `fix.sh` applies the change, waits for the new Pod, then waits (up to 240 seconds) until the autoscaler shows a real number and has added replicas. Expect roughly 1 to 3 minutes: the new Pod's first CPU readings take about a minute, and the autoscaler looks every ~15 seconds. In the watch you will see `<unknown>` turn into a percentage, then `REPLICAS` jump:
 ```

@@ -159,26 +159,28 @@ Namespaces and resource quotas, Helm releases, labels and annotations, and the h
 
 Each scenario lives in its own namespace, named after its original code (for example `k-08-oomkilled`), so nothing touches your lab work and nothing in your cluster or tests had to change when the folders were reorganised. All images and sizes are in [IMAGES.md](IMAGES.md). A machine-readable list is in [`index.tsv`](index.tsv).
 
-## The short way: one command for everything
+## The short way: open the folder, run `run.py`
 
-You never need to remember a folder path. `z2h.py` (plain Python 3, no packages) finds the scenario for you:
+Every scenario folder has a `break/run.py` and a `fix/run.py`. No ids to remember: open the section, open the scenario, run it.
 
 ```bash
-python3 z2h.py list              # every scenario, by section
-python3 z2h.py break S1.2        # set the scene
-python3 z2h.py check S1.2        # "am I done?" (read-only)
-python3 z2h.py fix S1.2          # apply the fix
-python3 z2h.py cleanup S1.2      # remove everything it created
+cd kubernetes/scenarios/1-architecture-and-pod-lifecycle/2-image-typo
+python3 break/run.py     # set the scene
+python3 fix/run.py       # later: apply the fix
+./check.sh               # any time: "am I done?" (read-only)
+python3 z2h.py cleanup S1.2   # or: ./cleanup.sh in the scenario folder
 ```
 
-It runs the same scripts described below; use whichever you prefer. `break` ends with one line, "the scene is set", and says nothing about the cause: finding it is the exercise.
+`run.py` is plain Python 3 with no packages; it simply runs the `break.sh` or `fix.sh` next to it (the old `cd break && ./break.sh` still works). `break` ends with one line, "the scene is set", and says nothing about the cause: finding it is the exercise.
+
+If you prefer one launcher from the repo root, `python3 z2h.py list` shows every scenario and `python3 z2h.py break S1.2` runs one.
 
 ## How a session runs
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
-2. **Break it**: `cd break && ./break.sh`
+2. **Break it**: `cd break && python3 run.py`
 3. **Predict, then investigate by hand.** Every scenario opens its investigation with a **predict-first** box (a few seconds in a 4-minute demo, a full minute in an exercise): say what you expect before you type anything. Then the class types the commands from the README. `break.sh` never explains the cause, that is the class's job. In scenarios with a small `visitor` Pod (most of them; the README says when) open a **second terminal** and run `kubectl logs -f visitor -n <namespace>` (the README gives the exact line) to watch the app fail as a user sees it. (S5.3 has no visitor: watch the autoscaler instead with `kubectl get hpa -n k-25-hpa -w`.)
-4. **Meet the tempting wrong fix.** Each scenario names the fix everyone reaches for first (restart it, scale it up, switch the rule off) and shows why it does not work. Then **fix it**: `cd ../fix && ./fix.sh`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
+4. **Meet the tempting wrong fix.** Each scenario names the fix everyone reaches for first (restart it, scale it up, switch the rule off) and shows why it does not work. Then **fix it**: `cd ../fix && python3 run.py`. If the visitor log is open, the live ❌ → ✅ moment is the best part of the demo.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you. To open an app, use a **second terminal**:
    ```bash
    kubectl port-forward -n <namespace> svc/<service> 92NN:<port>

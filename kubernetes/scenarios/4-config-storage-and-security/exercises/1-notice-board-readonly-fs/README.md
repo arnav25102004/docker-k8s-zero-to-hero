@@ -36,7 +36,7 @@ A container's filesystem is the image's files, plus a thin writable layer on top
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script deploys the notice board and finishes. The two `board` Pods are not healthy. A small `visitor` Pod, which asks for the board every few seconds, gets no answer:
 ```bash
@@ -137,7 +137,7 @@ kubectl logs -f visitor -n k-22-readonly-fs
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about half a minute the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

@@ -45,7 +45,7 @@ All of them, in one message. The checklist is evaluated in one go, so you can fi
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get deployment,pods -n k-44-checklist
@@ -81,7 +81,7 @@ The cart sets no `securityContext`, so it fails all four checklist items. The re
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix adds `runAsNonRoot` and a `seccompProfile` at the Pod level, and `allowPrivilegeEscalation: false` with `capabilities.drop: ["ALL"]` on the container.
 

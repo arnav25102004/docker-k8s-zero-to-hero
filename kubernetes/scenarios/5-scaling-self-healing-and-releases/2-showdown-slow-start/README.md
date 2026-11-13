@@ -38,7 +38,7 @@ Think of a guard at a hotel desk. The liveness probe is a guard who knocks on yo
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the app was deployed, but it never becomes ready. The Pod says `Running` but `0/1`, its `RESTARTS` count keeps climbing, and nobody can vote. A small `visitor` Pod keeps asking the app for `/healthz` every 2 seconds and gets no answer:
 ```bash
@@ -147,7 +147,7 @@ kubectl logs -f visitor -n k-07-slow-start
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The script waits for the new Pod, which takes about 25 seconds because the app really does need its 20 seconds to wake up. Then the log flips from ❌ to ✅ lines (Ctrl+C to stop it). The fix keeps the liveness probe exactly as it is and adds a **startupProbe** in front of it. What changed:
 ```bash

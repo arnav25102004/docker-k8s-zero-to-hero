@@ -36,7 +36,7 @@ docker compose -f work/compose.yaml up -d
 ```
 (`rm -rf work` clears any old copy, so this is safe to repeat.) Or the one-line shortcut, which prints exactly these commands (after a cleanup):
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 ```
 ▶ $ rm -rf work && cp -R break work
@@ -187,7 +187,7 @@ Compose recreated only `backup` and ran it again, this time as 1000:100. Jupyter
 
 **Or run the shortcut**, which copies `fix/` into `work/` and does the same, printing each command:
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 (Going back to running Jupyter as root, or `chmod 777`, would also "work". Don't: make the owner match the user.)
 

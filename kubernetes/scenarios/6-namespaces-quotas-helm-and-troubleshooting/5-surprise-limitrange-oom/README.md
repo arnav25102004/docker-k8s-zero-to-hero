@@ -29,7 +29,7 @@ The app itself needs about 16 MiB. In this demo, its start command also loads a 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script deploys the app (2 replicas) and a small `visitor` Pod, waits until the app has started crashing, and stops. The visitor asks the app for `/healthz` every 2 seconds:
 ```bash
@@ -176,7 +176,7 @@ kubectl logs -f visitor -n k-20-limitrange
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Watch the visitor go from ❌ to ✅ (Ctrl+C to stop it). There are two honest ways to fix this, and **who owns what decides which is right**:
 

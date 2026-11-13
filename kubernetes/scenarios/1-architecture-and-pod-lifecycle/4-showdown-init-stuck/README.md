@@ -35,7 +35,7 @@ Think of a restaurant kitchen: the head chef (the app) won't start cooking until
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says Redis is running, but the app is not coming up and nobody can vote. A small `visitor` Pod keeps asking the app "are you ready?" every 2 seconds and gets no answer:
 ```bash
@@ -188,7 +188,7 @@ kubectl logs -f visitor -n k-26-init-stuck
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about 15 seconds the log flips from ❌ to ✅ (Ctrl+C to stop it). The init container in the new Pod reaches `redis` straight away, exits, and the app starts. What changed: one word.
 ```bash

@@ -34,7 +34,7 @@ rm -rf work && cp -R break work
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
 
-Shortcut: `./break/break.sh` does the same and prints every command it runs. It always starts from a fresh `work/` (which also holds a copy of the script; ignore it).
+Shortcut: `python3 break/run.py` does the same and prints every command it runs. It always starts from a fresh `work/` (which also holds a copy of the script; ignore it).
 
 VS Code starts and asks for a password. Laptop: open http://localhost:8104. Playground: open the port 8104 URL. Type `change-me-123`. The page stays on the login screen with a red **Incorrect password**. (Try it once or twice only: code-server slows down a browser after a few wrong attempts.)
 
@@ -149,7 +149,7 @@ docker rm -f d04-vscode
 docker run -d --name d04-vscode -p 8104:8080 --env-file work/app.env codercom/code-server:4.145.2
 ```
 
-Or run `./fix/fix.sh`, which does the same: it copies `fix/` into a fresh `work/`, removes the container and runs it again, printing each command.
+Or run `python3 fix/run.py`, which does the same: it copies `fix/` into a fresh `work/`, removes the container and runs it again, printing each command.
 
 ## ✅ Verify it yourself
 Open http://localhost:8104 (playground: the port 8104 URL) and log in with `change-me-123`. VS Code opens. Then:

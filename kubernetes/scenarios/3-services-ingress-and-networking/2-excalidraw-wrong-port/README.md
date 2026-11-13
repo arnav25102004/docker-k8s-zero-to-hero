@@ -33,7 +33,7 @@ A request to a Service passes through two ports, and they don't have to be the s
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script finishes happily. Two Excalidraw Pods are `Running`, the Service exists and even has endpoints. But a small `visitor` Pod, which asks for the whiteboard every 2 seconds, never gets an answer:
 ```bash
@@ -147,7 +147,7 @@ kubectl logs -f visitor -n k-05-wrong-port
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

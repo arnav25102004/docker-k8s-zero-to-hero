@@ -35,7 +35,7 @@ Think of a restaurant changing its chef: the new chef cooks one trial plate whil
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script releases v1 and waits for all 3 Pods, then ships v2 ("🚀 Friday, 6 PM") and then goes quiet. Nothing looks on fire. A small `visitor` Pod asks the app which version it got, every 2 seconds:
 ```bash
@@ -164,7 +164,7 @@ kubectl logs -f visitor -n k-11-bad-rollout
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Expect the visitor to stay ✅ v1.0.0 the whole time: there was no outage to repair (Ctrl+C to stop it). The fix is a single command:
 ```bash

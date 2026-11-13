@@ -28,12 +28,12 @@ Scenario `NN` uses host port `81NN` (a second app, if any, uses `82NN`). The log
 
 ## How a session runs
 
-Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`), in all 15 scenarios: `./break/break.sh`, `./fix/fix.sh`, `./cleanup.sh`, no `cd`. (D01 to D09 are files-first, as described below. D10 to D15 start from the shortcut and build the files in `break/` and `fix/` directly, with paths like `docker build -t X break`.)
+Every command runs from the scenario folder (the one holding `break/`, `fix/` and `README.md`), in all 15 scenarios: `python3 break/run.py`, `python3 fix/run.py`, `./cleanup.sh`, no `cd`. (D01 to D09 are files-first, as described below. D10 to D15 start from the shortcut and build the files in `break/` and `fix/` directly, with paths like `docker build -t X break`.)
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.
-2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`; D06 adds `--build`). The one-line shortcut is `./break/break.sh`. It prints every Docker command it runs, exactly as you would type it.
+2. **Break it**: the README first shows the commands to type by hand: `rm -rf work && cp -R break work`, then build and run (D06 onward: `docker compose -f work/compose.yaml up -d`; D06 adds `--build`). The one-line shortcut is `python3 break/run.py`. It prints every Docker command it runs, exactly as you would type it.
 3. **Investigate by hand**: the class types the commands from the README. `break.sh` never explains the cause, that is the class's job.
-4. **Fix it**: `diff break/X fix/X` shows what changed. The class edits the files in `work/` and runs the build/run commands again. `./fix/fix.sh` is the safety net: it does the same and prints its commands too.
+4. **Fix it**: `diff break/X fix/X` shows what changed. The class edits the files in `work/` and runs the build/run commands again. `python3 fix/run.py` is the safety net: it does the same and prints its commands too.
 5. **Verify by hand**: the class checks it really works. `fix.sh` does not verify for you.
 6. **Clean up**: `./cleanup.sh` resets everything, including `work/`.
 
@@ -58,7 +58,7 @@ Stay calm. Nothing here can hurt the laptop. In this order:
 
 1. **Reset the scenario:** `./cleanup.sh` (from the scenario folder; it also deletes `work/`). It is safe at any time, even if nothing is running.
 2. **Look at what is running and where:** `docker ps --format '{{.Names}}  {{.Ports}}'`. A port clash names the holder.
-3. **Run it again:** `./break/break.sh` again. It starts clean every time.
+3. **Run it again:** `python3 break/run.py` again. It starts clean every time.
 4. **Still odd? Reset everything:** `./labs.sh docker clean` from the repo root. It runs every scenario's `cleanup.sh`.
 
 Docker not running? Start Docker Desktop, wait for the whale to settle, then step 3.

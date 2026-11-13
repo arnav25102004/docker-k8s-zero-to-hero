@@ -43,7 +43,7 @@ The row to remember is the middle one: "updated" does not mean "the app noticed"
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script deploys the page, waits until it is ready, and then the design team's change goes in. The script finishes without errors. A small `visitor` Pod keeps asking the site which theme it shows (it hopes for dark):
 ```bash
@@ -163,7 +163,7 @@ kubectl logs -f visitor -n k-23-dark-mode
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about half a minute the log flips from ❌ to ✅ (Ctrl+C to stop it):
 ```

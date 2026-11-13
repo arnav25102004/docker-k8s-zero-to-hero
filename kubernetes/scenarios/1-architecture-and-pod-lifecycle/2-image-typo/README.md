@@ -37,7 +37,7 @@ A container needs an **image** (the packaged app). Kubernetes doesn't carry imag
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the whiteboard was deployed, but there is no running Pod. The Deployment exists, nothing crashed, and nobody can open the whiteboard. A small `visitor` Pod keeps asking for it every 2 seconds and gets no answer:
 ```bash
@@ -126,7 +126,7 @@ kubectl logs -f visitor -n k-02-image-typo
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within a few seconds once Excalidraw is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it). It doesn't wait for the back-off timer: changing the image makes a **new** Pod, and a new Pod pulls straight away. What changed: just the one letter.
 ```bash

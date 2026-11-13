@@ -39,7 +39,7 @@ The stall is healthy and serving. Is the autoscaler's `TARGETS` column going to 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get hpa,deployment -n k-41-hpa-target
@@ -76,7 +76,7 @@ The HPA's `scaleTargetRef.name` is `lasi`, a typo for `lassi`. The API cannot fi
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix corrects the name. By hand: `kubectl edit hpa lassi -n k-41-hpa-target`. Note: the `scaleTargetRef` can be changed in place.
 

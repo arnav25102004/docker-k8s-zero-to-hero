@@ -30,9 +30,9 @@ docker compose -f work/compose.yaml up -d --build
 ```
 Or the one-line shortcut, which does the same and prints every command it runs:
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
-Real output of `./break/break.sh` (shortened: the build log is left out, and Compose 5 may print some lines twice):
+Real output of `python3 break/run.py` (shortened: the build log is left out, and Compose 5 may print some lines twice):
 ```
 ✅ Scenario d06 cleaned up
 ▶ $ rm -rf work && cp -R break work
@@ -158,7 +158,7 @@ docker compose -f work/compose.yaml up -d --build
  Container d06-trainer-1 Starting 
  Container d06-trainer-1 Started 
 ```
-Or run `./fix/fix.sh`, which does the same from the corrected files (it makes a fresh `work/` and prints its commands).
+Or run `python3 fix/run.py`, which does the same from the corrected files (it makes a fresh `work/` and prints its commands).
 
 ## ✅ Verify it yourself
 Right after `up -d --build`, watch the memory live (3 seconds in, mid-training):

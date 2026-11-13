@@ -40,7 +40,7 @@ No complaint: the route is valid YAML, and the API server does not check that a 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get gateway,httproute,svc -n k-33-gateway
@@ -77,7 +77,7 @@ The `/dosa` rule's `backendRefs` points at a Service called `dossa`, which does 
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix changes the backend name to `dosa`. By hand: `kubectl edit httproute menu -n k-33-gateway`. The status flips to `ResolvedRefs: True` within seconds.
 
