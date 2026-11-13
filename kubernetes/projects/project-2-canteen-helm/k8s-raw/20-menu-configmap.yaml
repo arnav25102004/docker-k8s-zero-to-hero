@@ -1,0 +1,14 @@
+# Project 2, phase 1: the menu as configuration, in two shapes.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: canteen-menu
+  namespace: canteen2
+data:
+  # As a FILE (mounted into the Pod): the app re-reads it on every request, so edits go live.
+  menu.txt: |
+    chai|🍵|Chai|10
+    samosa|🥟|Samosa|15
+    dosa|🥞|Dosa|40
+  # As an ENVIRONMENT VARIABLE (see the exercise at the end of phase 1): copied once at start.
+  MENU: "chai|🍵|Chai|10,samosa|🥟|Samosa|15,dosa|🥞|Dosa|40"

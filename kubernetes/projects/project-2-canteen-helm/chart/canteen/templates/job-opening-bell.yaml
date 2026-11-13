@@ -1,0 +1,32 @@
+{{- if .Values.openingBell.enabled }}
+# A Helm hook: this Job runs once, right after the FIRST install, and places a few sample orders so
+# the page is not empty on day one. It waits for the app to be ready first.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "canteen.fullname" . }}-opening-bell
+  labels:
+    {{- include "canteen.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ring
+          image: {{ .Values.cronjob.image }}
+          command: ["sh", "-c"]
+          args:
+            - |
+              for i in $(seq 1 60); do
+                curl -sf http://{{ include "canteen.fullname" . }}/readyz >/dev/null && break
+                echo "waiting for the canteen to open..."; sleep 2
+              done
+              for item in chai chai samosa dosa chai; do
+                curl -sf "http://{{ include "canteen.fullname" . }}/api/order?item=$item" >/dev/null && echo "ordered $item"
+              done
+              echo "🔔 the canteen is open for business"
+{{- end }}

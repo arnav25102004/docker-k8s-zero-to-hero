@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen Rush</title>
+<style>
+  :root { --theme: #e85d04; --ink: #1f2430; --muted: #6b7280; --card: #ffffff; --bg: #fff7ed; }
+  @media (prefers-color-scheme: dark) { :root { --ink: #f3f4f6; --muted: #9ca3af; --card: #1f2937; --bg: #111827; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--theme); color: #fff; padding: 18px 16px; text-align: center; }
+  header h1 { margin: 0; font-size: 1.6rem; }
+  header p { margin: 4px 0 0; opacity: .9; }
+  #banner { display: none; margin: 12px auto 0; max-width: 560px; padding: 8px 12px; border-radius: 10px; background: #fff; color: #7c2d12; font-weight: 600; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .card .emoji { font-size: 2.6rem; }
+  .card .name { font-weight: 700; margin: 4px 0; }
+  .card .meta { color: var(--muted); font-size: .9rem; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 10px 14px; background: var(--theme); color: #fff; font-weight: 700; width: 100%; margin-top: 8px; }
+  button:active { transform: scale(.97); }
+  button.crash { background: #b91c1c; width: auto; margin: 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 16px; }
+  .panel { background: var(--card); border-radius: 14px; padding: 14px; margin-top: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .panel h2 { margin: 0 0 8px; font-size: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 6px 10px; border-radius: 999px; color: #fff; font-size: .85rem; font-weight: 600; transition: opacity .6s; }
+  .chip.old { opacity: .25; }
+  .stat { font-size: 1.4rem; font-weight: 800; }
+  #status { min-height: 1.4em; color: var(--muted); }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Canteen Rush</h1>
+  <p id="sub">Order something. Watch which counter serves you.</p>
+  <div id="banner"></div>
+</header>
+<main>
+  <div class="grid" id="menu"></div>
+  <p id="status">Loading the menu…</p>
+
+  <div class="panel">
+    <h2>Today so far</h2>
+    <div class="row" style="margin-top:0">
+      <div><div class="stat" id="total">0</div><div class="meta">orders</div></div>
+      <div><div class="stat" id="revenue">₹0</div><div class="meta">revenue</div></div>
+      <div><div class="stat" id="rate">0.0</div><div class="meta">orders per second</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Counters that have served you (one chip per container)</h2>
+    <div class="chips" id="counters"></div>
+    <div class="row">
+      <span class="meta" id="storage"></span>
+      <button class="crash" id="crash">💥 Crash the counter that answers next</button>
+    </div>
+  </div>
+</main>
+<footer id="foot">Canteen Rush · a Kubernetes practice app</footer>
+<script>
+const $ = (id) => document.getElementById(id);
+const seen = new Map();               // hostname -> last time it answered
+let lastTotal = null, lastTime = null;
+const lines = ["is brewing it", "is on it", "just took your order", "is shouting your name"];
+function color(name) {                // a stable colour per container name
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return `hsl(${h} 55% 40%)`;
+}
+function remember(host) { if (host) seen.set(host, Date.now()); drawCounters(); }
+function drawCounters() {
+  const now = Date.now();
+  $("counters").innerHTML = [...seen.entries()].sort().map(([h, t]) =>
+    `<span class="chip ${now - t > 8000 ? "old" : ""}" style="background:${color(h)}">${h}</span>`).join("");
+}
+async function api(path) {
+  const r = await fetch(path, { cache: "no-store" });
+  remember(r.headers.get("X-Served-By"));
+  return r.json();
+}
+async function loadInfo() {
+  const info = await api("/api/info");
+  document.documentElement.style.setProperty("--theme", info.theme);
+  $("title").textContent = info.title;
+  document.title = info.title;
+  $("foot").textContent = `${info.title} · version ${info.version} · answered by ${info.hostname}`;
+  if (info.version.startsWith("2")) {
+    $("banner").style.display = "block";
+    $("banner").textContent = `🎉 Version ${info.version} is live: the new menu is rolling out!`;
+  } else { $("banner").style.display = "none"; }
+  $("storage").textContent = info.storage === "redis"
+    ? "Orders are kept in Redis: every counter sees the same numbers."
+    : "Orders are kept in each counter's own memory: numbers differ per counter!";
+}
+async function refresh() {
+  try {
+    await loadInfo();
+    const s = await api("/api/stats");
+    $("menu").innerHTML = s.by_item.map((i) => `
+      <div class="card"><div class="emoji">${i.emoji}</div><div class="name">${i.name}</div>
+      <div class="meta">₹${i.price} · ${i.orders} ordered</div>
+      <button data-item="${i.id}">Order ${i.name}</button></div>`).join("");
+    document.querySelectorAll("button[data-item]").forEach((b) => b.onclick = () => order(b.dataset.item));
+    $("total").textContent = s.total_orders;
+    $("revenue").textContent = "₹" + s.revenue;
+    const now = Date.now();
+    if (lastTotal !== null && now > lastTime) $("rate").textContent = Math.max(0, (s.total_orders - lastTotal) / ((now - lastTime) / 1000)).toFixed(1);
+    lastTotal = s.total_orders; lastTime = now;
+  } catch (e) { $("status").textContent = "😬 No counter answered. Is the Service pointing anywhere? (" + e.message + ")"; }
+}
+async function order(item) {
+  try {
+    const r = await api("/api/order?item=" + encodeURIComponent(item));
+    if (r.error) { $("status").textContent = "😅 " + r.error; return; }
+    $("status").textContent = `✅ ${item} ordered. Counter ${r.served_by} ${lines[Math.floor(Math.random() * lines.length)]}.`;
+    refresh();
+  } catch (e) { $("status").textContent = "😬 That order got lost: " + e.message; }
+}
+$("crash").onclick = async () => {
+  try { const r = await api("/api/crash"); $("status").textContent = `💥 Counter ${r.served_by} just crashed. Watch Kubernetes bring it back!`; } catch (e) {}
+};
+refresh(); setInterval(refresh, 2000); setInterval(drawCounters, 2000);
+</script>
+</body>
+</html>

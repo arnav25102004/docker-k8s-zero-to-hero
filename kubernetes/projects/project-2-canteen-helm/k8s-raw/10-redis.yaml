@@ -1,0 +1,40 @@
+# Project 2: the same Redis as Project 1.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: canteen2
+  labels: { app: redis, project: canteen-helm }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis, project: canteen-helm }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: redis
+          image: redis:7.4.12-alpine
+          ports:
+            - containerPort: 6379
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { memory: 96Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: canteen2
+  labels: { app: redis, project: canteen-helm }
+spec:
+  selector: { app: redis }
+  ports:
+    - port: 6379
+      targetPort: 6379

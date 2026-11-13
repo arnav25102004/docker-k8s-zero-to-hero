@@ -1,0 +1,67 @@
+# Project 2, phases 1 and 2: the app, with a ConfigMap-mounted menu and a Secret-backed admin token.
+# Create the Secret first:
+#   kubectl create secret generic canteen-admin --from-literal=admin-token=z2h-demo-token -n canteen2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canteen
+  namespace: canteen2
+  labels: { app: canteen, project: canteen-helm }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: canteen }
+  template:
+    metadata:
+      labels: { app: canteen, tier: web, project: canteen-helm }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: canteen
+          image: canteen-rush:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: redis
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: canteen-admin
+                  key: admin-token
+          volumeMounts:
+            - name: menu
+              mountPath: /etc/canteen        # the app reads /etc/canteen/menu.txt
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 3
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 48Mi }
+            limits: { cpu: 300m, memory: 96Mi }
+      volumes:
+        - name: menu
+          configMap:
+            name: canteen-menu
+            items:
+              - key: menu.txt
+                path: menu.txt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: canteen
+  namespace: canteen2
+  labels: { app: canteen, project: canteen-helm }
+spec:
+  selector: { app: canteen }
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

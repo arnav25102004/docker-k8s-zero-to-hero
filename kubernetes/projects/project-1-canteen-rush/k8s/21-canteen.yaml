@@ -1,0 +1,45 @@
+# Project 1, phase 4 onwards: the real deployment.
+# Orders go to Redis, probes watch the app, resources are declared, updates are safe.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canteen
+  namespace: canteen
+  labels: { app: canteen, project: canteen-rush }
+  annotations:
+    kubernetes.io/change-cause: "v1.0.0: orders in Redis, probes, resources"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1           # at most one extra Pod while updating
+      maxUnavailable: 0     # never fewer Ready Pods than wanted: zero downtime
+  selector:
+    matchLabels: { app: canteen }
+  template:
+    metadata:
+      labels: { app: canteen, tier: web, project: canteen-rush }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: canteen
+          image: canteen-rush:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: redis
+          readinessProbe:               # "may customers come in?" (checks Redis too)
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 3
+          livenessProbe:                # "is the cook alive?" (restart if not)
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 48Mi }    # what the scheduler reserves
+            limits: { cpu: 300m, memory: 96Mi }      # the fence

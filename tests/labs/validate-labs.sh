@@ -76,7 +76,7 @@ check_refused() { # LABEL FILE
 }
 
 # 2. Every manifest, lab by lab (kustomize folders as one unit).
-for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/; do
+for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/ kubernetes/projects/project-1-canteen-rush/k8s/ kubernetes/projects/project-2-canteen-helm/k8s-raw/; do
   dir="${dir%/}"
   [ -d "$dir" ] || continue
   printf '== %s\n' "${dir#kubernetes/}"
@@ -103,6 +103,22 @@ for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/; do
     fi
   fi
 done
+
+# 3. The Helm chart of Project 2: lint it, render it with each values file, and let the server check the result.
+if command -v helm >/dev/null 2>&1 && [ -d kubernetes/projects/project-2-canteen-helm/chart/canteen ]; then
+  printf '== projects/project-2-canteen-helm/chart\n'
+  CHART=kubernetes/projects/project-2-canteen-helm/chart/canteen
+  if helm lint "$CHART" >/dev/null 2>&1; then printf '  ok: helm lint\n'; PASS=$((PASS + 1)); else printf '  FAIL: helm lint\n'; FAIL=$((FAIL + 1)); fi
+  for vf in "" "-f $CHART/values-dev.yaml" "-f $CHART/values-prod.yaml"; do
+    label="render ${vf:+with ${vf##*/}}"; label="${label:-render with defaults}"
+    # shellcheck disable=SC2086
+    if helm template canteen "$CHART" $vf 2>/dev/null | kubectl apply --dry-run=server -f - >/dev/null 2>"$TMP/chart.err"; then
+      printf '  ok: %s\n' "$label"; PASS=$((PASS + 1))
+    else
+      printf '  FAIL: %s\n' "$label"; tail -n 3 "$TMP/chart.err" | sed 's/^/        | /'; FAIL=$((FAIL + 1))
+    fi
+  done
+fi
 
 printf '\n== Summary: %s ok, %s failed, %s skipped\n' "$PASS" "$FAIL" "$SKIP"
 [ "$SKIP" -gt 0 ] && printf 'Skipped files need the Gateway API CRDs (lab K12, step 1) or the Prometheus CRDs (./scripts/install-monitoring.sh). Install them and run again to cover them.\n'

@@ -1,0 +1,32 @@
+# Project 1, phase 3: the canteen gets its own room, with a fair-share rule.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: canteen
+  labels:
+    project: canteen-rush
+---
+# A ResourceQuota is the room's budget: the whole namespace may not ask for more than this.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: canteen-budget
+  namespace: canteen
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.memory: 4Gi
+    pods: "30"
+---
+# A LimitRange fills in sensible defaults for containers that forget to say what they need.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: canteen-defaults
+  namespace: canteen
+spec:
+  limits:
+    - type: Container
+      defaultRequest: { cpu: 25m, memory: 32Mi }
+      default: { memory: 128Mi }

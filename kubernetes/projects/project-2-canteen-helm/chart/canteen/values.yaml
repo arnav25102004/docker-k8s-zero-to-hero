@@ -1,0 +1,53 @@
+# Default values for the canteen chart. Every setting a student may want to change lives here.
+# Per-environment files (values-dev.yaml, values-prod.yaml) override only what differs.
+
+image:
+  repository: canteen-rush
+  tag: ""                 # empty = use the chart's appVersion (see Chart.yaml)
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+
+# The menu: one "id|emoji|name|price" per line. It becomes a ConfigMap mounted as a file.
+menu: |
+  chai|🍵|Chai|10
+  samosa|🥟|Samosa|15
+  dosa|🥞|Dosa|40
+
+# The admin token protects "close the day". It becomes a Secret.
+# A Secret in a values file is for demos only. In real life, create the Secret outside Git and
+# point existingSecret at it (the Secret must have a key called admin-token).
+adminToken: "z2h-demo-token"
+existingSecret: ""
+
+redis:
+  enabled: true
+  image: redis:7.4.12-alpine
+
+resources:
+  requests: { cpu: 50m, memory: 64Mi }
+  limits: { cpu: 300m, memory: 128Mi }
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 50
+
+# The nightly job: print the report, then close the day (needs the admin token).
+cronjob:
+  enabled: true
+  schedule: "*/2 * * * *"        # every 2 minutes, so a "night" fits in a class
+  suspend: false
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  image: curlimages/curl:8.11.1
+
+# The opening bell: a Job that places a few sample orders once, right after the first install.
+openingBell:
+  enabled: true

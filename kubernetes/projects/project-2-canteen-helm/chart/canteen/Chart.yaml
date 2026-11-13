@@ -1,0 +1,9 @@
+apiVersion: v2
+name: canteen
+description: Canteen Rush, the ordering app, packaged for Kubernetes (Deployment, Service, ConfigMap menu, Secret, Redis, nightly CronJob, opening-bell Job, optional autoscaling).
+type: application
+# The chart's own version: bump it whenever the chart changes.
+version: 0.1.0
+# The version of the app it ships by default.
+appVersion: "1.0.0"
+keywords: [canteen, demo, training]

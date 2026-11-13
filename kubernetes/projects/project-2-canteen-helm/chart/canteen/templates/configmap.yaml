@@ -1,0 +1,11 @@
+# The menu, as a file. The app re-reads it on every request, so editing the menu shows up live,
+# with no restart. (Environment variables from a ConfigMap would NOT: they are copied once, at start.)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "canteen.fullname" . }}-menu
+  labels:
+    {{- include "canteen.labels" . | nindent 4 }}
+data:
+  menu.txt: |
+    {{- .Values.menu | nindent 4 }}

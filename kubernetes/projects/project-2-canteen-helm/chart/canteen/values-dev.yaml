@@ -1,0 +1,7 @@
+# Developer laptop: one replica, small, the night is short.
+replicaCount: 1
+resources:
+  requests: { cpu: 25m, memory: 48Mi }
+  limits: { cpu: 200m, memory: 96Mi }
+cronjob:
+  schedule: "*/2 * * * *"

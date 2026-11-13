@@ -1,0 +1,26 @@
+# Project 1, phase 3: the first deployment. Orders live in each Pod's own memory.
+# (On purpose: you will see why that is a problem, then fix it in phase 4.)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canteen
+  namespace: canteen
+  labels: { app: canteen, project: canteen-rush }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: canteen }
+  template:
+    metadata:
+      labels: { app: canteen, tier: web, project: canteen-rush }
+    spec:
+      containers:
+        - name: canteen
+          image: canteen-rush:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests: { cpu: 50m, memory: 48Mi }
+            limits: { memory: 96Mi }
