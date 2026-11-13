@@ -14,6 +14,9 @@ It's exam week at Christ University and Meera is deploying the class "Cats vs Do
 ![Diagram: the setup for K03, who talks to whom and what your mission is](../images/k03-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K03](../images/k03-crashloop-bad-port.svg)
+
 A Pod's **restartPolicy** tells the kubelet (the agent on each node) what to do when a container exits. For Deployments it is `Always`: if the container stops, for any reason, start it again. That is how Kubernetes heals a crashed app without waking you up.
 
 - But a container that crashes *immediately*, every time, would be restarted in a tight loop and waste the node. So the kubelet **backs off**: it waits about 10 s, then 20 s, 40 s… up to 5 minutes between restarts. Think of a friend who keeps ringing your doorbell, but waits longer each time.

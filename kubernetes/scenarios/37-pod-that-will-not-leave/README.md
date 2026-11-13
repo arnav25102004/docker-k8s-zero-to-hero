@@ -18,6 +18,9 @@ The Pod is still on the list, with a status that looks like it is on its way out
 ![Diagram: the setup for K37, who talks to whom and what your mission is](../images/k37-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K37](../images/k37-stuck-finalizer.svg)
+
 Deleting in Kubernetes is a *request*, not an instant action. When you delete something:
 1. Kubernetes stamps it with a **`deletionTimestamp`**: "this is going away".
 2. It then waits until the object's **finalizers** list is empty, and only then removes it.

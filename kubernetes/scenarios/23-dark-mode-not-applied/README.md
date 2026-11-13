@@ -14,6 +14,9 @@ The campus has screens in the canteen, the library and the main gate, all showin
 ![Diagram: the setup for K23, who talks to whom and what your mission is](../images/k23-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K23](../images/k23-config-not-live.svg)
+
 A **ConfigMap** keeps settings outside your container image, so one image can run in many places with different settings. A Pod can receive a ConfigMap in two main ways:
 
 - **As environment variables** (`envFrom` or `env`): Kubernetes copies the values into the container's environment at the moment the container is created. After that, they are part of that running process.

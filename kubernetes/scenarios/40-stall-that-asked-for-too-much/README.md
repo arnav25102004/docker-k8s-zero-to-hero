@@ -23,6 +23,9 @@ The committee does not shout. It just never lets the stall open. The form was fi
 ![Diagram: the setup for K40, who talks to whom and what your mission is](../images/k40-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K40](../images/k40-limitrange-max.svg)
+
 A **`LimitRange`** is a rule for one namespace: "no single container may ask for more than X" (a `max`), "at least Y" (a `min`), and sensible defaults. It is checked when a Pod is **created**, by the API server. If a Pod breaks the rule it is never created at all.
 
 So the Deployment cannot make Pods, and the object that tells you why is the **ReplicaSet** between them, in its `ReplicaFailure` condition and its events. Compare with [K19](../19-hackathon-quota/README.md), the same "created nothing" mystery, with a different rule.

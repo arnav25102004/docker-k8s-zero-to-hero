@@ -18,6 +18,9 @@ The counter also has a very diligent manager (the **liveness probe**). He checks
 ![Diagram: the setup for K35, who talks to whom and what your mission is](../images/k35-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K35](../images/k35-liveness-too-early.svg)
+
 Kubernetes has three probes, and they answer three different questions:
 
 | Probe | Question | If it fails |

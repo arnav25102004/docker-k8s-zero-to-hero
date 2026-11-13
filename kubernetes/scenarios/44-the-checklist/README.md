@@ -23,6 +23,9 @@ The gate does not just say "no". The refusal message is a list of everything on 
 ![Diagram: the setup for K44, who talks to whom and what your mission is](../images/k44-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K44](../images/k44-psa-restricted.svg)
+
 The **restricted** level asks for four things (on current Kubernetes):
 
 1. `allowPrivilegeEscalation: false` on every container

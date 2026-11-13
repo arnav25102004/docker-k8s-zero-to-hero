@@ -18,6 +18,9 @@ And yet the stall is open, both fryers are hot, and the visitor is going hungry.
 ![Diagram: the setup for K32, who talks to whom and what your mission is](../images/k32-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K32](../images/k32-label-wrong-object.svg)
+
 Every Kubernetes object has its **own** labels. The labels on a Deployment describe the *Deployment*. The labels on a Pod describe the *Pod*. They are not shared, and a Deployment does **not** copy its labels onto its Pods.
 
 - The Deployment stamps its Pods using the **Pod template** (`spec.template.metadata.labels`). Only those labels reach the Pods.

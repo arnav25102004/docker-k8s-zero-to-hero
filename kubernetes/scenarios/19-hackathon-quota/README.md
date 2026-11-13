@@ -14,6 +14,9 @@ It is 2 AM at the BengaluruBuild 24-hour hackathon. Lakshmi from the organising 
 ![Diagram: the setup for K19, who talks to whom and what your mission is](../images/k19-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K19](../images/k19-quota-needs-requests.svg)
+
 A shared cluster is like a shared hostel kitchen: if one team switches on every burner, nobody else gets to cook. Platform teams prevent that with budgets per namespace:
 
 - A **ResourceQuota** is a budget for a whole namespace: "all Pods together may *request* at most 500m of CPU and 256Mi of memory, and may be *limited* to at most 1 CPU and 512Mi".

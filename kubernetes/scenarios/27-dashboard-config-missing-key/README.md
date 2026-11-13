@@ -14,6 +14,9 @@ The Student Council wants one page with everything a student needs: the canteen 
 ![Diagram: the setup for K27, who talks to whom and what your mission is](../images/k27-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K27](../images/k27-config-key-name.svg)
+
 A **ConfigMap** keeps settings outside your container image, so one image can run in many places. One way to hand it to a Pod is as a **volume**: Kubernetes turns the ConfigMap into files, and the kubelet (the agent on each node that starts your containers) puts them inside the container before it starts.
 
 - Each **key** in the ConfigMap becomes one file. By default you get all of them.

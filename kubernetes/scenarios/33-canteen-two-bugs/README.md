@@ -24,6 +24,9 @@ Each change alone is a one-line mistake. Together they make the best kind of puz
 ![Diagram: the setup for K33, who talks to whom and what your mission is](../images/k33-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K33](../images/k33-two-bugs-one-service.svg)
+
 Nothing new, which is the point. A request to a Service has to get through **two doors**:
 1. **Finding the Pods:** the Service's selector must match the Pods' labels (K04, K31, K32).
 2. **Reaching the Pods:** the Service's `targetPort` must be the port the container really listens on (K05).

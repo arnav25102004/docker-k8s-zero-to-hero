@@ -23,6 +23,9 @@ Three stalls share the fridge: a **cache** the whole court depends on, a **web c
 ![Diagram: the setup for K42, who talks to whom and what your mission is](../images/k42-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K42](../images/k42-qos-classes.svg)
+
 Every Pod gets a **QoS class**, computed from its requests and limits. It decides who is evicted first when a node is short of memory:
 
 | Class | When you get it | Evicted |

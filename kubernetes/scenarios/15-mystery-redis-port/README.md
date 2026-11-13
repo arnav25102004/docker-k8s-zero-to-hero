@@ -14,6 +14,9 @@ Priya writes a small worker for the campus fest scoreboard. It reads the Redis p
 ![Diagram: the setup for K15, who talks to whom and what your mission is](../images/k15-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K15](../images/k15-service-env-collision.svg)
+
 Long before DNS names were common in clusters, Docker's old "links" feature told one container about another by putting variables in its environment. Kubernetes kept the habit and calls it **service links**.
 
 - When a Pod starts, Kubernetes looks at every **Service** in the same namespace and adds environment variables for each: `<NAME>_SERVICE_HOST`, `<NAME>_SERVICE_PORT`, and the Docker-style `<NAME>_PORT=tcp://<ip>:<port>`.
