@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install a Gateway API controller (Envoy Gateway) and a GatewayClass called "eg".
-# Lab K12 teaches it; scenario K33 needs it. Safe to run again.
+# Lab K12 teaches it; scenario S3.4 needs it. Safe to run again.
 #
 #   ./scripts/install-gateway.sh
 #

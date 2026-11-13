@@ -2,7 +2,7 @@
 # Spec for scenario K34 (34-doorbell-on-the-wrong-door). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-34-doorbell"
-CHECK34="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/x1-doorbell-on-the-wrong-door" && pwd)/check.sh"
+CHECK34="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/exercises/1-doorbell-on-the-wrong-door" && pwd)/check.sh"
 
 events34() { kubectl get events -n k-34-doorbell -o jsonpath='{.items[*].message}' 2>&1; }
 

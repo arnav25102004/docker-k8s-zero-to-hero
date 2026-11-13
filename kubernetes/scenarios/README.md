@@ -1,11 +1,11 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-**30 core scenarios in six sections, plus 14 exercises and a finale.** Each core scenario is a 4-minute live demo that **breaks something in a cluster on purpose**: the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, a diagram, the concept, the commands to type, a `check.sh` and takeaways.
+**30 core scenarios in six sections, plus 30 exercises (five per section, one of them the finale).** Each core scenario is a 4-minute live demo that **breaks something in a cluster on purpose**: the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, a diagram, the concept, the commands to type, a `check.sh` and takeaways.
 
 > **Scenarios vs labs.** Scenarios are named **S1.1 to S6.5** (section, then number) and live in the six section folders here. They are not the labs K00–K19 in the [Kubernetes track](../README.md).
 
 > ### 🧰 Install these two things first (once)
-> **1. metrics-server, right after your cluster is up.** Without it there is no `kubectl top`, the autoscaler (S5.3) has nothing to read, and the S1.1 tour is half blind.
+> **1. metrics-server, right after your cluster is up.** Without it there is no `kubectl top`, the autoscaler (S5.3) has nothing to read, and the K01 lab tour is half blind.
 > ```bash
 > ./scripts/install-metrics-server.sh
 > ```
@@ -252,19 +252,19 @@ Do this once on every platform you will teach from, a day or more before the eve
    ```bash
    export Z2H_DRY_RUN_CONTEXT="$(kubectl config current-context)"
    ```
-5. Run everything except S2.3, S5.3 and S3.4 (it needs the Gateway controller, so give it its own run). The first group takes the longest, so start it before a coffee:
+5. Run everything except S2.3, S5.3 and S3.4 (it needs the Gateway controller, so give it its own run). The 15 question exercises have no break/fix, so the harness has nothing to run for them. The first group takes the longest, so start it before a coffee:
    ```bash
-   ./tests/scenarios/k8s.sh 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 17 18 19 20 21 22 23 24 26 27 28 29 30 31 32 34 35 36 37 38 39 40 41 42 43 44 45
+   ./tests/scenarios/k8s.sh S1.1 S1.2 S1.3 S1.4 S1.5 S1.x1 S1.x2 S1.x3 S2.1 S2.2 S2.4 S2.5 S3.1 S3.2 S3.3 S3.5 S4.1 S4.2 S4.3 S4.4 S4.5 S4.x1 S4.x2 S4.x3 S4.x4 S5.1 S5.2 S5.4 S5.5 S5.x1 S5.x2 S5.x3 S5.x4 S5.x5 S6.1 S6.2 S6.3 S6.4 S6.5 S6.x1 S6.x2 S6.x5
    ```
 6. Run S2.3, S5.3 and S3.4 on their own, one after the other (S2.3 taints a node, S5.3 installs metrics-server only if the cluster has none, S3.4 installs the Gateway controller if needed):
    ```bash
-   ./tests/scenarios/k8s.sh 16
+   ./tests/scenarios/k8s.sh S2.3
    ```
    ```bash
-   ./tests/scenarios/k8s.sh 25
+   ./tests/scenarios/k8s.sh S5.3
    ```
    ```bash
-   ./tests/scenarios/k8s.sh 33
+   ./tests/scenarios/k8s.sh S3.4
    ```
 7. All ✅ in the summaries means you can tick that platform's column in the table below. Lock the harness again and clean up:
    ```bash

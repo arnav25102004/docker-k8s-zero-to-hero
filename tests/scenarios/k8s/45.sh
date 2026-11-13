@@ -2,7 +2,7 @@
 # Spec for scenario K45 (45-the-locked-down-kitchen). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-45-lockdown"
-CHECK45="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/4-config-storage-and-security/x4-the-locked-down-kitchen" && pwd)/check.sh"
+CHECK45="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/4-config-storage-and-security/exercises/4-the-locked-down-kitchen" && pwd)/check.sh"
 
 ready45() { local r; r="$(kubectl get deployment kitchen -n k-45-lockdown -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }
 rsmsg45() { kubectl get rs -n k-45-lockdown -l app=kitchen -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].message}' 2>&1; }

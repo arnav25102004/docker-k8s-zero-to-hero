@@ -2,7 +2,7 @@
 # Spec for scenario K41 (41-autoscaler-pointing-at-nobody). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-41-hpa-target"
-CHECK41="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/x5-autoscaler-pointing-at-nobody" && pwd)/check.sh"
+CHECK41="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/exercises/5-autoscaler-pointing-at-nobody" && pwd)/check.sh"
 
 ready41() { local r; r="$(kubectl get deployment lassi -n k-41-hpa-target -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }
 rsmsg41() { kubectl get rs -n k-41-hpa-target -l app=lassi -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].message}' 2>&1; }

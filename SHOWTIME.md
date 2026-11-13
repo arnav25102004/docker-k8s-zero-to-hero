@@ -164,4 +164,5 @@ Close with the checklist on screen: *"Every line on this list is something you *
 | **1 day hands-on** | D01–D08, K01–K08, 4 break-and-fix scenarios each ([Docker ones](docker/scenarios/README.md), [Kubernetes ones](kubernetes/scenarios/README.md)) |
 | **2 days, zero to hero** | Day 1: Git G00–G06 (morning) + Docker labs D00–D08 + [break-and-fix scenarios](docker/scenarios/README.md) 01–05. Day 2: K00–K12 + [Kubernetes break-and-fix scenarios](kubernetes/scenarios/README.md) |
 | **3 days, complete** | Day 1: Track 0 Git + G-scenarios. Day 2: Track 1 Docker + [Docker scenarios](docker/scenarios/README.md). Day 3: Track 2 Kubernetes + [Kubernetes scenarios](kubernetes/scenarios/README.md) |
+| **4-hour Kubernetes workshop (college syllabus)** | Hour 1 to 2: the 30 [scenarios](kubernetes/scenarios/README.md), six sections of five, 4 minutes each, non-stop. Hour 3 to 4: the section exercises, the finale (S6.x5) and the two [projects](kubernetes/projects/README.md) |
 | **Semester course** | One lab per session + one troubleshooting scenario as homework |

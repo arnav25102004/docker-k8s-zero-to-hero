@@ -33,7 +33,7 @@ wait_for "the nodes to be ready" 60 nodes_settled
 if ! NODES=$(schedulable_node_count) || [ "$NODES" -lt 1 ]; then
   warn "Node status right now:"
   kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints[*].key,UNSCHEDULABLE:.spec.unschedulable 2>&1 || true
-  die "No node accepts new Pods right now (all tainted or cordoned, or the cluster did not answer). Check: kubectl get nodes. If you just ran K16, run its cleanup.sh first."
+  die "No node accepts new Pods right now (all tainted or cordoned, or the cluster did not answer). Check: kubectl get nodes. If you just ran S2.3, run its cleanup.sh first."
 fi
 REPLICAS=$((NODES + 1))
 
