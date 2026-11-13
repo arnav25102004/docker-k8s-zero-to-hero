@@ -252,6 +252,7 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K07](../07-showdown-slow-start/README.md), the other worked example: A perfectly healthy app keeps getting killed, again and again, every few seconds. Then try the **"Ready or alive?" practice lane**: [K34](../34-doorbell-on-the-wrong-door/README.md), [K35](../35-biryani-that-needs-20-seconds/README.md), [K36](../36-two-probes-two-mistakes/README.md).
+Next, in this section: [K07](../07-showdown-slow-start/README.md): A perfectly healthy app keeps getting killed, again and again, every few seconds.
 
 🏋️ **More reps on this idea (optional):** the practice lane K34 to K36 ("Ready or alive?"), starting at [K34](../34-doorbell-on-the-wrong-door/README.md).
+

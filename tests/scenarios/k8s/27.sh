@@ -1,40 +1,33 @@
 #!/usr/bin/env bash
-# Spec for scenario K27 (27-dashboard-config-missing-key). Sourced by tests/scenarios/k8s.sh.
+# Spec for scenario K27 (27-upgrade-that-broke-the-stall). Needs helm. Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
-NAMESPACES="k-27-config-key"
-# shellcheck source=/dev/null
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && pwd)/_lib.sh"
+NAMESPACES="k-27-helm"
+CHECK27="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/27-upgrade-that-broke-the-stall" && pwd)/check.sh"
+command -v helm >/dev/null 2>&1 || { printf 'helm is needed for scenario K27\n' >&2; exit 1; }
 
-# in_cluster_body NS URL: the response BODY (whitespace removed) seen from inside the cluster, or "none".
-# Kept in this spec on purpose: the shared lib only returns status codes.
-in_cluster_body() {
-  local ns="$1" url="$2" out=""
-  out=$(in_cluster_pod "$ns" "" curl -s --max-time 5 "$url" | tr -d '[:space:]')
-  printf '%s\n' "${out:-none}"
-}
+img27() { kubectl get deployment stall -n k-27-helm -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null; }
 
-# http_code NS URL: in_cluster_http, retried (a throwaway curl Pod can lose its output).
-http_code() {
-  local c="" try
-  for try in 1 2 3; do
-    c=$(in_cluster_http "$1" "$2")
-    [ "$c" != "000" ] && break
-    sleep 2
+check_passes27() {
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    bash "$CHECK27" >/dev/null 2>&1 && return 0
+    sleep 3
   done
-  printf '%s\n' "$c"
+  return 1
 }
 
 broken() {
-  # "More than 30 s": let the Pod age, then check it is still stuck.
-  sleep 30
-  assert_eq "$(pod_reason k-27-config-key app=dashboard)" "ContainerCreating" "the dashboard Pod is still ContainerCreating after 30 s"
-  # Wording differs a little by version, so only the event reason is checked.
-  assert_contains "$(kubectl get events -n k-27-config-key 2>&1)" "FailedMount" "the events contain FailedMount"
+  assert_contains "$(img27)" "9.9.9" "the upgrade put a bad image tag in the Deployment"
+  assert_contains "$(helm history stall -n k-27-helm 2>&1)" "deployed" "Helm reports the upgrade as deployed"
+  assert_contains "$(kubectl get pods -n k-27-helm -l app=stall -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>&1)" "Image" "a new Pod cannot pull its image"
+  assert_cmd_fails "check.sh says: not done yet" bash "$CHECK27"
 }
 
 fixed() {
-  kubectl rollout status deployment/dashboard -n k-27-config-key --timeout=180s >/dev/null 2>&1
-  assert_eq "$?" "0" "dashboard Deployment rolled out"
-  assert_eq "$(http_code k-27-config-key http://dashboard)" "200" "dashboard answers 200 inside the cluster"
-  assert_contains "$(in_cluster_body k-27-config-key http://dashboard/assets/config.yml)" "Canteenmenu" "the served config holds a link title from the new config"
+  kubectl rollout status deployment/stall -n k-27-helm --timeout=180s >/dev/null 2>&1
+  assert_eq "$?" "0" "stall Deployment rolled out"
+  assert_contains "$(img27)" "1.0.0" "the good image is back"
+  assert_contains "$(helm history stall -n k-27-helm 2>&1)" "Rollback to 1" "Helm history records the rollback"
+  check_passes27
+  assert_eq "$?" "0" "check.sh says: done"
 }

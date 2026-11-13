@@ -285,4 +285,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K20](../20-surprise-limitrange-oom/README.md): "Nobody set a memory limit. The app still got killed for exceeding it."
+Next, in this section: [K27](../27-upgrade-that-broke-the-stall/README.md): Helm said "deployed". Helm was not lying. Helm was not helping either.

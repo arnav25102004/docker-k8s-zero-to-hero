@@ -1,31 +1,23 @@
 #!/usr/bin/env bash
-# Spec for scenario K16 (16-game-server-vip-node). Sourced by tests/scenarios/k8s.sh.
-# Cluster-level (taints every node): run it alone, never in parallel with other scenarios.
+# Spec for scenario K16 (16-watchman-skipped-a-gate). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
-NAMESPACES="k-16-vip-node"
-# shellcheck source=/dev/null
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios" && pwd)/_lib.sh"
+NAMESPACES="k-16-daemonset"
+CHECK16="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/16-watchman-skipped-a-gate" && pwd)/check.sh"
 
-# in_cluster_http cannot be used here: its curl Pod has no toleration, so while every node
-# carries z2h-vip it would sit Pending forever. Same probe, plus the toleration.
-tolerant_http() {
-  local out code ov
-  ov='{"spec":{"tolerations":[{"key":"z2h-vip","operator":"Equal","value":"true","effect":"NoSchedule"}]}}'
-  out=$(in_cluster_pod "$1" "$ov" curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$2") || { printf 'ERR\n'; return 0; }
-  code=$(printf '%s' "$out" | grep -o '^[0-9][0-9][0-9]' | head -n 1)
-  printf '%s\n' "${code:-000}"
-}
+nodes16() { kubectl get nodes --no-headers | wc -l | tr -d ' '; }
+want16() { local r; r="$(kubectl get daemonset watchman -n k-16-daemonset -o jsonpath='{.status.desiredNumberScheduled}' 2>/dev/null)"; echo "${r:-0}"; }
+ready16() { local r; r="$(kubectl get daemonset watchman -n k-16-daemonset -o jsonpath='{.status.numberReady}' 2>/dev/null)"; echo "${r:-0}"; }
 
 broken() {
-  assert_eq "$(kubectl get pods -n k-16-vip-node -l app=game -o jsonpath='{.items[*].status.phase}' 2>&1)" "Pending Pending" "both game Pods are Pending"
-  # Wording differs by version: "untolerated taint(s)" (current) or "had taint" (older).
-  assert_contains "$(kubectl get events -n k-16-vip-node 2>&1)" "taint" "the scheduler events mention the taint"
-  # Kubernetes 1.37 no longer names the taint in the event, so ask the nodes.
-  assert_contains "$(kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>&1)" "z2h-vip" "the nodes carry the z2h-vip taint"
+  local n; n="$(nodes16)"
+  assert_eq "$([ "$(want16)" -lt "$n" ] && echo yes || echo no)" "yes" "the DaemonSet wants fewer watchmen than there are nodes ($(want16) of $n)"
+  assert_cmd_fails "check.sh says: not done yet" bash "$CHECK16"
 }
 
 fixed() {
-  kubectl rollout status deployment/game -n k-16-vip-node --timeout=180s >/dev/null 2>&1
-  assert_eq "$?" "0" "game Deployment rolled out"
-  assert_eq "$(tolerant_http k-16-vip-node http://game)" "200" "game answers 200 inside the cluster"
+  local n i; n="$(nodes16)"
+  for i in $(seq 1 60); do [ "$(ready16)" = "$n" ] && break; sleep 3; done
+  assert_eq "$(want16)" "$n" "the DaemonSet now wants one watchman per node"
+  assert_eq "$(ready16)" "$n" "every watchman is Ready"
+  assert_eq "$(bash "$CHECK16" >/dev/null 2>&1; echo $?)" "0" "check.sh says: done"
 }

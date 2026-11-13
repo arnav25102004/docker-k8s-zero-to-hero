@@ -218,4 +218,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K03](../03-showdown-crashloop/README.md): It starts. It dies. It starts. It dies. Welcome to the loop.
+Next, in this section: [K03](../03-showdown-crashloop/README.md): It starts. It dies. It starts. It dies. Welcome to the loop.

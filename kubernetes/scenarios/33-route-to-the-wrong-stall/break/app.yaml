@@ -1,0 +1,104 @@
+# K33 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chai
+  namespace: k-33-gateway
+  labels: { app: chai }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: chai }
+  template:
+    metadata:
+      labels: { app: chai }
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🍵 chai stall"]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet: { path: /, port: 5678 }
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chai
+  namespace: k-33-gateway
+spec:
+  selector: { app: chai }
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dosa
+  namespace: k-33-gateway
+  labels: { app: dosa }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: dosa }
+  template:
+    metadata:
+      labels: { app: dosa }
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🥞 dosa stall"]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet: { path: /, port: 5678 }
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dosa
+  namespace: k-33-gateway
+spec:
+  selector: { app: dosa }
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: stalls
+  namespace: k-33-gateway
+spec:
+  gatewayClassName: eg
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: menu
+  namespace: k-33-gateway
+spec:
+  parentRefs:
+    - name: stalls
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: /chai }
+      backendRefs:
+        - name: chai
+          port: 80
+    - matches:
+        - path: { type: PathPrefix, value: /dosa }
+      backendRefs:
+        - name: dossa
+          port: 80

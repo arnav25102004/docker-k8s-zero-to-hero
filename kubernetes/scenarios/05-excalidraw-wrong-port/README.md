@@ -237,4 +237,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K06](../06-kanboard-never-ready/README.md): It's running. It's healthy. It just never gets any visitors.
+Next, in this section: [K12](../12-showdown-dns-namespaces/README.md): The Redis is running. The app is running. And the app swears Redis does not exist.

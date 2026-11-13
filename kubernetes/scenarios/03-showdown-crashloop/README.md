@@ -236,4 +236,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K04](../04-it-tools-no-endpoints/README.md): Every Pod is Running. Every request fails.
+Next, in this section: [K26](../26-showdown-init-stuck/README.md): Cats vs Dogs is waiting for its database. Forever.

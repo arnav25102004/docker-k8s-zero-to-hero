@@ -253,4 +253,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K11](../11-showdown-bad-rollout/README.md): Friday, 6 PM. The release goes out. Nobody notices… because Kubernetes saved you.
+Next, in this section: [K14](../14-leaderboard-bot-forbidden/README.md): The bot has a valid ID card. The API still says: not allowed.

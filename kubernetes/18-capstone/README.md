@@ -37,7 +37,7 @@ For every block in [`manifests/`](manifests/), name the lab where you learned it
 |---|---|
 | [`namespace.yaml`](manifests/namespace.yaml) | Pod Security `restricted` (K16) |
 | [`redis.yaml`](manifests/redis.yaml) | StatefulSet, volumeClaimTemplates, headless Service, fsGroup (K10, K16) |
-| [`api.yaml`](manifests/api.yaml) | ConfigMap → envFrom (K07), startup/liveness/readiness (K08), resources (K09), rolling strategy + preStop (K06), topology spread (K17), securityContext (K16), `enableServiceLinks: false` ([scenario K15](../scenarios/15-mystery-redis-port/README.md)) |
+| [`api.yaml`](manifests/api.yaml) | ConfigMap → envFrom (K07), startup/liveness/readiness (K08), resources (K09), rolling strategy + preStop (K06), topology spread (K17), securityContext (K16), `enableServiceLinks: false` (stops Kubernetes injecting variables like `REDIS_PORT=tcp://…` that confuse apps) |
 | [`frontend.yaml`](manifests/frontend.yaml) | read-only root FS with a `/tmp` emptyDir |
 | [`resilience.yaml`](manifests/resilience.yaml) | HPA (K13), PDBs (K17), ResourceQuota (K09) |
 | [`network-policies.yaml`](manifests/network-policies.yaml) | default deny + explicit allows (K15) |

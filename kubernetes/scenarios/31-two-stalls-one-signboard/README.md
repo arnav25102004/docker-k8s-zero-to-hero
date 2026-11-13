@@ -8,7 +8,7 @@
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> 🧭 **Practice lane: "Services find Pods".** [K04](../04-it-tools-no-endpoints/README.md) was the worked example. This is practice problem 1 of 3: the same big idea, a new twist, fewer hints. Then [K32](../32-label-on-the-wrong-object/README.md), then the [K33](../33-canteen-two-bugs/README.md) boss.
+> 🧭 **Section 6, "Namespaces, quotas, Helm and troubleshooting".** Labels and annotations. [K04](../04-it-tools-no-endpoints/README.md) showed a Service finding its Pods by label; here the label is *too loose*. Fewer hints than the first scenarios.
 
 ## 📖 The story
 Priya runs the website for the campus chai stall. It is wonderfully simple: one signboard (a **Service**) that says "Chai here →" and points at every stall wearing the `chai` badge.
@@ -151,4 +151,4 @@ A green message means every address behind the Service is fresh. The visitor log
 ```
 
 ## Next →
-[K32](../32-label-on-the-wrong-object/README.md): the label is right there. Kubernetes is looking somewhere else.
+Next, in this section: [K20](../20-surprise-limitrange-oom/README.md): "Nobody set a memory limit. The app still got killed for exceeding it."

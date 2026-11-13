@@ -237,4 +237,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K02](../02-image-typo/README.md): One missing letter. Kubernetes tries, waits, tries again… forever.
+Next, in this section: [K02](../02-image-typo/README.md): One missing letter. Kubernetes tries, waits, tries again… forever.

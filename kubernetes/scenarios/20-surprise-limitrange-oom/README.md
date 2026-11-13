@@ -308,6 +308,7 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K21](../21-notice-board-runasnonroot/README.md): Security turned on one rule. The notice board went dark.
+That was the last of the 30 core scenarios. Back to the [scenario guide](../README.md): the exercises, the [finale (K30)](../30-friday-5pm-outage/README.md) and the two projects.
 
 🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).
+

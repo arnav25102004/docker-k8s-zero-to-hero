@@ -270,6 +270,7 @@ You have now seen both probe failures once, with every step explained ([K06](../
 Each one has a `./check.sh` that tells you, any time, whether you are done.
 
 ## Next →
-[K08](../08-ai-trainer-oomkilled/README.md): Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.
+Next, in this section: [K25](../25-showdown-hpa-not-scaling/README.md): Traffic is pouring in. The autoscaler shrugs: "unknown".
 
 🏋️ **More reps on this idea (optional):** the practice lane K34 to K36 ("Ready or alive?"), starting at [K34](../34-doorbell-on-the-wrong-door/README.md).
+

@@ -93,7 +93,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K19 🔔](kubernetes/19-observability/README.md) | **see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
 | [🏁 Projects](kubernetes/projects/README.md) | **two end-to-end projects for your CV**: deploy, scale and update an app (lab exercise 5); config, secrets, Jobs, CronJobs and a Helm chart (lab exercise 6) | 🚀 build ours, then build your own |
 | [K20 🏁](kubernetes/20-projects/README.md) | **two 30-minute projects**: Jenkins ships to your cluster, monitoring emails you when it breaks | 📬 build it live, break it, get the email |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): 30 core incidents, then practice lanes with a worked example, guided, solo and boss problem per idea | 🧯 every one has a diagram, a `check.sh`, and a test |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): **30 core scenarios in six syllabus sections, 4 minutes each**, plus 14 exercises and a 30-minute finale | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
 ```bash

@@ -237,16 +237,15 @@ Answer from memory, then peek.
 3. The replacement Pod gets the same labels from the same Deployment, so nothing changed.
 </details>
 
-## 🏋️ Now you try: the "Services find Pods" practice lane
-You have seen the idea once, with every step explained. Now lock it in with three more problems, each with less help than the last:
+## 🏋️ Now you try: more Services and labels
+You have seen the idea once, with every step explained. Two more scenarios use labels in a new way, each with less help:
 
-| # | Practice | What is new | Hand-holding |
-|---|----------|-------------|--------------|
-| [K31](../31-two-stalls-one-signboard/README.md) | Two stalls, one signboard | a Service that matches *too many* Pods | guided questions + hint ladder |
-| [K32](../32-label-on-the-wrong-object/README.md) | The label on the wrong object | labels on a Deployment are not on its Pods | questions only |
-| [K33](../33-canteen-two-bugs/README.md) | Two bugs in one trench coat | two stacked faults (boss) | no hints for 5 minutes |
+| # | Practice | What is new |
+|---|----------|-------------|
+| [K32](../32-label-on-the-wrong-object/README.md) | The label on the wrong object | labels on a Deployment are not on its Pods |
+| [K31](../31-two-stalls-one-signboard/README.md) | Two stalls, one signboard | a Service that matches *too many* Pods |
 
 Each one has a `./check.sh` that tells you, any time, whether you are done.
 
 ## Next →
-Finish the lane above, then [K05](../05-excalidraw-wrong-port/README.md): Endpoints exist. The Pod is fine. Still: connection refused.
+Next, in this section: [K05](../05-excalidraw-wrong-port/README.md): Endpoints exist. The Pod is fine. Still: connection refused.

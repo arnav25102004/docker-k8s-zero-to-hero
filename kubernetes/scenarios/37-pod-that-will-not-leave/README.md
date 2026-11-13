@@ -138,4 +138,4 @@ A green message means the Pod is really gone.
 The cleanup lifts the finalizer first, which is what lets the namespace be deleted at all. (A namespace with a stuck Pod would otherwise be stuck too.)
 
 ## Next →
-[K38](../38-applied-here-looking-there/README.md): the deploy said "created". The cluster says "No resources found".
+Next, the next section: [K32](../32-label-on-the-wrong-object/README.md): The label is right there. Kubernetes is looking somewhere else.

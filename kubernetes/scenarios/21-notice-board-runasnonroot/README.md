@@ -260,6 +260,7 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K22](../22-notice-board-readonly-fs/README.md): Locked down perfectly. Now it can't even start.
+Next, the next section: [K06](../06-kanboard-never-ready/README.md): It's running. It's healthy. It just never gets any visitors.
 
 🏋️ **More reps on this idea (optional):** the practice lane K43 to K45 ("Security"), starting at [K43](../43-maintenance-van-wants-the-master-key/README.md).
+

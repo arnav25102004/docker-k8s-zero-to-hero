@@ -44,7 +44,7 @@ delete_ns() {
 # cleanup (which removes the taint) before it gets to fresh_ns, so it is not blocked.
 die_if_k16_taint() {
   if kubectl get nodes -o jsonpath='{range .items[*]}{range .spec.taints[*]}{.key}{"\n"}{end}{end}' 2>/dev/null | grep -q '^z2h-vip$'; then
-    die "The nodes still carry the z2h-vip taint from K16. Run kubernetes/scenarios/16-game-server-vip-node/cleanup.sh (or: kubectl taint nodes --all z2h-vip-) and try again."
+    die "The nodes still carry the z2h-vip taint from K16. Run kubernetes/scenarios/16-watchman-skipped-a-gate/cleanup.sh (or: kubectl taint nodes --all z2h-vip-) and try again."
   fi
 }
 

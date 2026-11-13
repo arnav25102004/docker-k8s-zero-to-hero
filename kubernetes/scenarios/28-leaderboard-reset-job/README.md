@@ -279,4 +279,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K29](../29-log-sidecar-half-ready/README.md): Half ready. Fully confusing.
+Next, in this section: [K24](../24-nightly-reset-that-never-started/README.md): It is scheduled for every minute. It has been "every minute" for three weeks. Nothing has run.

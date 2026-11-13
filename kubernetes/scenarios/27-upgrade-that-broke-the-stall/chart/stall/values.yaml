@@ -1,0 +1,6 @@
+# Settings for the stall. Change them with --set or a values file.
+replicaCount: 2
+image:
+  repository: hashicorp/http-echo
+  tag: "1.0.0"
+message: "🍛 Fresh biryani, still hot"

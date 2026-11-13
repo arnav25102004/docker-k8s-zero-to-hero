@@ -288,6 +288,7 @@ This deletes the namespace and, only if this scenario installed it, metrics-serv
 </details>
 
 ## Next →
-[K26](../26-showdown-init-stuck/README.md): Cats vs Dogs is waiting for its database. Forever.
+Next, in this section: [K11](../11-showdown-bad-rollout/README.md): Friday, 6 PM. The release goes out. Nobody notices… because Kubernetes saved you.
 
 🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).
+

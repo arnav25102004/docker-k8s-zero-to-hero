@@ -284,7 +284,7 @@ test_fresh_ns_refuses_leftover_k16_taint() {
   kubectl taint nodes --all z2h-vip=true:NoSchedule --overwrite >/dev/null 2>&1
   out=$(bash -c "source '$LIB'; fresh_ns k-94-selftest" 2>&1); rc=$?
   check "fresh_ns dies with a leftover z2h-vip taint" [ "$rc" -ne 0 ] || f=1
-  check "message names K16's cleanup.sh" has "$out" "16-game-server-vip-node/cleanup.sh" || f=1
+  check "message names K16's cleanup.sh" has "$out" "16-watchman-skipped-a-gate/cleanup.sh" || f=1
   check "no namespace was created" no_ns k-94-selftest || f=1
   bash -c "source '$LIB'; untaint_all z2h-vip" >/dev/null 2>&1
   bash -c "source '$LIB'; fresh_ns k-94-selftest" >/dev/null 2>&1; check "fresh_ns works again after untaint" rc_is "$?" 0 || f=1

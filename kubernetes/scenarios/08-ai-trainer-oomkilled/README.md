@@ -249,6 +249,7 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K09](../09-adminer-missing-secret/README.md): The database tool won't even start. No logs. Nothing.
+Next, the next section: [K38](../38-applied-here-looking-there/README.md): The deploy said "created". The cluster says "No resources found". Both are telling the truth.
 
 🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).
+

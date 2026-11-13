@@ -1,0 +1,28 @@
+# A small visitor that asks the front door for BOTH stalls every 2 seconds.
+# @URL@ is filled in by break.sh with the address of the Gateway's proxy.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: visitor
+  namespace: k-33-gateway
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: visitor
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            a=$(wget -q -T 2 -O - @URL@/chai 2>/dev/null)
+            b=$(wget -q -T 2 -O - @URL@/dosa 2>/dev/null)
+            if [ -n "$a" ] && [ -n "$b" ]; then
+              echo "✅ $(date +%T) /chai and /dosa both answer"
+            elif [ -n "$a" ]; then
+              echo "❌ $(date +%T) /chai answers, /dosa does not"
+            else
+              echo "❌ $(date +%T) the front door answers nothing"
+            fi
+            sleep 2
+          done
