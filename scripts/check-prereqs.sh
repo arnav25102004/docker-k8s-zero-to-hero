@@ -61,6 +61,8 @@ if kubectl cluster-info >/dev/null 2>&1; then
 else
   note "no cluster reachable: fine for the Docker labs; needed from Lab K01 (see 00-setup)"
 fi
+command -v helm >/dev/null 2>&1 && ok "helm: $(helm version --short 2>/dev/null)" || note "helm not installed (needed from Lab K19; see kubernetes/README.md)"
+command -v kubens >/dev/null 2>&1 && ok "kubens and kubectx installed" || note "kubens/kubectx not installed (optional but handy; see kubernetes/README.md)"
 
 head1 "📦 Course images"
 for img in z2h/api:1.0 z2h/frontend:1.0; do
