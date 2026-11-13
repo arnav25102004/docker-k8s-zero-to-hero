@@ -8,6 +8,9 @@
 - Annotations, and the recommended label conventions
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K03](images/lab-concept.svg)
+
 - A **namespace** is a folder for objects: names must be unique *within* a namespace. It's also the unit for access control (RBAC), quotas, and network policies.
 - A **label** is a key/value tag on an object (`app=shop`, `env=prod`).
 - A **selector** is a query over labels (`app=shop,env=prod`). Deployments find their Pods by selector, and Services find their endpoints by selector. **A wrong label equals a broken app** ([scenario K04](../scenarios/04-it-tools-no-endpoints/README.md)).
@@ -77,6 +80,14 @@ metadata:
     app.kubernetes.io/managed-by: helm
 ```
 Tools like dashboards, Helm, and cost reports rely on these.
+
+## 🏆 Challenge
+Without editing any file, print the name and namespace of every Pod in the cluster that has the label `tier=api` and `env=prod`.
+
+<details><summary>Check your answer</summary>
+
+`kubectl get pods -A -l tier=api,env=prod -o custom-columns=NS:.metadata.namespace,NAME:.metadata.name`. Commas in a selector mean AND.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. Can two Pods named <code>api</code> exist in the same cluster?</summary>

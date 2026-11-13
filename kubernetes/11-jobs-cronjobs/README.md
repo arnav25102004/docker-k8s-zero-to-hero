@@ -8,6 +8,9 @@
 - Debug a failing Job
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K11](images/lab-concept.svg)
+
 A Deployment keeps Pods **running forever**. A **Job** keeps creating Pods **until N of them succeed**. A **CronJob** creates a Job on a cron schedule.
 
 ## 🧪 Hands-on
@@ -51,6 +54,14 @@ kubectl patch cronjob heartbeat -p '{"spec":{"suspend":true}}'
 - Set `activeDeadlineSeconds` so a hung job doesn't run forever, and `ttlSecondsAfterFinished` so finished Jobs don't pile up.
 - CronJob schedules use the controller's time zone (UTC on most clusters). Use `spec.timeZone: "Asia/Kolkata"` to be explicit.
 - Database migrations as a Job (or Helm hook) before a rollout are a very common pattern.
+
+## 🏆 Challenge
+Write a Job that runs six Pods to completion, three at a time, and is stopped if it takes longer than two minutes.
+
+<details><summary>Check your answer</summary>
+
+`completions: 6`, `parallelism: 3` and `activeDeadlineSeconds: 120` in the Job spec.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. Why must Job Pods use <code>restartPolicy: Never</code> or <code>OnFailure</code>?</summary>

@@ -10,6 +10,9 @@
 - Call the Kubernetes API from inside a Pod
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K14](images/lab-concept.svg)
+
 ```
  Subject (User / Group / ServiceAccount) ──RoleBinding──▶ Role { verbs on resources }
                                                          e.g. get,list,watch on pods in ns rbac-lab
@@ -82,6 +85,14 @@ Common pattern: `kubectl create rolebinding dev-team-edit -n team-a --clusterrol
 - Never bind `cluster-admin` to a workload ServiceAccount. A compromised Pod would own the cluster.
 - Humans authenticate through the cloud IAM or SSO (OIDC); groups map to Roles. CI/CD gets its own narrowly scoped identity per environment.
 - Audit regularly: `kubectl auth can-i --list --as=...`, or tools like `rbac-lookup` and `kubectl-who-can`.
+
+## 🏆 Challenge
+Use `kubectl auth can-i ... --as=system:serviceaccount:rbac-lab:pod-reader` to show that the account can list Pods but cannot delete them. Then change the Role so it can, and prove it.
+
+<details><summary>Check your answer</summary>
+
+`can-i list pods` is yes and `can-i delete pods` is no. Add `delete` to the Role's `verbs`, apply it, and `can-i delete pods` becomes yes. The binding did not need to change.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A Role allows <code>list pods</code> in namespace A. Can the subject list pods in namespace B?</summary>

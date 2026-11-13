@@ -104,7 +104,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 
 ## 🧪 Tested, not just written
-Every Kubernetes scenario has an automated test, and all 45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
+Every Kubernetes scenario has an automated test, and all 45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
 
 ## 🔥 The Troubleshooting Arena
 ```bash
@@ -127,12 +127,13 @@ docker-k8s-zero-to-hero/
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
 ├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (45 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
-├── scripts/                 check-prereqs.sh · load-image.sh
+├── scripts/                 check-prereqs.sh · load-image.sh · link-check.py
+├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
 ```
 
 ## 🧭 How every lab is built
-🎯 what you'll learn → 🧠 the concept in 60 seconds → 🧪 hands-on steps with expected output → 🏭 what changes in production → 🏆 challenge → ✅ checkpoint quiz (answers hidden) → 🧹 cleanup
+🎯 what you'll learn → 🧠 the concept in 60 seconds (with a diagram) → 🧪 hands-on steps with expected output → 🏭 what changes in production → 🏆 a challenge you solve yourself (answer hidden) → ✅ checkpoint quiz (answers hidden) → 🔥 scenarios that break the same idea → 🧹 cleanup
 
 ## 📚 Cheat sheets
 [Git](cheatsheets/git.md) (checkout *and* switch) · [Docker](cheatsheets/docker.md) · [kubectl](cheatsheets/kubectl.md)

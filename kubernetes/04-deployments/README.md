@@ -10,6 +10,9 @@
 - Why per-Pod memory is a trap (the votes jump around!)
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K04](images/lab-concept.svg)
+
 ```
 Deployment "api"   (replicas: 3, Pod template)
    └── ReplicaSet "api-7c9f8d6b5"     keeps EXACTLY 3 Pods matching the template
@@ -95,6 +98,14 @@ kubectl delete pod -l app=quarantine
 - Run **≥ 2–3 replicas** of anything user-facing, so a Pod or node failure is a non-event.
 - Add **PodDisruptionBudgets** (K17) so maintenance never takes all replicas at once.
 - Kubernetes *tries* to maintain desired state. If there's no room, new Pods stay **Pending** ([scenario K01](../scenarios/01-excalidraw-pending/README.md)).
+
+## 🏆 Challenge
+Scale `api` to 5. Then delete two of its Pods in one command. Predict how many Pods exist ten seconds later, and which object noticed.
+
+<details><summary>Check your answer</summary>
+
+Five. The ReplicaSet counts Pods, sees three instead of five, and creates two more. `kubectl get rs` shows the desired and current counts.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. You delete a Pod owned by a Deployment. Who replaces it?</summary>

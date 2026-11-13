@@ -9,6 +9,9 @@
 - **Why you almost never create bare Pods in production**
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K02](images/lab-concept.svg)
+
 A **Pod** wraps one or more containers that are deployed together:
 - They share **one network identity** (one IP; they reach each other on `localhost`)
 - They can share **volumes**

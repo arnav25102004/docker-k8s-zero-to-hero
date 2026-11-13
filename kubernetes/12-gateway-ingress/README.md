@@ -10,6 +10,9 @@
 - How classic **Ingress** relates (you'll still meet it everywhere)
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K12](images/lab-concept.svg)
+
 ```
                        ┌──────────── Gateway (Envoy) ────────────┐
  browsers / phones ──▶ │  HTTPRoute "showdown"                    │
@@ -108,6 +111,14 @@ Read [`ingress-example.yaml`](ingress-example.yaml): the same host + path → Se
 ## 🏭 In production
 - One cloud load balancer → Gateway → hundreds of Services. TLS terminates at the Gateway (HTTPS listener + **cert-manager**).
 - **Argo Rollouts** / **Flagger** automate exactly what you did by hand: shift weights step by step, watch error rates, roll back automatically.
+
+## 🏆 Challenge
+Send half of the traffic to v2 without adding a single Pod. Which field of which object did you change?
+
+<details><summary>Check your answer</summary>
+
+The `weight` values of the two `backendRefs` in the `HTTPRoute` (for example 50 and 50). Routing is configuration, not capacity.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. Why not give every Service <code>type: LoadBalancer</code>?</summary>

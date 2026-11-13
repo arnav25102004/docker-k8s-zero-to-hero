@@ -36,6 +36,8 @@ By the end of this track you can deploy, expose, update, scale, secure, and debu
 
 Lab numbers (K00–K18) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
 
+Every lab opens its concept with a diagram and gives you a 🏆 challenge to solve before the quiz. To check that the lab manifests still work on your cluster: `./tests/labs/validate-labs.sh` (throwaway cluster only; it starts no Pods).
+
 [`stack/`](stack/README.md) holds the shared frontend + Redis manifests used by K04–K13.
 
 **The story arc:** K04: votes jump between Pods → K05: shared Redis fixes it → K06: ship v2 🦄 mid-vote with 0 failures → K07: swap the whole poll via config → K12: canary 10% of traffic → K13: the Pod wall grows by itself → K18: survive the Gauntlet.

@@ -10,6 +10,9 @@
 - Fix K04's cliffhanger: shared state in Redis, reached **by name**
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K05](images/lab-concept.svg)
+
 ```
  frontend Pod ──▶ http://api:8080 ──DNS──▶ Service "api" (stable virtual IP 10.96.x.x)
                                                │ selector app=api
@@ -120,6 +123,14 @@ kubectl patch svc api -p '{"spec":{"selector":{"app":"api"}}}'
 - Services talk to each other via **names**, never Pod IPs.
 - External HTTP usually enters through **one** load balancer → Gateway → many ClusterIP Services (K12).
 - Only **Ready** Pods receive traffic, and readiness probes (K08) decide who is Ready.
+
+## 🏆 Challenge
+Break the Service on purpose: change the selector of Service `api` to `app: apii`. Predict what `kubectl get endpointslices -l kubernetes.io/service-name=api` shows, then fix it again.
+
+<details><summary>Check your answer</summary>
+
+The endpoints list is empty: no Pod wears the label `app=apii`. The Pods stay Running and Ready, but nobody is sent to them. Put `app: api` back and the addresses return.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. <code>port</code> vs <code>targetPort</code>?</summary>

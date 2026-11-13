@@ -8,6 +8,9 @@
 - Read and fix admission rejections
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K16](images/lab-concept.svg)
+
 | Standard | Allows | Use for |
 |---|---|---|
 | `privileged` | everything | system components (CNI, storage drivers) |
@@ -66,6 +69,14 @@ The warnings list every existing Pod that would violate the standard. This is ho
 - Roll out in stages: `warn` → `audit` → `enforce`.
 - Policy engines (**Kyverno**, **OPA Gatekeeper**, built-in **ValidatingAdmissionPolicy**) add rules PSA can't express: "images only from our registry", "every Deployment must have resource requests", "no `:latest` tags".
 - Combine with image scanning (Lab D05), RBAC (K14), and NetworkPolicies (K15) for defence in depth.
+
+## 🏆 Challenge
+Take `insecure-pod.yaml` and edit it until the `secure-lab` namespace accepts it. How many settings did you have to add?
+
+<details><summary>Check your answer</summary>
+
+Four: `runAsNonRoot`, a `seccompProfile`, `allowPrivilegeEscalation: false` and dropping all capabilities. The refusal message lists all of them, so read the whole message once.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A Deployment shows READY 0/1 and there are no Pods at all. Where do you look?</summary>

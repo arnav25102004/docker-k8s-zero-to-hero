@@ -9,6 +9,9 @@
 - Why editing a ConfigMap doesn't change env vars in running Pods
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K07](images/lab-concept.svg)
+
 | | ConfigMap | Secret |
 |---|---|---|
 | For | settings, URLs, feature flags, config files | passwords, tokens, keys, certificates |
@@ -94,6 +97,14 @@ kubectl rollout undo deploy/api
 - Enable **encryption at rest** for etcd.
 - Prefer secrets **as files** over env vars: env vars leak into crash dumps and child processes.
 - Versioned, immutable ConfigMaps (`showdown-config-v7`, `immutable: true`) make config changes auditable and roll back cleanly. Kustomize generates them for you.
+
+## 🏆 Challenge
+Change `TITLE` in the ConfigMap and predict whether the running Pods show the new title. Then make the new title appear without editing the Deployment.
+
+<details><summary>Check your answer</summary>
+
+They do not: the values were copied into the environment when the containers started. `kubectl rollout restart deployment/api` creates new Pods that start after the change.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. You changed a ConfigMap but the app didn't change. Why?</summary>

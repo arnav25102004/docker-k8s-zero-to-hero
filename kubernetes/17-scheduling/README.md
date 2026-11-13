@@ -9,6 +9,9 @@
 - **PodDisruptionBudgets**: never drain away all your replicas
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K17](images/lab-concept.svg)
+
 | Tool | Who sets it | Effect |
 |---|---|---|
 | `nodeSelector` / node affinity | Pod | "I want nodes with label X" (attraction) |
@@ -78,6 +81,14 @@ Existing Pods don't move back automatically; new ones are placed using the sprea
 - Every production Deployment with 2+ replicas should have a **PDB**. Without one, a node drain can evict all replicas at once.
 - But a PDB that allows **zero** disruptions (e.g. `minAvailable` = replicas) blocks drains forever and stalls cluster upgrades. Platform teams watch for this.
 - Taints are used for dedicated node pools: GPU nodes, spot/preemptible nodes, system nodes.
+
+## 🏆 Challenge
+Cordon one worker node, delete one `web` Pod, and see where its replacement lands. Then uncordon the node.
+
+<details><summary>Check your answer</summary>
+
+On another node: a cordoned node accepts no new Pods, but Pods already running there are left alone. `kubectl uncordon` makes it schedulable again.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A Pod is Pending with "node(s) had untolerated taint". Fix options?</summary>
