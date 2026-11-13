@@ -267,4 +267,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K12](../12-showdown-dns-namespaces/README.md): The Redis is running. The app is running. And the app swears Redis does not exist.
+Next, in this section: [K08](../08-ai-trainer-oomkilled/README.md): Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.

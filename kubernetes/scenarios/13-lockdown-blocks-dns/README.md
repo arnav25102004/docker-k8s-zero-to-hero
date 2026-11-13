@@ -278,4 +278,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K14](../14-leaderboard-bot-forbidden/README.md): The bot has a valid ID card. The API still says: not allowed.
+Next, the next section: [K23](../23-dark-mode-not-applied/README.md): Dark mode is ON in the config. The site is still blinding white.

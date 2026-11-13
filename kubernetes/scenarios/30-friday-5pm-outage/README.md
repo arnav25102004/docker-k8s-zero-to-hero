@@ -27,7 +27,7 @@ Every track climbs the same **debugging ladder** you've used since K01, one rung
 ```
  Rung 1  Is it running?     kubectl get pods → describe → Events     (K01, K02, K03)
  Rung 2  Is it reachable?   Service → endpoints → ports              (K04, K05, K06)
- Rung 3  Is it right?       logs → config → environment              (K12, K15, K23)
+ Rung 3  Is it right?       logs → config → environment              (K12, K09, K23)
 ```
 
 Think of a doctor whose patient arrives with three symptoms. A good doctor doesn't prescribe three medicines in one go: one treatment, watch the patient, then the next. Otherwise, when the patient feels better (or worse), nobody knows why.

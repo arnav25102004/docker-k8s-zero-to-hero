@@ -33,7 +33,7 @@ Think of seating at a wedding: "no two cousins at one table" works until you hav
    node A [whoami]     node B [whoami][whoami]                  all 3 run, spread as well as possible
 ```
 
-**Why this scenario has "nodes + 1" replicas.** `break.sh` counts the nodes that accept ordinary Pods and asks for one more Pod than that. On a 3-node kind cluster the control-plane node is tainted (see [K16](../16-game-server-vip-node/README.md)), so only 2 nodes count and you get **3 replicas**. On a 1-node cluster (minikube, Docker Desktop, many playgrounds) you get **2 replicas**. Either way, exactly one Pod has no room.
+**Why this scenario has "nodes + 1" replicas.** `break.sh` counts the nodes that accept ordinary Pods and asks for one more Pod than that. On a 3-node kind cluster the control-plane node is tainted (see [K16](../16-watchman-skipped-a-gate/README.md)), so only 2 nodes count and you get **3 replicas**. On a 1-node cluster (minikube, Docker Desktop, many playgrounds) you get **2 replicas**. Either way, exactly one Pod has no room.
 
 ## 🏢 Where you'll meet this at work
 - **High availability.** "Spread my replicas over different nodes (or zones) so one failure doesn't take the service down" (SRE, platform team).
@@ -93,7 +93,7 @@ kubectl get events -n k-18-anti-affinity --field-selector reason=FailedSchedulin
 LAST SEEN   TYPE      REASON             OBJECT                        MESSAGE
 14s         Warning   FailedScheduling   pod/whoami-85f467d95f-lksdp   0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 node(s) didn't match pod anti-affinity rules. preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
 ```
-(The exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match pod anti-affinity rules.`) The clue is **`didn't match pod anti-affinity rules`**: the nodes have room, but the Pod's own rule about neighbours rules them out. (The `control-plane` taint part is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-game-server-vip-node/README.md); it appears only on clusters with a separate control-plane node.)
+(The exact wording and node counts depend on your Kubernetes version and cluster. On a one-node cluster it reads like `0/1 nodes are available: 1 node(s) didn't match pod anti-affinity rules.`) The clue is **`didn't match pod anti-affinity rules`**: the nodes have room, but the Pod's own rule about neighbours rules them out. (The `control-plane` taint part is the usual "keep ordinary apps off the control-plane node" rule from [K16](../16-watchman-skipped-a-gate/README.md); it appears only on clusters with a separate control-plane node.)
 
 **3. How many nodes could take a Pod, and where did the others go?** The `-o wide` view shows the node of each Pod.
 ```bash

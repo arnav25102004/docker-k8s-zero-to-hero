@@ -144,4 +144,4 @@ Run the plain `kubectl get pods` again. This time you see the canteen's two Pods
 It also puts your context's namespace back, but only if it was left pointing at this scenario's namespace.
 
 ## Next →
-[K39](../39-robot-that-cannot-move-the-stalls/README.md): the maintenance robot is refused, every single night.
+Next, in this section: [K19](../19-hackathon-quota/README.md): The deploy succeeded. Kubernetes created… nothing.

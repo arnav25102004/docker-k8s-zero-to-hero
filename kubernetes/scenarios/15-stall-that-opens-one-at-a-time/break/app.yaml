@@ -1,0 +1,48 @@
+# K15 scenario manifest
+apiVersion: v1
+kind: Service
+metadata:
+  name: stall-pods            # the "governing" headless Service: gives each Pod its own stable DNS name
+  namespace: k-15-statefulset
+spec:
+  clusterIP: None
+  selector: { app: stall }
+  ports:
+    - port: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stall                 # the Service customers use
+  namespace: k-15-statefulset
+spec:
+  selector: { app: stall }
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stall
+  namespace: k-15-statefulset
+  labels: { app: stall }
+spec:
+  serviceName: stall-pods
+  replicas: 3
+  selector:
+    matchLabels: { app: stall }
+  template:
+    metadata:
+      labels: { app: stall }
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🍢 Street-food stall: open"]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+            periodSeconds: 2

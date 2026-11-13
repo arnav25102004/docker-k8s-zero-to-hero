@@ -260,4 +260,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K10](../10-kanboard-pvc-pending/README.md): The Pod isn't crashing. It isn't even starting. It's waiting for a disk that doesn't exist.
+Next, in this section: [K10](../10-kanboard-pvc-pending/README.md): The Pod isn't crashing. It isn't even starting. It's waiting for a disk that doesn't exist.

@@ -265,4 +265,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K13](../13-lockdown-blocks-dns/README.md): Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.
+Next, in this section: [K33](../33-route-to-the-wrong-stall/README.md): One front door, two paths. One path leads to a stall that does not exist.

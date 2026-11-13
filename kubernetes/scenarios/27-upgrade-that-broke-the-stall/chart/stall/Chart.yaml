@@ -1,0 +1,6 @@
+apiVersion: v2
+name: stall
+description: "A tiny chart for scenario K27: one stall (a Deployment) and its Service."
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

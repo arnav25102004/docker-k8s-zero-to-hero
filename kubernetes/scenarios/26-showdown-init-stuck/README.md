@@ -318,4 +318,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K27](../27-dashboard-config-missing-key/README.md): The dashboard is ready. Its config is right there. It still won't start.
+Next, in this section: [K37](../37-pod-that-will-not-leave/README.md): You said delete. Kubernetes said yes. The Pod did not get the message.

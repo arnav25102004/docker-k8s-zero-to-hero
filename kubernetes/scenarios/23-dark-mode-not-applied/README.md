@@ -273,4 +273,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K24](../24-showdown-wrong-command/README.md): No crash log. No error from the app. The app never even ran.
+Next, in this section: [K09](../09-adminer-missing-secret/README.md): The database tool won't even start. No logs. Nothing.

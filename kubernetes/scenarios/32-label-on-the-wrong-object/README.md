@@ -8,7 +8,7 @@
 
 Output columns and wording can differ a little between kubectl versions and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
 
-> 🧭 **Practice lane: "Services find Pods".** Problem 2 of 3, after [K31](../31-two-stalls-one-signboard/README.md). Less hand-holding this time, and one trap that *looks* like it works.
+> 🧭 **Section 2, "Workloads".** Deployments and ReplicaSets: labels on the Deployment are not the labels on its Pods. Less hand-holding, and one trap that *looks* like it works.
 
 ## 📖 The story
 Meera's samosa stall has two fryers (Pods) and one signboard (a Service). She did the sensible, tidy thing: she put the badge `app: samosa` on the Deployment. It is right there if you ask the Deployment. It is exactly what the signboard asks for.
@@ -143,4 +143,4 @@ Then replay the trap from above: delete a Pod and confirm the replacement is sti
 ```
 
 ## Next →
-[K33](../33-canteen-two-bugs/README.md): the boss level. Two bugs, one trench coat.
+Next, in this section: [K15](../15-stall-that-opens-one-at-a-time/README.md): Three stalls were ordered. One opened. The other two are not even built.

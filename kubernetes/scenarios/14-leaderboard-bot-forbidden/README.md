@@ -232,5 +232,4 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-[K15](../15-mystery-redis-port/README.md): Nobody set REDIS_PORT. Kubernetes did.
-
+Next, in this section: [K21](../21-notice-board-runasnonroot/README.md): Security turned on one rule. The notice board went dark.
