@@ -10,7 +10,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
   🐱🐶 Build & ship a live voting app the whole room uses from their phones
   💀 Delete every server and watch Kubernetes bring them back
   🦄 "One more thing…": release a new version mid-vote with 0 failed requests
-  🔥 Break things on purpose, 68 times, and fix them like a pro
+  🔥 Break things on purpose, 71 times, and fix them like a pro
 ```
 
 ---
@@ -18,7 +18,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
 ## 🎯 Who this is for
 - **Never touched a terminal?** Start at [00-setup](00-setup/README.md), then **Track 0 · Git** ([G00](git/00-foundations/README.md)), then [D00 Docker Foundations](docker/00-foundations/README.md). Each track opens with the why and how, using stories and diagrams, before any command. Every command after that is given and explained.
 - **Used Docker a bit?** Jump to [D05 production Dockerfiles](docker/05-production-dockerfiles/README.md) or [Kubernetes K01](kubernetes/01-cluster-tour/README.md).
-- **Know the basics, want the debugging muscle?** Go straight to the [45 Kubernetes break-and-fix scenarios](kubernetes/scenarios/README.md). Each starts from a diagram, makes you predict, then lets you investigate with `kubectl`; a `./check.sh` tells you when you are done.
+- **Know the basics, want the debugging muscle?** Go straight to the [48 Kubernetes break-and-fix scenarios](kubernetes/scenarios/README.md). Each starts from a diagram, makes you predict, then lets you investigate with `kubectl`; a `./check.sh` tells you when you are done.
 - **Teaching this?** Read [🎤 SHOWTIME.md](SHOWTIME.md), a keynote-style run-of-show with timings, lines, and "wow" moments.
 
 ## 🐱🐶 The star of the show: *The Showdown*
@@ -90,7 +90,8 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K16](kubernetes/16-pod-security/README.md) | securityContext, Pod Security | the API server says no |
 | [K17](kubernetes/17-scheduling/README.md) | affinity, taints, PDBs, drain | node maintenance with zero downtime |
 | [K18 🏆](kubernetes/18-capstone/README.md) | **capstone: production-grade deploy** | 🔥 the Gauntlet: chaos vs your platform |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): 30 core incidents, then practice lanes with a worked example, guided, solo and boss problem per idea | 🧯 every one has a diagram, a `check.sh`, and a test |
+| [K19 🔔](kubernetes/19-observability/README.md) | **bonus: see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **48 break-and-fix incidents** (K01–K48): 30 core incidents, then practice lanes with a worked example, guided, solo and boss problem per idea | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
 ```bash
@@ -104,7 +105,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 
 ## 🧪 Tested, not just written
-Every Kubernetes scenario has an automated test, and all 45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
+Every Kubernetes scenario has an automated test, and K01 to K45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
 
 ## 🔥 The Troubleshooting Arena
 ```bash
@@ -113,7 +114,7 @@ Every Kubernetes scenario has an automated test, and all 45 pass on a real [kind
 ```
 Docker and Kubernetes scenarios are run by hand from their folders: see [docker/scenarios/README.md](docker/scenarios/README.md) and [kubernetes/scenarios/README.md](kubernetes/scenarios/README.md). `./labs.sh docker clean` and `./labs.sh k8s clean` reset them all.
 
-68 real-world incidents (8 Git, 15 Docker, 45 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+71 real-world incidents (8 Git, 15 Docker, 48 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
 
 ## 📁 Repository layout
 ```
@@ -125,7 +126,7 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (45 scenarios)
+├── kubernetes/              K00–K19 + stack/ (shared manifests) + scenarios/ (48 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · install-metrics-server.sh · load-image.sh · link-check.py
 ├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check

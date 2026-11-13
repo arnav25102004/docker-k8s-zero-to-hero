@@ -95,7 +95,7 @@ Run each experiment **while the room is voting**. Before each one, ask the audie
 - [ ] HTTPS on the Gateway with **cert-manager**
 - [ ] **Egress** NetworkPolicies, remembering DNS (K15 Step 5)
 - [ ] A GitHub Actions pipeline: build → trivy scan → push → `kubectl apply -k`
-- [ ] **kube-prometheus-stack** and a Grafana dashboard of votes per second
+- [ ] **kube-prometheus-stack** and a Grafana dashboard of votes per second (lab [K19](../19-observability/README.md) installs the stack)
 
 ## ✅ Production-readiness checklist
 - [ ] Images pinned, scanned, non-root (D05)

@@ -2,7 +2,7 @@
 
 By the end of this track you can deploy, expose, update, scale, secure, and debug real applications on Kubernetes, and explain *why* each production practice exists.
 
-**Before you start:** a running cluster ([00-setup](../00-setup/README.md)) with metrics-server installed (`./scripts/install-metrics-server.sh`, one minute), and the course images loaded ([K01 Step 8](01-cluster-tour/README.md#step-8-prepare-the-course-image-for-the-cluster-)).
+**Before you start:** a running cluster ([00-setup](../00-setup/README.md)) with metrics-server installed (`./scripts/install-metrics-server.sh`, one minute; lab K19 adds Prometheus and Grafana with `./scripts/install-monitoring.sh`), and the course images loaded ([K01 Step 8](01-cluster-tour/README.md#step-8-prepare-the-course-image-for-the-cluster-)).
 
 | # | Lab | Time | Level |
 |---|---|---|---|
@@ -25,16 +25,17 @@ By the end of this track you can deploy, expose, update, scale, secure, and debu
 | K16 | [Pod Security](16-pod-security/README.md) | 40m | 🟡→🔴 |
 | K17 | [Scheduling & Availability](17-scheduling/README.md) | 60m | 🔴 |
 | K18 | [🏆 Capstone: The Showdown Goes to Production](18-capstone/README.md) | 2h | 🔴 |
-| 🔥 | [Break-and-fix scenarios K01 … K45](scenarios/README.md) (separate from the labs above) | ~8h | 🟢→🔴 |
+| K19 | [🔔 Bonus: See Everything: Helm, Prometheus & Grafana](19-observability/README.md) (after K13; scenarios K46 to K48 use it) | 60m | 🟡 |
+| 🔥 | [Break-and-fix scenarios K01 … K48](scenarios/README.md) (separate from the labs above) | ~8h | 🟢→🔴 |
 
 ## How the labs and the scenarios fit together
 | You want to… | Go to |
 |---|---|
-| **Learn** a topic from zero | the lab (K00–K18), in order |
+| **Learn** a topic from zero | the lab (K00–K19), in order |
 | **Practise** it by fixing something broken | the matching scenarios: each lab ends with a "🔥 Now break it" list |
 | **Get fast at debugging** | the [scenarios](scenarios/README.md) on their own: every scenario has a diagram, a prediction step, a hint ladder, and a `./check.sh` |
 
-Lab numbers (K00–K18) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
+Lab numbers (K00–K19) and scenario numbers (K01–K48) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
 
 Every lab opens its concept with a diagram and gives you a 🏆 challenge to solve before the quiz. To check that the lab manifests still work on your cluster: `./tests/labs/validate-labs.sh` (throwaway cluster only; it starts no Pods).
 
