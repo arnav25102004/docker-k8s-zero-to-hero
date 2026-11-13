@@ -127,6 +127,14 @@ Over `localhost`, because they share the Pod's network namespace. They can also 
 `kubectl logs <pod> --previous` (add `-c <container>` for multi-container Pods).
 </details>
 
+## 🔥 Now break it
+Pods fail in a handful of ways. Meet them on purpose:
+- [K02](../scenarios/02-image-typo/README.md): image typo: ImagePullBackOff
+- [K03](../scenarios/03-showdown-crashloop/README.md): crash loop
+- [K24](../scenarios/24-showdown-wrong-command/README.md): a wrong start command
+- [K26](../scenarios/26-showdown-init-stuck/README.md): an init container that waits forever
+- [K29](../scenarios/29-log-sidecar-half-ready/README.md): a sidecar that is never Ready
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete pod hello web web-with-sidecar --ignore-not-found

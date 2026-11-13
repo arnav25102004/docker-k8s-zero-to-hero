@@ -73,6 +73,14 @@ The warnings list every existing Pod that would violate the standard. This is ho
 `kubectl describe rs` (or the namespace events) for the ReplicaSet. Admission rejections such as PodSecurity or ResourceQuota show up there, not on Pods.
 </details>
 
+## 🔥 Now break it
+The security rules, from the other side (when they lock *you* out):
+- [K21](../scenarios/21-notice-board-runasnonroot/README.md): runAsNonRoot meets an image that wants root
+- [K22](../scenarios/22-notice-board-readonly-fs/README.md): a read-only filesystem
+- [K43](../scenarios/43-maintenance-van-wants-the-master-key/README.md): a privileged container in a baseline namespace
+- [K44](../scenarios/44-the-checklist/README.md): the restricted checklist
+- [K45](../scenarios/45-the-locked-down-kitchen/README.md): the restricted boss level
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete ns secure-lab

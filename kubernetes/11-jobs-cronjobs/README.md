@@ -58,6 +58,10 @@ kubectl patch cronjob heartbeat -p '{"spec":{"suspend":true}}'
 `Always` would restart a container that finished successfully, so the Job would never complete.
 </details>
 
+## 🔥 Now break it
+When a Job gives up:
+- [K28](../scenarios/28-leaderboard-reset-job/README.md): the nightly reset that ran three times and quit
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f kubernetes/11-jobs-cronjobs/jobs.yaml; kubectl delete job heartbeat-manual --ignore-not-found
