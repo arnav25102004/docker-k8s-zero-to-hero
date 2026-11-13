@@ -26,6 +26,9 @@ fi
 # The tour (K01) and the autoscaling lab use metrics-server too, so make sure it is there.
 "$HERE/install-metrics-server.sh"
 
+# Alertmanager sends its emails to a mail catcher (lab K20). Create it first so the address exists.
+kubectl apply -f "$HERE/../kubernetes/20-projects/mailpit.yaml" >/dev/null
+
 say "Adding the prometheus-community chart repository"
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts >/dev/null 2>&1 || true
 helm repo update prometheus-community >/dev/null

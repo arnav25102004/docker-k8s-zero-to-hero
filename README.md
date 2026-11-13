@@ -90,7 +90,8 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K16](kubernetes/16-pod-security/README.md) | securityContext, Pod Security | the API server says no |
 | [K17](kubernetes/17-scheduling/README.md) | affinity, taints, PDBs, drain | node maintenance with zero downtime |
 | [K18 🏆](kubernetes/18-capstone/README.md) | **capstone: production-grade deploy** | 🔥 the Gauntlet: chaos vs your platform |
-| [K19 🔔](kubernetes/19-observability/README.md) | **bonus: see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
+| [K19 🔔](kubernetes/19-observability/README.md) | **see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
+| [K20 🏁](kubernetes/20-projects/README.md) | **two 30-minute projects**: Jenkins ships to your cluster, monitoring emails you when it breaks | 📬 build it live, break it, get the email |
 | [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): 30 core incidents, then practice lanes with a worked example, guided, solo and boss problem per idea | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
@@ -126,9 +127,9 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K19 + stack/ (shared manifests) + scenarios/ (45 scenarios)
+├── kubernetes/              K00–K20 + stack/ (shared manifests) + scenarios/ (45 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
-├── scripts/                 check-prereqs.sh · install-metrics-server.sh · load-image.sh · link-check.py
+├── scripts/                 check-prereqs.sh · install-metrics-server.sh · install-monitoring.sh · install-jenkins.sh · load-image.sh · link-check.py
 ├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
 ```

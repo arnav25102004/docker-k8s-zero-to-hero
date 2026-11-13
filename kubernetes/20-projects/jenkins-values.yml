@@ -1,0 +1,31 @@
+# Lean settings for Jenkins on a laptop cluster. Used by scripts/install-jenkins.sh.
+# Everything not listed here keeps the chart's default (which already includes the Kubernetes
+# plugin that starts one Pod per build).
+controller:
+  # Lab-only login. Never use a fixed password like this anywhere real.
+  admin:
+    username: admin
+    password: z2h-jenkins
+  # The default plugins plus the one that sends email.
+  additionalPlugins:
+    - mailer
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1536Mi
+  JCasC:
+    configScripts:
+      # Jenkins sends its emails to the mail catcher in namespace "mail", never to the internet.
+      mail: |
+        unclassified:
+          location:
+            adminAddress: "jenkins@z2h.local"
+          mailer:
+            smtpHost: "mailpit.mail.svc.cluster.local"
+            smtpPort: "1025"
+            useSsl: false
+            charset: "UTF-8"
+persistence:
+  enabled: false

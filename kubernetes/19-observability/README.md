@@ -43,7 +43,7 @@ That is how many Kubernetes objects one `helm install` creates. No one writes th
 ```bash
 ./scripts/install-monitoring.sh
 ```
-It installs chart version `93.1.2` into the namespace `monitoring` with lean settings from [`monitoring-values.yml`](monitoring-values.yml): no Alertmanager, no node-exporter, and the control-plane scrapes off (on a laptop cluster they could never be reached and would only raise false alarms). The first run takes a few minutes. Meanwhile:
+It installs chart version `93.1.2` into the namespace `monitoring` with lean settings from [`monitoring-values.yml`](monitoring-values.yml): no node-exporter, and the control-plane scrapes off (on a laptop cluster they could never be reached and would only raise false alarms). Alertmanager is on, and sends its emails to a local mail catcher that the script also creates, so nothing leaves your laptop. The first run takes a few minutes. Meanwhile:
 ```bash
 helm list -A
 kubectl get pods -n monitoring
@@ -78,7 +78,7 @@ Open http://localhost:9090, **Graph**, and run these one at a time:
 Each row is a scenario you already know: restarts are K03 and K07, OOM kills are K08 and K20, Pending is K09 and K16 to K18. Now you can see them **before** a user complains.
 
 ### Step 5: Alerts
-Open **Alerts** in the Prometheus UI. A rule is a query plus a condition. Every red line there is a question someone decided was worth waking a person for. In real teams they go to Slack or a pager (that is Alertmanager's job, which we left out).
+Open **Alerts** in the Prometheus UI. A rule is a query plus a condition. Every red line there is a question someone decided was worth waking a person for. In real teams they go to Slack, email or a pager: that is Alertmanager's job, and in this setup it mails a local inbox (lab [K20](../20-projects/README.md) makes you read those emails).
 
 A real alert waits before it fires, so one blip does not wake anyone. Try it: run scenario [K03](../scenarios/03-showdown-crashloop/README.md) (a crash loop) and watch **KubePodCrashLooping**. It goes *pending* first and only turns *firing* after several minutes, because the rule says "for 15 minutes". That patience is on purpose.
 

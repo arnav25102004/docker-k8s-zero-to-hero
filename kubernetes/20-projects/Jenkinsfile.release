@@ -1,0 +1,60 @@
+// Lab K20: release version 2.0.0 of the Showdown app with no downtime
+// Runs inside a Pod that Jenkins creates for this build and deletes afterwards.
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'tools'
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-deployer
+  securityContext: { runAsUser: 1000, runAsGroup: 1000 }   # same user as the Jenkins agent, so both can share the workspace
+  containers:
+    - name: tools
+      image: curlimages/curl:8.11.1
+      command: ["cat"]
+      tty: true
+'''
+    }
+  }
+  options { timeout(time: 10, unit: 'MINUTES') }
+  stages {
+    stage('Checkout') {
+      steps { container('jnlp') { checkout scm } }
+    }
+    stage('Get kubectl') {
+      steps {
+        sh '''
+ARCH=$(uname -m); [ "$ARCH" = x86_64 ] && ARCH=amd64; [ "$ARCH" = aarch64 ] && ARCH=arm64
+curl -sSL -o /tmp/kubectl "https://dl.k8s.io/release/v1.37.0/bin/linux/$ARCH/kubectl"
+chmod +x /tmp/kubectl
+/tmp/kubectl version --client
+'''
+      }
+    }
+    stage('Release 2.0.0') {
+      steps {
+        sh '/tmp/kubectl set env deployment/api -n showdown APP_VERSION=2.0.0 "VOTE_OPTIONS=cats:🐱:Cats,dogs:🐶:Dogs,unicorns:🦄:Unicorns"'
+        sh '/tmp/kubectl rollout status deployment/api -n showdown --timeout=180s'
+      }
+    }
+    stage('Smoke test') {
+      steps {
+        sh 'curl -sf http://frontend.showdown.svc.cluster.local/api/info | grep 2.0.0'
+      }
+    }
+  }
+  post {
+    success {
+      mail to: 'team@z2h.local', from: 'jenkins@z2h.local',
+           subject: "🦄 Showdown 2.0.0 is live (build ${env.BUILD_NUMBER})",
+           body: "Version 2.0.0 is rolled out and answers on /api/info.\nBuild: ${env.BUILD_URL}"
+    }
+    failure {
+      mail to: 'team@z2h.local', from: 'jenkins@z2h.local',
+           subject: "❌ Showdown release FAILED (build ${env.BUILD_NUMBER})",
+           body: "The release did not finish. Roll back: kubectl rollout undo deployment/api -n showdown\nBuild: ${env.BUILD_URL}"
+    }
+  }
+}

@@ -12,7 +12,7 @@ You cannot master Kubernetes in a few hours, and nobody expects that. The goal i
 | 2 | [`kubectx` and `kubens`](#2-kubectx-and-kubens-switch-namespaces-without-typing--n) | stop typing `-n <namespace>` all day | 3 min |
 | 3 | [metrics-server](#3-metrics-server-who-is-using-what) | see which Pod or node is using how much | 2 min |
 | 4 | [Helm](#4-helm-the-package-manager-of-kubernetes) | how real teams install software | 3 min |
-| 5 | [Prometheus + Grafana, then Jenkins and Argo CD](#5-real-software-on-your-cluster-prometheus-grafana-jenkins-argo-cd) | see how real applications look inside a cluster | 10 min |
+| 5 | [Prometheus + Grafana, then Jenkins](#5-real-software-on-your-cluster-prometheus-grafana-and-jenkins) | see how real applications look inside a cluster | 15 min |
 
 Check what you already have at any time: `./scripts/check-prereqs.sh`
 
@@ -96,48 +96,37 @@ helm search repo kube-prometheus-stack
 ```
 Lab [K19](19-observability/README.md) teaches Helm properly (install, upgrade, rollback, values). For now, you only need it to run.
 
-### 5. Real software on your cluster: Prometheus, Grafana, Jenkins, Argo CD
-The core labs use small demo apps. In a real job you will meet *big* ones, and the fastest way to feel what a real cluster looks like is to install a few. **Install one at a time and remove it before the next** (each needs about 1 to 2 GB of memory). All of these use `kubectl port-forward`, so they work on every cluster.
+### 5. Real software on your cluster: Prometheus, Grafana and Jenkins
+The core labs use small demo apps. In a real job you will meet *big* ones, and the fastest way to feel what a real cluster looks like is to run a few. We install two, each with one script, and then use them together in lab [K20](20-projects/README.md). Together they need about 4 GB of free memory (Docker Desktop: give it 8 GB). All access is through `kubectl port-forward`, so it works on every cluster.
 
-**a) Prometheus + Grafana (monitoring).** The one you will keep.
+**a) Prometheus + Grafana + Alertmanager (monitoring).**
 ```bash
 ./scripts/install-monitoring.sh                       # about 5 minutes the first time
 kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
 ```
-Open http://localhost:3000 (login `admin` / `z2h-grafana`). Lab [K19](19-observability/README.md) walks through it, and many scenarios have a "👀 See it in monitoring" tip that uses it.
+Open http://localhost:3000 (login `admin` / `z2h-grafana`). The script also creates a small **mail catcher** (Mailpit) so alert emails have somewhere to land that is not the internet. Lab [K19](19-observability/README.md) walks through all of it, and many scenarios have a "👀 See it in monitoring" tip.
 
-**b) Jenkins (the CI server half the industry runs).**
+**b) Jenkins (the CI server half the industry runs), installed with Helm and able to deploy into the same cluster.**
 ```bash
-helm repo add jenkins https://charts.jenkins.io && helm repo update
-helm install jenkins jenkins/jenkins --version 5.11.0 -n jenkins --create-namespace \
-  --set persistence.enabled=false --wait --timeout 10m
-kubectl get secret -n jenkins jenkins -o jsonpath='{.data.jenkins-admin-password}' | base64 --decode; echo
+./scripts/install-jenkins.sh                          # 3 to 5 minutes: it downloads plugins
 kubectl port-forward -n jenkins svc/jenkins 8081:8080
 ```
-Open http://localhost:8081, user `admin`, the password printed above. The first start downloads plugins, so give it a few minutes.
-
-**c) Argo CD (GitOps: the cluster that deploys itself from Git).**
-```bash
-helm repo add argo https://argoproj.github.io/argo-helm && helm repo update
-helm install argocd argo/argo-cd --version 10.17.0 -n argocd --create-namespace --wait --timeout 10m
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
-kubectl port-forward -n argocd svc/argocd-server 8080:443
-```
-Open https://localhost:8080 (accept the self-signed certificate), user `admin`. If Helm says a version is not found, list what exists with `helm search repo argo/argo-cd --versions | head` and use the newest one.
+Open http://localhost:8081 (login `admin` / `z2h-jenkins`). Builds run as **Pods that Kubernetes starts and removes**, and Jenkins can email the mail catcher too. Passwords like these are for a lab; never use a fixed password for real.
 
 **What to look at (this is the point).** After each install, open the cluster the way you learned and connect the dots:
 ```bash
-kubectl get all -n jenkins                     # Deployments, Pods, Services: Labs K04 and K05
-kubectl get pvc,configmap,secret,sa -n jenkins # storage, config, identity: Labs K07, K10, K14
+kubectl get all -n jenkins                       # StatefulSet, Pod, Services: Labs K04, K05, K10
+kubectl get pvc,configmap,secret,sa -n jenkins   # storage, config, identity: Labs K07, K10, K14
 helm get manifest jenkins -n jenkins | grep '^kind:' | sort | uniq -c
-kubectl top pods -n jenkins                    # metrics-server at work
+kubectl top pods -n jenkins                      # metrics-server at work
 ```
 That last command counts every kind of object one `helm install` created. You will recognise nearly all of them from the labs. That is the moment the course clicks: the "big" tools are the same small pieces, assembled.
 
-Remove each one when you are done:
+Then run the two projects in [K20](20-projects/README.md): **ship an app with Jenkins into your own cluster**, and **get an email when it breaks**.
+
+Remove everything when you are done:
 ```bash
-helm uninstall jenkins -n jenkins && kubectl delete namespace jenkins
-helm uninstall argocd -n argocd && kubectl delete namespace argocd
+./scripts/uninstall-jenkins.sh
 ./scripts/uninstall-monitoring.sh
 ```
 
@@ -164,17 +153,18 @@ helm uninstall argocd -n argocd && kubectl delete namespace argocd
 | K16 | [Pod Security](16-pod-security/README.md) | 40m | 🟡→🔴 |
 | K17 | [Scheduling & Availability](17-scheduling/README.md) | 60m | 🔴 |
 | K18 | [🏆 Capstone: The Showdown Goes to Production](18-capstone/README.md) | 2h | 🔴 |
-| K19 | [🔔 Bonus: See Everything: Helm, Prometheus & Grafana](19-observability/README.md) (after K13; many scenarios link to it) | 60m | 🟡 |
+| K19 | [🔔 See Everything: Helm, Prometheus & Grafana](19-observability/README.md) (after K13; many scenarios link to it) | 60m | 🟡 |
+| K20 | [🏁 Build Real Things: two 30-minute projects with Jenkins and monitoring](20-projects/README.md) | 70m | 🟡→🔴 |
 | 🔥 | [Break-and-fix scenarios K01 … K45](scenarios/README.md) (separate from the labs above) | ~8h | 🟢→🔴 |
 
 ## How the labs and the scenarios fit together
 | You want to… | Go to |
 |---|---|
-| **Learn** a topic from zero | the lab (K00–K19), in order |
+| **Learn** a topic from zero | the lab (K00–K20), in order |
 | **Practise** it by fixing something broken | the matching scenarios: each lab ends with a "🔥 Now break it" list |
 | **Get fast at debugging** | the [scenarios](scenarios/README.md) on their own: every scenario has a diagram, a prediction step, a hint ladder, and a `./check.sh` |
 
-Lab numbers (K00–K19) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
+Lab numbers (K00–K20) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
 
 Every lab opens its concept with a diagram and gives you a 🏆 challenge to solve before the quiz. To check that the lab manifests still work on your cluster: `./tests/labs/validate-labs.sh` (throwaway cluster only; it starts no Pods).
 

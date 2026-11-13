@@ -1,0 +1,39 @@
+# Lab K20, project 2: the alerts the Showdown team wants to hear about.
+# The label notify=email is what routes them to the inbox (see monitoring-values.yml).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: showdown-alerts
+  namespace: showdown
+spec:
+  groups:
+    - name: showdown
+      rules:
+        - alert: ShowdownApiDown
+          expr: kube_deployment_status_replicas_available{namespace="showdown",deployment="api"} == 0
+          for: 30s
+          labels:
+            severity: critical
+            notify: email
+          annotations:
+            summary: "Showdown: no api Pod is available"
+            description: "Nobody can vote. Check: kubectl get pods -n showdown"
+        - alert: ShowdownApiDegraded
+          expr: >-
+            kube_deployment_status_replicas_available{namespace="showdown",deployment="api"}
+            < kube_deployment_spec_replicas{namespace="showdown",deployment="api"}
+          for: 1m
+          labels:
+            severity: warning
+            notify: email
+          annotations:
+            summary: "Showdown: fewer api Pods are available than wanted"
+            description: "The app still works, but with less capacity than planned."
+        - alert: ShowdownPodRestarting
+          expr: increase(kube_pod_container_status_restarts_total{namespace="showdown"}[5m]) > 2
+          labels:
+            severity: warning
+            notify: email
+          annotations:
+            summary: "Showdown: a container restarted more than twice in 5 minutes"
+            description: "Look at the logs of the previous run: kubectl logs --previous"
