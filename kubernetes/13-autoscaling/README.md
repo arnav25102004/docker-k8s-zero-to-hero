@@ -21,16 +21,16 @@ Example: 2 Pods at 150% of request, target 50% → `ceil(2 × 150/50)` = **6 Pod
 
 ## 🧪 Hands-on
 
-### Step 1: Install metrics-server
-Skip this if `kubectl top nodes` already works (some Docker Desktop setups and Killercoda include it).
+### Step 1: Check metrics-server
+You installed it during setup (and used `kubectl top` in K01). Check that it is still answering:
 ```bash
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.9.1/components.yaml
-# Local clusters use self-signed kubelet certificates, so allow that (NOT for production):
-kubectl patch deployment metrics-server -n kube-system --type=json \
-  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
-kubectl rollout status deployment/metrics-server -n kube-system
-sleep 30; kubectl top nodes
+kubectl top nodes
 ```
+Got numbers? Go to Step 2. Got an error? Install it (safe to repeat):
+```bash
+./scripts/install-metrics-server.sh
+```
+That script applies the pinned release `v0.9.1` and, on lab clusters, allows their self-signed kubelet certificates with `--kubelet-insecure-tls` (never in production).
 
 ### Step 2: Deploy the app and the HPA
 ```bash

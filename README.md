@@ -127,7 +127,7 @@ docker-k8s-zero-to-hero/
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
 ├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (45 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
-├── scripts/                 check-prereqs.sh · load-image.sh · link-check.py
+├── scripts/                 check-prereqs.sh · install-metrics-server.sh · load-image.sh · link-check.py
 ├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
 ```

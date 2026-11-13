@@ -2,12 +2,12 @@
 
 By the end of this track you can deploy, expose, update, scale, secure, and debug real applications on Kubernetes, and explain *why* each production practice exists.
 
-**Before you start:** a running cluster ([00-setup](../00-setup/README.md)) and the course images loaded ([K01 Step 8](01-cluster-tour/README.md#step-8-prepare-the-course-image-for-the-cluster-)).
+**Before you start:** a running cluster ([00-setup](../00-setup/README.md)) with metrics-server installed (`./scripts/install-metrics-server.sh`, one minute), and the course images loaded ([K01 Step 8](01-cluster-tour/README.md#step-8-prepare-the-course-image-for-the-cluster-)).
 
 | # | Lab | Time | Level |
 |---|---|---|---|
 | **K00** ⭐ | [**Kubernetes Foundations**: why orchestration, how Kubernetes thinks](00-foundations/README.md) · [quiz](00-foundations/quiz.md) | 2.5–3h | 🟢 |
-| K01 | [Tour of a Cluster](01-cluster-tour/README.md) | 40m | 🟢 |
+| K01 | [Tour of a Cluster](01-cluster-tour/README.md) | 50m | 🟢 |
 | K02 | [Pods](02-pods/README.md) | 50m | 🟢 |
 | K03 | [Namespaces, Labels & Selectors](03-namespaces-labels/README.md) | 30m | 🟢 |
 | K04 | [Deployments: Self-Healing You Can See](04-deployments/README.md) | 45m | 🟢 |
