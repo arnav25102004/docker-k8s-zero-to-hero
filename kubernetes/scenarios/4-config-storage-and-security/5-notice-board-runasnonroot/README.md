@@ -262,5 +262,5 @@ cd .. && ./cleanup.sh
 ## Next →
 Next, the next section: [S5.1](../../5-scaling-self-healing-and-releases/1-kanboard-never-ready/README.md): It's running. It's healthy. It just never gets any visitors.
 
-🏋️ **More reps on this idea (optional):** the practice lane S4.x2 to S4.x4 ("Security"), starting at [S4.x2](../x2-maintenance-van-wants-the-master-key/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S4.x2 to S4.x4 ("Security"), starting at [S4.x2](../exercises/2-maintenance-van-wants-the-master-key/README.md).
 

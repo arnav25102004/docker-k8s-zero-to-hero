@@ -18,9 +18,11 @@ Namespaces and resource quotas, Helm releases, labels and annotations, and the h
 
 | # | Exercise | What it teaches |
 |---|---|---|
-| **S6.x1** | [The stall that asked for too much](x1-stall-that-asked-for-too-much/README.md) | LimitRange maximum |
-| **S6.x2** | [Who gets evicted first](x2-who-gets-evicted-first/README.md) | QoS classes and eviction order |
-| **S6.x3** | [The Friday 5 PM outage (the finale)](x3-friday-5pm-outage/README.md) | three faults at once |
+| **S6.x1** | [The stall that asked for too much](exercises/1-stall-that-asked-for-too-much/README.md) | LimitRange maximum |
+| **S6.x2** | [Who gets evicted first](exercises/2-who-gets-evicted-first/README.md) | QoS classes and eviction order |
+| **S6.x3** | [Roll a release back](exercises/3-roll-a-release-back/README.md) | helm install, upgrade, history, rollback, values |
+| **S6.x4** | [Find it by label](exercises/4-find-it-by-label/README.md) | labels, selectors (equality and set-based), annotations, kubectl -l |
+| **S6.x5** | [The Friday 5 PM outage (the finale)](exercises/5-friday-5pm-outage/README.md) | three faults at once |
 
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 

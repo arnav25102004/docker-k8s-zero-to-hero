@@ -87,10 +87,10 @@ Four: `runAsNonRoot`, a `seccompProfile`, `allowPrivilegeEscalation: false` and 
 ## 🔥 Now break it
 The security rules, from the other side (when they lock *you* out):
 - [S4.5](../scenarios/4-config-storage-and-security/5-notice-board-runasnonroot/README.md): runAsNonRoot meets an image that wants root
-- [S4.x1](../scenarios/4-config-storage-and-security/x1-notice-board-readonly-fs/README.md): a read-only filesystem
-- [S4.x2](../scenarios/4-config-storage-and-security/x2-maintenance-van-wants-the-master-key/README.md): a privileged container in a baseline namespace
-- [S4.x3](../scenarios/4-config-storage-and-security/x3-the-checklist/README.md): the restricted checklist
-- [S4.x4](../scenarios/4-config-storage-and-security/x4-the-locked-down-kitchen/README.md): the restricted boss level
+- [S4.x1](../scenarios/4-config-storage-and-security/exercises/1-notice-board-readonly-fs/README.md): a read-only filesystem
+- [S4.x2](../scenarios/4-config-storage-and-security/exercises/2-maintenance-van-wants-the-master-key/README.md): a privileged container in a baseline namespace
+- [S4.x3](../scenarios/4-config-storage-and-security/exercises/3-the-checklist/README.md): the restricted checklist
+- [S4.x4](../scenarios/4-config-storage-and-security/exercises/4-the-locked-down-kitchen/README.md): the restricted boss level
 
 ## 🧹 Cleanup
 ```bash

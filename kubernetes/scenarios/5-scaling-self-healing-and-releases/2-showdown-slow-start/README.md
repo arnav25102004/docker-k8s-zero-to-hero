@@ -263,14 +263,14 @@ You have now seen both probe failures once, with every step explained ([S5.1](..
 
 | # | Practice | What is new | Hand-holding |
 |---|----------|-------------|--------------|
-| [S5.x1](../x1-doorbell-on-the-wrong-door/README.md) | The doorbell on the wrong door | a readiness probe with the wrong *port* | guided questions + hint ladder |
-| [S5.x2](../x2-biryani-that-needs-20-seconds/README.md) | The biryani that needs 20 seconds | a slow starter, and the timing maths | questions only |
-| [S5.x3](../x3-two-probes-two-mistakes/README.md) | Two probes, two mistakes | both probes wrong at once (boss) | no hints for 5 minutes |
+| [S5.x1](../exercises/1-doorbell-on-the-wrong-door/README.md) | The doorbell on the wrong door | a readiness probe with the wrong *port* | guided questions + hint ladder |
+| [S5.x2](../exercises/2-biryani-that-needs-20-seconds/README.md) | The biryani that needs 20 seconds | a slow starter, and the timing maths | questions only |
+| [S5.x3](../exercises/3-two-probes-two-mistakes/README.md) | Two probes, two mistakes | both probes wrong at once (boss) | no hints for 5 minutes |
 
 Each one has a `./check.sh` that tells you, any time, whether you are done.
 
 ## Next →
 Next, in this section: [S5.3](../3-showdown-hpa-not-scaling/README.md): Traffic is pouring in. The autoscaler shrugs: "unknown".
 
-🏋️ **More reps on this idea (optional):** the practice lane S5.x1 to S5.x3 ("Ready or alive?"), starting at [S5.x1](../x1-doorbell-on-the-wrong-door/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S5.x1 to S5.x3 ("Ready or alive?"), starting at [S5.x1](../exercises/1-doorbell-on-the-wrong-door/README.md).
 

@@ -18,10 +18,11 @@ ConfigMaps and Secrets, persistent storage, RBAC and Pod security.
 
 | # | Exercise | What it teaches |
 |---|---|---|
-| **S4.x1** | [Locked down and locked out](x1-notice-board-readonly-fs/README.md) | read-only root filesystem |
-| **S4.x2** | [The maintenance van wants the master key](x2-maintenance-van-wants-the-master-key/README.md) | Pod Security: baseline |
-| **S4.x3** | [The checklist](x3-the-checklist/README.md) | Pod Security: restricted checklist |
-| **S4.x4** | [The locked-down kitchen](x4-the-locked-down-kitchen/README.md) | Pod Security: boss |
+| **S4.x1** | [Locked down and locked out](exercises/1-notice-board-readonly-fs/README.md) | read-only root filesystem |
+| **S4.x2** | [The maintenance van wants the master key](exercises/2-maintenance-van-wants-the-master-key/README.md) | Pod Security: baseline |
+| **S4.x3** | [The checklist](exercises/3-the-checklist/README.md) | Pod Security: restricted checklist |
+| **S4.x4** | [The locked-down kitchen](exercises/4-the-locked-down-kitchen/README.md) | Pod Security: boss |
+| **S4.x5** | [The file that outlived the Pod](exercises/5-the-file-that-outlived-the-pod/README.md) | PersistentVolumeClaim, volumes, StorageClass, data outliving a Pod |
 
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 

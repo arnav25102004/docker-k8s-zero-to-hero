@@ -18,9 +18,11 @@ How a Pod comes to life, and which component notices when it does not: scheduler
 
 | # | Exercise | What it teaches |
 |---|---|---|
-| **S1.x1** | [The trainer wants a GPU](x1-ai-trainer-needs-gpu/README.md) | GPU request: Pending, node selection |
-| **S1.x2** | [One replica too many](x2-whoami-anti-affinity/README.md) | anti-affinity: one replica too many |
-| **S1.x3** | [Half ready](x3-log-sidecar-half-ready/README.md) | multi-container Pod: half ready |
+| **S1.x1** | [The trainer wants a GPU](exercises/1-ai-trainer-needs-gpu/README.md) | GPU request: Pending, node selection |
+| **S1.x2** | [One replica too many](exercises/2-whoami-anti-affinity/README.md) | anti-affinity: one replica too many |
+| **S1.x3** | [Half ready](exercises/3-log-sidecar-half-ready/README.md) | multi-container Pod: half ready |
+| **S1.x4** | [Follow a Pod's birth](exercises/4-follow-a-pods-birth/README.md) | the scheduler, the kubelet and the container runtime, read from Events |
+| **S1.x5** | [Read the cluster you are standing on](exercises/5-read-the-cluster-you-stand-on/README.md) | control-plane components, node components, DaemonSets in kube-system, kubelet and runtime versions |
 
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 

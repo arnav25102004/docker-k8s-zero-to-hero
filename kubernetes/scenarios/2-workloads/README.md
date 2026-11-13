@@ -14,6 +14,16 @@ Deployments and ReplicaSets, StatefulSets, DaemonSets, Jobs and CronJobs: the ri
 | **S2.4** | [The nightly reset that gave up](4-leaderboard-reset-job/README.md) | Job: retries, backoffLimit | *The midnight reset ran. Three times. Then gave up.* |
 | **S2.5** | [The nightly reset that never started](5-nightly-reset-that-never-started/README.md) ⏳ | CronJob: schedule, suspend | *It is scheduled for every minute. It has been "every minute" for three weeks. Nothing has run.* |
 
+## Exercises (self-paced, with hints)
+
+| # | Exercise | What it teaches |
+|---|---|---|
+| **S2.x1** | [Delete the owner, keep the Pods](exercises/1-delete-the-owner-keep-the-pods/README.md) | ReplicaSet, ownerReferences, selectors, --cascade=orphan |
+| **S2.x2** | [The Pod that comes back with the same name](exercises/2-pod-that-comes-back-with-the-same-name/README.md) | StatefulSet, stable Pod names, headless Service, ordered start and stop |
+| **S2.x3** | [A watchman for chosen gates only](exercises/3-watchman-for-chosen-gates-only/README.md) | DaemonSet, nodeSelector, node labels |
+| **S2.x4** | [Six tasks, two hands](exercises/4-six-tasks-two-hands/README.md) | Job, completions, parallelism, restartPolicy |
+| **S2.x5** | [Run the nightly job right now](exercises/5-run-the-nightly-job-right-now/README.md) | CronJob, create job --from, suspend, concurrencyPolicy |
+
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)
