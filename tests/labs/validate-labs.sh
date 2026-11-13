@@ -18,8 +18,6 @@ if [ -z "${Z2H_DRY_RUN_CONTEXT:-}" ] && [ "${KUBECONFIG:-}" != "$HOME/.kube/z2h-
   exit 1
 fi
 kubectl get --raw /readyz >/dev/null 2>&1 || { echo "Can't reach the cluster." >&2; exit 1; }
-command -v python3 >/dev/null 2>&1 || { echo "python3 is needed (it lists the namespaces in the lab files)." >&2; exit 1; }
-
 TMP="$(mktemp -d)"
 CREATED=""
 cleanup() {
@@ -30,25 +28,17 @@ cleanup() {
 trap cleanup EXIT
 
 # 1. Create each namespace the lab files define (with its real labels), if it is not there already.
-python3 - "$TMP" kubernetes <<'PY'
-import sys, glob, os, yaml
-tmp, root = sys.argv[1], sys.argv[2]
-seen = {}
-for f in sorted(glob.glob(root + '/**/*.yaml', recursive=True)):
-    if '/scenarios/' in f:
-        continue
-    try:
-        docs = list(yaml.safe_load_all(open(f, encoding='utf-8')))
-    except Exception:
-        continue
-    for d in docs:
-        if isinstance(d, dict) and d.get('kind') == 'Namespace':
-            seen[d['metadata']['name']] = d
-with open(os.path.join(tmp, 'namespaces.yaml'), 'w', encoding='utf-8') as out:
-    yaml.safe_dump_all(list(seen.values()), out)
-print(' '.join(seen))
-PY
-for ns in $(python3 -c "import yaml,sys;print(' '.join(d['metadata']['name'] for d in yaml.safe_load_all(open('$TMP/namespaces.yaml')) if d))"); do
+#    Pure shell: split every file at "---" and keep the documents whose kind is Namespace.
+: > "$TMP/namespaces.yaml"
+for f in $(find kubernetes -name '*.yaml' -not -path 'kubernetes/scenarios/*' | sort); do
+  awk '
+    function flush() { if (d ~ /(^|\n)kind: Namespace[ \t]*(\n|$)/) printf "---\n%s", d; d = "" }
+    /^---[ \t]*$/ { flush(); next }
+    { d = d $0 "\n" }
+    END { flush() }
+  ' "$f" >> "$TMP/namespaces.yaml"
+done
+for ns in $(kubectl create --dry-run=client -f "$TMP/namespaces.yaml" -o name 2>/dev/null | sed 's#^namespace/##' | sort -u); do
   kubectl get namespace "$ns" >/dev/null 2>&1 || CREATED="$CREATED $ns"
 done
 kubectl apply -f "$TMP/namespaces.yaml" >/dev/null 2>&1 || { echo "Could not create the lab namespaces." >&2; exit 1; }
