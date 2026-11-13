@@ -108,6 +108,11 @@ At most 5 Pods; never fewer than 4 ready.
 The new Pod never became Ready, and `maxUnavailable: 0` forbids removing old Pods until new ones are Ready.
 </details>
 
+## 🔥 Now break it
+A release can go wrong while visitors are watching:
+- [K11](../scenarios/11-showdown-bad-rollout/README.md): a bad rollout that Kubernetes holds back safely
+- [K07](../scenarios/07-showdown-slow-start/README.md): an app that needs time to start
+
 ## 🧹 Cleanup
 Keep the stack for K07, or: `kubectl delete -f kubernetes/06-rollouts/deployment.yaml -f kubernetes/stack/`
 

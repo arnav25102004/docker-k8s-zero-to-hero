@@ -83,6 +83,11 @@ kubectl apply -f kubernetes/13-autoscaling/hpa.yaml     # restore
 metrics-server isn't installed or working, or the Pods have no CPU **requests** (utilisation is a percentage of the request).
 </details>
 
+## 🔥 Now break it
+When the autoscaler shrugs:
+- [K25](../scenarios/25-showdown-hpa-not-scaling/README.md): the autoscaler says unknown
+- [K41](../scenarios/41-autoscaler-pointing-at-nobody/README.md): an autoscaler pointing at a Deployment that does not exist
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete pod load --ignore-not-found; kubectl delete -f kubernetes/13-autoscaling/hpa.yaml

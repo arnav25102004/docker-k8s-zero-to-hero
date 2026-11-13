@@ -89,6 +89,14 @@ Add a matching toleration to the Pod (if it should run there), remove the taint 
 `cordon` only marks the node unschedulable, so existing Pods keep running. `drain` cordons and then evicts Pods, respecting PDBs.
 </details>
 
+## 🔥 Now break it
+Placement and maintenance, when they go wrong:
+- [K01](../scenarios/01-excalidraw-pending/README.md): a Pod stuck Pending
+- [K16](../scenarios/16-game-server-vip-node/README.md): a taint nobody tolerates
+- [K17](../scenarios/17-ai-trainer-needs-gpu/README.md): a Pod that needs a GPU
+- [K18](../scenarios/18-whoami-anti-affinity/README.md): anti-affinity with one replica too many
+- [K39](../scenarios/39-robot-that-cannot-move-the-stalls/README.md): a PodDisruptionBudget that refuses every eviction
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f kubernetes/17-scheduling/ --ignore-not-found

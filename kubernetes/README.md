@@ -27,6 +27,15 @@ By the end of this track you can deploy, expose, update, scale, secure, and debu
 | K18 | [🏆 Capstone: The Showdown Goes to Production](18-capstone/README.md) | 2h | 🔴 |
 | 🔥 | [Break-and-fix scenarios K01 … K45](scenarios/README.md) (separate from the labs above) | ~8h | 🟢→🔴 |
 
+## How the labs and the scenarios fit together
+| You want to… | Go to |
+|---|---|
+| **Learn** a topic from zero | the lab (K00–K18), in order |
+| **Practise** it by fixing something broken | the matching scenarios: each lab ends with a "🔥 Now break it" list |
+| **Get fast at debugging** | the [scenarios](scenarios/README.md) on their own: every scenario has a diagram, a prediction step, a hint ladder, and a `./check.sh` |
+
+Lab numbers (K00–K18) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
+
 [`stack/`](stack/README.md) holds the shared frontend + Redis manifests used by K04–K13.
 
 **The story arc:** K04: votes jump between Pods → K05: shared Redis fixes it → K06: ship v2 🦄 mid-vote with 0 failures → K07: swap the whole poll via config → K12: canary 10% of traffic → K13: the Pod wall grows by itself → K18: survive the Gauntlet.

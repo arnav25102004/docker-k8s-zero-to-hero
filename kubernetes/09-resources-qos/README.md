@@ -101,6 +101,14 @@ Scheduling uses **requests**, not usage. The existing Pods have *reserved* (requ
 BestEffort, then Burstable Pods using more than their request, and Guaranteed last.
 </details>
 
+## 🔥 Now break it
+Requests, limits and quotas cause some of the most confusing failures:
+- [K08](../scenarios/08-ai-trainer-oomkilled/README.md): an OOM kill with no error
+- [K19](../scenarios/19-hackathon-quota/README.md): a deploy that creates nothing (quota)
+- [K20](../scenarios/20-surprise-limitrange-oom/README.md): a limit nobody wrote (LimitRange)
+- [K40](../scenarios/40-stall-that-asked-for-too-much/README.md): a limit above the namespace maximum
+- [K42](../scenarios/42-who-gets-evicted-first/README.md): who gets evicted first (QoS)
+
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f kubernetes/09-resources-qos/ --ignore-not-found

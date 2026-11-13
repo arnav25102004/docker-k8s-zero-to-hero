@@ -18,6 +18,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
 ## 🎯 Who this is for
 - **Never touched a terminal?** Start at [00-setup](00-setup/README.md), then **Track 0 · Git** ([G00](git/00-foundations/README.md)), then [D00 Docker Foundations](docker/00-foundations/README.md). Each track opens with the why and how, using stories and diagrams, before any command. Every command after that is given and explained.
 - **Used Docker a bit?** Jump to [D05 production Dockerfiles](docker/05-production-dockerfiles/README.md) or [Kubernetes K01](kubernetes/01-cluster-tour/README.md).
+- **Know the basics, want the debugging muscle?** Go straight to the [45 Kubernetes break-and-fix scenarios](kubernetes/scenarios/README.md). Each starts from a diagram, makes you predict, then lets you investigate with `kubectl`; a `./check.sh` tells you when you are done.
 - **Teaching this?** Read [🎤 SHOWTIME.md](SHOWTIME.md), a keynote-style run-of-show with timings, lines, and "wow" moments.
 
 ## 🐱🐶 The star of the show: *The Showdown*
@@ -89,7 +90,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K16](kubernetes/16-pod-security/README.md) | securityContext, Pod Security | the API server says no |
 | [K17](kubernetes/17-scheduling/README.md) | affinity, taints, PDBs, drain | node maintenance with zero downtime |
 | [K18 🏆](kubernetes/18-capstone/README.md) | **capstone: production-grade deploy** | 🔥 the Gauntlet: chaos vs your platform |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45) | |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): 30 core incidents, then practice lanes with a worked example, guided, solo and boss problem per idea | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
 ```bash
@@ -101,6 +102,9 @@ docker build -t z2h/api:1.0 apps/api
 docker run -d --name showdown -p 8080:8080 z2h/api:1.0
 open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just open the URL in a browser)
 ```
+
+## 🧪 Tested, not just written
+Every Kubernetes scenario has an automated test, and all 45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
 
 ## 🔥 The Troubleshooting Arena
 ```bash
@@ -121,7 +125,7 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (39 scenarios)
+├── kubernetes/              K00–K18 + stack/ (shared manifests) + scenarios/ (45 scenarios)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · load-image.sh
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
