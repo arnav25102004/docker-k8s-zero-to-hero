@@ -154,6 +154,8 @@ deployment "score-worker" successfully rolled out
 (shortened: the "Waiting…" line repeats a few times.) The alternative fix is a rename: have the code read a variable nobody else will invent, such as `APP_REDIS_PORT`.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-15-mystery-env
 ```

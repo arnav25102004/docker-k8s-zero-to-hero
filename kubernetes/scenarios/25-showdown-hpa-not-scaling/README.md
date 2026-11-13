@@ -182,6 +182,8 @@ kubectl rollout status deployment/showdown -n k-25-hpa --timeout=180s
 Then watch the autoscaler as above until `TARGETS` shows a number.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get hpa -n k-25-hpa
 ```
@@ -280,3 +282,5 @@ This deletes the namespace and, only if this scenario installed it, metrics-serv
 
 ## Next →
 [K26](../26-showdown-init-stuck/README.md): Cats vs Dogs is waiting for its database. Forever.
+
+🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).

@@ -198,6 +198,8 @@ It is a rolling restart: the new Pod must be Ready before the old one goes away,
 2. **Mount the ConfigMap as a file** instead of environment variables. Kubernetes updates the mounted files in running Pods after a short delay, without a restart. But be honest about the catch: the **app has to re-read the file** (or watch it). An app that reads its settings once at startup, like ours, would still show the old theme. (Also, a mount that uses `subPath` is never updated.)
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-23-dark-mode
 ```

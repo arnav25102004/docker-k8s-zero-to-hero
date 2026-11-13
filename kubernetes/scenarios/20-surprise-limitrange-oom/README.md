@@ -212,6 +212,8 @@ kubectl rollout status deployment/showdown -n k-20-limitrange --timeout=180s
 ```
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-20-limitrange
 ```
@@ -300,3 +302,5 @@ cd .. && ./cleanup.sh
 
 ## Next →
 [K21](../21-notice-board-runasnonroot/README.md): Security turned on one rule. The notice board went dark.
+
+🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).

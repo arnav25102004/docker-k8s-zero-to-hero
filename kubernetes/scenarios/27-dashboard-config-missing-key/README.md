@@ -177,6 +177,8 @@ kubectl rollout status deployment/dashboard -n k-27-config-key --timeout=180s
 **Careful, this only worked because the container never started.** With a mount that uses `subPath`, like this one, a **running** Pod never sees later edits to the ConfigMap. So when you change config for a Pod that is already running, restart it (see [K23](../23-dark-mode-not-applied/README.md)).
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-27-config-key
 ```

@@ -172,6 +172,8 @@ kubectl apply -f app.yaml
 **Why not just turn `readOnlyRootFilesystem` off?** Because it would work, and that is the trap. The board would come up in seconds, and you would have quietly removed the security team's rule for this app. A read-only filesystem is one of the cheapest protections there is: the attacker who gets into this container cannot write tools or edit config anywhere except the small scratch folder you chose. The policy was right. What was missing was a scratchpad, so add the scratchpad.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-22-readonly-fs
 ```
@@ -281,3 +283,5 @@ cd .. && ./cleanup.sh
 
 ## Next →
 [K23](../23-dark-mode-not-applied/README.md): Dark mode is ON in the config. The site is still blinding white.
+
+🏋️ **More reps on this idea (optional):** the practice lane K43 to K45 ("Security"), starting at [K43](../43-maintenance-van-wants-the-master-key/README.md).

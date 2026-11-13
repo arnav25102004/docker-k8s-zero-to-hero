@@ -171,6 +171,8 @@ kubectl apply -f app.yaml
 A Service's selector can be changed in place, so a plain apply is enough. Kubernetes notices the new selector, finds the two matching Pods and fills in the endpoints.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get endpointslices -n k-04-no-endpoints -l kubernetes.io/service-name=tools
 ```

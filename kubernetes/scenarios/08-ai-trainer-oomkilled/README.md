@@ -153,6 +153,8 @@ kubectl apply -f app.yaml
 Kubernetes starts a new Pod with the bigger limit and removes the old one. Wait about 10 seconds before you start verifying.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 There is no web page to open, so we read the proof. Is the Pod up and stable?
 ```bash
 kubectl get pods -n k-08-oomkilled
@@ -238,3 +240,5 @@ cd .. && ./cleanup.sh
 
 ## Next →
 [K09](../09-adminer-missing-secret/README.md): The database tool won't even start. No logs. Nothing.
+
+🏋️ **More reps on this idea (optional):** the practice lane K40 to K42 ("Resources"), starting at [K40](../40-stall-that-asked-for-too-much/README.md).

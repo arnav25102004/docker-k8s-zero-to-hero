@@ -168,6 +168,8 @@ kubectl apply -f app.yaml
 **Why not set `runAsUser: 101` on the original image?** It is tempting, and it passes the guard, but the plain `nginx` image was built for root. The reason that is always true: it wants to write into root-owned folders (such as `/var/cache/nginx` and `/var/run`), and user 101 is not allowed to. On top of that it listens on port 80, which traditionally a normal user may not do (some platforms relax this). The Pod would get past the guard and then crash with permission errors, and you would patch that with more settings, one fragile fix at a time. (That path exists, and is sometimes the only option for an image you cannot replace, but you must then fix every path and port yourself.) An image built for a normal user does all of this by design.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-21-nonroot
 ```
@@ -256,3 +258,5 @@ cd .. && ./cleanup.sh
 
 ## Next →
 [K22](../22-notice-board-readonly-fs/README.md): Locked down perfectly. Now it can't even start.
+
+🏋️ **More reps on this idea (optional):** the practice lane K43 to K45 ("Security"), starting at [K43](../43-maintenance-van-wants-the-master-key/README.md).

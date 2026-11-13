@@ -208,6 +208,8 @@ kubectl wait --for=condition=complete job/leaderboard-reset -n k-28-job --timeou
 Kubernetes answers with "deleted", then "created", then "condition met" (the exact wording of the first line depends on your kubectl version).
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get job,pods -n k-28-job
 ```

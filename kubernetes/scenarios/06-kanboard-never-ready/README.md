@@ -180,6 +180,8 @@ kubectl rollout status deployment/board -n k-06-never-ready --timeout=180s
 Pro tip: `/` would also pass (Kanboard answers it with a 302 redirect to the login page, and anything below 400 counts as success), but `/healthcheck.php` is better: it also confirms the database works.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-06-never-ready
 ```
@@ -244,3 +246,5 @@ cd .. && ./cleanup.sh
 
 ## Next →
 [K07](../07-showdown-slow-start/README.md), the other worked example: A perfectly healthy app keeps getting killed, again and again, every few seconds. Then try the **"Ready or alive?" practice lane**: [K34](../34-doorbell-on-the-wrong-door/README.md), [K35](../35-biryani-that-needs-20-seconds/README.md), [K36](../36-two-probes-two-mistakes/README.md).
+
+🏋️ **More reps on this idea (optional):** the practice lane K34 to K36 ("Ready or alive?"), starting at [K34](../34-doorbell-on-the-wrong-door/README.md).

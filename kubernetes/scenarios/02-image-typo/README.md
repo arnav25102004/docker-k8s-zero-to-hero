@@ -143,6 +143,8 @@ kubectl apply -f app.yaml
 Kubernetes starts a new Pod with the right image and removes the stuck one. (The one-line alternative is `kubectl set image deploy/draw -n k-02-image-typo draw=excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9`.)
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-02-image-typo
 ```

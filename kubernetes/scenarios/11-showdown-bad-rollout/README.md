@@ -183,6 +183,8 @@ deployment "showdown" successfully rolled out
 ```
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl rollout history deployment/showdown -n k-11-bad-rollout
 ```

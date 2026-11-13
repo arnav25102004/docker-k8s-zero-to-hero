@@ -216,6 +216,8 @@ kubectl apply -f app.yaml
 ```
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get pods -n k-29-sidecar
 ```

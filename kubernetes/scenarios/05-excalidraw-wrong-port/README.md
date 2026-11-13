@@ -173,6 +173,8 @@ kubectl apply -f app.yaml
 A Service's `targetPort` can be changed in place, so a plain apply is enough. Pro tip for real projects: give the container port a **name** (`name: http`) and set `targetPort: http`, so the Service follows the container definition and the two can never drift apart.
 
 ## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
 ```bash
 kubectl get endpointslices -n k-05-wrong-port -l kubernetes.io/service-name=draw
 ```
