@@ -47,13 +47,29 @@ HAVE_GATEWAY=no
 kubectl get crd gateways.gateway.networking.k8s.io >/dev/null 2>&1 && HAVE_GATEWAY=yes
 
 PASS=0; FAIL=0; SKIP=0
-check() { # LABEL KUBECTL-ARGS...
+check() { # LABEL KUBECTL-ARGS...   (last two args are "-f FILE" or "-k DIR")
   local label="$1" out
   shift
   if out=$(kubectl apply --dry-run=server "$@" 2>&1); then
     printf '  ok: %s\n' "$label"; PASS=$((PASS + 1))
+  # A file that creates a ServiceAccount and then a Pod that uses it: a dry run does not keep the
+  # account, so the server cannot find it. Check the file's shape instead of failing it.
+  elif printf '%s' "$out" | grep -q 'serviceaccount .* not found' && kubectl apply --dry-run=client "$@" >/dev/null 2>&1; then
+    printf '  ok: %s (the Pod uses a ServiceAccount made in the same file, so only its shape was checked)\n' "$label"; PASS=$((PASS + 1))
   else
     printf '  FAIL: %s\n' "$label"; printf '%s\n' "$out" | tail -n 4 | sed 's/^/        | /'; FAIL=$((FAIL + 1))
+  fi
+}
+
+# A file whose first comment says it "will be REJECTED" is supposed to be refused by the cluster.
+check_refused() { # LABEL FILE
+  local out
+  if out=$(kubectl apply --dry-run=server -f "$2" 2>&1); then
+    printf '  FAIL: %s was accepted, but the lab says it must be refused\n' "$1"; FAIL=$((FAIL + 1))
+  elif printf '%s' "$out" | grep -q 'violates PodSecurity'; then
+    printf '  ok: %s (refused by Pod Security, as the lab intends)\n' "$1"; PASS=$((PASS + 1))
+  else
+    printf '  FAIL: %s was refused for another reason\n' "$1"; printf '%s\n' "$out" | tail -n 3 | sed 's/^/        | /'; FAIL=$((FAIL + 1))
   fi
 }
 
@@ -68,7 +84,11 @@ for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/; do
     if grep -q 'gateway.networking.k8s.io' "$f" && [ "$HAVE_GATEWAY" = no ]; then
       printf '  skip: %s (needs the Gateway API CRDs from lab K12)\n' "$(basename "$f")"; SKIP=$((SKIP + 1)); continue
     fi
-    check "$(basename "$f")" -f "$f"
+    if head -n 3 "$f" | grep -q 'REJECTED'; then
+      check_refused "$(basename "$f")" "$f"
+    else
+      check "$(basename "$f")" -f "$f"
+    fi
   done
   if [ -f "$dir/manifests/kustomization.yaml" ]; then
     if grep -rq 'gateway.networking.k8s.io' "$dir/manifests" "$dir/gateway.yaml" 2>/dev/null && [ "$HAVE_GATEWAY" = no ]; then
