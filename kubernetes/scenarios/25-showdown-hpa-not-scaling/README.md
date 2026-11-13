@@ -242,6 +242,13 @@ Or open http://localhost:9225 in your browser and cast a vote. Press Ctrl+C in t
 
 Good to know: when the load stops, the HPA waits about 5 minutes before removing copies, so the replica count does not drop right away.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch the autoscaler as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_horizontalpodautoscaler_status_desired_replicas{namespace="k-25-hpa"}
+```
+With the fix, desired replicas rises under load and current follows it. Before the fix, no CPU request means no percentage, which is the `<unknown>` you saw.
+
 ## 🎯 Key takeaways
 - **`<unknown>` in `kubectl get hpa` means "cannot compute", not "zero".** Read the HPA's conditions and events (`kubectl describe hpa`) for the reason.
 - **Utilization targets are percentages of the request.** Without `resources.requests.cpu` the HPA has nothing to divide by.

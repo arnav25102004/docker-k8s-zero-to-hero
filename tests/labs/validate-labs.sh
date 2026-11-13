@@ -45,6 +45,8 @@ kubectl apply -f "$TMP/namespaces.yaml" >/dev/null 2>&1 || { echo "Could not cre
 
 HAVE_GATEWAY=no
 kubectl get crd gateways.gateway.networking.k8s.io >/dev/null 2>&1 && HAVE_GATEWAY=yes
+HAVE_PROM=no
+kubectl get crd prometheusrules.monitoring.coreos.com >/dev/null 2>&1 && HAVE_PROM=yes
 
 PASS=0; FAIL=0; SKIP=0
 check() { # LABEL KUBECTL-ARGS...   (last two args are "-f FILE" or "-k DIR")
@@ -84,6 +86,9 @@ for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/; do
     if grep -q 'gateway.networking.k8s.io' "$f" && [ "$HAVE_GATEWAY" = no ]; then
       printf '  skip: %s (needs the Gateway API CRDs from lab K12)\n' "$(basename "$f")"; SKIP=$((SKIP + 1)); continue
     fi
+    if grep -q 'monitoring.coreos.com' "$f" && [ "$HAVE_PROM" = no ]; then
+      printf '  skip: %s (needs the Prometheus CRDs from lab K19)\n' "$(basename "$f")"; SKIP=$((SKIP + 1)); continue
+    fi
     if head -n 3 "$f" | grep -q 'REJECTED'; then
       check_refused "$(basename "$f")" "$f"
     else
@@ -100,5 +105,5 @@ for dir in kubernetes/[0-9][0-9]-*/ kubernetes/stack/; do
 done
 
 printf '\n== Summary: %s ok, %s failed, %s skipped\n' "$PASS" "$FAIL" "$SKIP"
-[ "$SKIP" -gt 0 ] && printf 'Skipped files need the Gateway API CRDs. Install them (lab K12, step 1) and run again to cover them.\n'
+[ "$SKIP" -gt 0 ] && printf 'Skipped files need the Gateway API CRDs (lab K12, step 1) or the Prometheus CRDs (./scripts/install-monitoring.sh). Install them and run again to cover them.\n'
 [ "$FAIL" -eq 0 ]

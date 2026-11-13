@@ -2,7 +2,18 @@
 
 45 stage demos: 30 main scenarios, four 3-problem practice lanes (K31 to K36, K40 to K45) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K45 means scenario folders** in this directory. They are not the labs K00–K18 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K45 means scenario folders** in this directory. They are not the labs K00–K19 in the [Kubernetes track](../README.md).
+
+> ### 🧰 Install these two things first (once)
+> **1. metrics-server, right after your cluster is up.** Without it there is no `kubectl top`, the autoscaler (K25) has nothing to read, and the K01 tour is half blind.
+> ```bash
+> ./scripts/install-metrics-server.sh
+> ```
+> **2. (Optional) Prometheus and Grafana**, to watch every incident as a graph and an alert. Many scenarios have a short "👀 See it in monitoring" tip that needs it. It needs `helm` and about 2 GB of free memory; the first run takes about five minutes. Lab [K19](../19-observability/README.md) teaches it.
+> ```bash
+> ./scripts/install-monitoring.sh
+> ```
+> Every scenario works without it. For a live picture of the cluster as you break it, the [Kubilitics](https://kubilitics.com/) desktop app helps too ([K01, Step 9](../01-cluster-tour/README.md)).
 
 ## The lineup
 

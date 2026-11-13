@@ -224,6 +224,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9207
 ```
 Or open http://localhost:9207 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a liveness probe that kills a healthy app as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+increase(kube_pod_container_status_restarts_total{namespace="k-07-slow-start"}[5m])
+```
+A steady staircase of restarts, one every few seconds. Compare with K03: same counter, but this app was never broken. Only the graph plus the probe settings tell you which one you have.
+
 ## 🎯 Key takeaways
 - **Liveness restarts; startup waits.** A liveness probe that fires before the app is up kills a healthy app over and over.
 - **Give slow starters a `startupProbe`.** Budget = `periodSeconds` × `failureThreshold` (here 5 × 12 = 60 s). Liveness only begins once it passes.

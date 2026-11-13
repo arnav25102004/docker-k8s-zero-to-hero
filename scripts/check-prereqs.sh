@@ -56,11 +56,13 @@ if kubectl cluster-info >/dev/null 2>&1; then
   ok "context: $(kubectl config current-context)"
   ok "nodes: $(kubectl get nodes --no-headers 2>/dev/null | awk '{print $1"("$2")"}' | tr '\n' ' ')"
   kubectl get storageclass 2>/dev/null | grep -q default && ok "default StorageClass present" || note "no default StorageClass (needed for K10/K18)"
-  kubectl top nodes >/dev/null 2>&1 && ok "metrics-server working" || note "metrics-server not installed (installed in Lab K13)"
+  kubectl top nodes >/dev/null 2>&1 && ok "metrics-server working" || note "metrics-server not installed: run ./scripts/install-metrics-server.sh (K01 and K13 use it)"
   if kubectl get crd gateways.gateway.networking.k8s.io >/dev/null 2>&1; then ok "Gateway API CRDs present"; else note "Gateway API not installed (installed in Lab K12)"; fi
 else
   note "no cluster reachable: fine for the Docker labs; needed from Lab K01 (see 00-setup)"
 fi
+command -v helm >/dev/null 2>&1 && ok "helm: $(helm version --short 2>/dev/null)" || note "helm not installed (needed from Lab K19; see kubernetes/README.md)"
+command -v kubens >/dev/null 2>&1 && ok "kubens and kubectx installed" || note "kubens/kubectx not installed (optional but handy; see kubernetes/README.md)"
 
 head1 "📦 Course images"
 for img in z2h/api:1.0 z2h/frontend:1.0; do

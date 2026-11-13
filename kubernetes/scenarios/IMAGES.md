@@ -18,3 +18,5 @@ All are pinned to an exact tag (or digest) and published for linux/amd64 and lin
 | `b4bz/homer:v25.10.1` | about 7 MB | K19, K27 (the Homer dashboard) |
 | `nginxinc/nginx-unprivileged:1.27.5-alpine` | about 22 MB | K21 (the fix), K22, K29 (the notice board pages), K45 (the fix) |
 | `registry.k8s.io/metrics-server/metrics-server:v0.9.1` | about 22 MB | K25 (a cluster add-on, installed only if your cluster has none yet) |
+
+The optional monitoring stack from lab K19 (Prometheus, Grafana and friends) is pulled by Helm when you run `./scripts/install-monitoring.sh`; it is not listed here and `preload.sh` does not fetch it. Budget about 2 GB of memory and a few hundred MB of download.

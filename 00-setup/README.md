@@ -81,6 +81,16 @@ If no builder is available, push the image from your laptop to a registry the cl
 
 ---
 
+## Step: let the cluster measure itself (metrics-server)
+Do this once, right after your cluster is up (Options A to D). It makes `kubectl top` work from the first lab, and the K01 tour, the autoscaling lab (K13) and scenario K25 all rely on it:
+```bash
+./scripts/install-metrics-server.sh
+kubectl top nodes
+```
+It installs the pinned upstream release (minikube: turns on its own addon), allows the lab clusters' self-signed kubelet certificates (never do that in production), and waits about a minute for the first numbers. Safe to run again.
+
+---
+
 ## ✅ Final check: run this before class
 ```bash
 ./scripts/check-prereqs.sh

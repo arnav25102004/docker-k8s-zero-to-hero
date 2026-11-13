@@ -286,6 +286,13 @@ kubectl logs notice-578487d68c-7qj2z -n k-29-sidecar -c log-shipper | grep curl
 ```
 (The `curl/…` version will differ on your computer.) Or open http://localhost:9229 in your browser: pick a day on the mess menu, book a laundry slot, and watch the quiet-hours countdown. The page needs no internet. Each reload adds a line to the helper's log. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a Pod that is half ready as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_container_status_ready{namespace="k-29-sidecar"}
+```
+One series per container: the app container reads 1, the sidecar reads 0. The Pod as a whole is not Ready until every container is.
+
 ## 🎯 Key takeaways
 - **`READY 1/2` counts containers.** The Pod is Ready only when all of them are, and a Service sends traffic only to Ready Pods.
 - **"The web server is fine but the site is down" can be a helper's fault.** One unready sidecar takes the whole Pod out of the Service.

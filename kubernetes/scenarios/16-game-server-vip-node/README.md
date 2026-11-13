@@ -209,6 +209,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9216
 ```
 (The port-forward terminal also prints `Handling connection for 9216`.) Or open http://localhost:9216 in your browser and catch some dosas (idli +3, vada +5). Your best scores are kept in your own browser. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch Pods no node will take as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_status_phase{namespace="k-16-vip-node",phase="Pending"} == 1
+```
+Pending again, but the cause is a taint, not capacity. The metric cannot tell the two apart; the Pod events can. That is why you always follow the number with `kubectl describe`.
+
 ## 🎯 Key takeaways
 - **Taints repel, tolerations permit.** A taint is on the node, a toleration is in the Pod, and a Pod gets in only if it tolerates *every* taint the node has.
 - **A toleration doesn't attract.** It never picks a node for the Pod; it only removes one reason to be refused.

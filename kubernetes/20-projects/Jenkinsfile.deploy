@@ -1,0 +1,61 @@
+// Lab K20: deploy the Showdown app into namespace "showdown"
+// Runs inside a Pod that Jenkins creates for this build and deletes afterwards.
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'tools'
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-deployer
+  securityContext: { runAsUser: 1000, runAsGroup: 1000 }   # same user as the Jenkins agent, so both can share the workspace
+  containers:
+    - name: tools
+      image: curlimages/curl:8.11.1
+      command: ["cat"]
+      tty: true
+'''
+    }
+  }
+  options { timeout(time: 10, unit: 'MINUTES') }
+  stages {
+    stage('Checkout') {
+      steps { container('jnlp') { checkout scm } }
+    }
+    stage('Get kubectl') {
+      steps {
+        sh '''
+ARCH=$(uname -m); [ "$ARCH" = x86_64 ] && ARCH=amd64; [ "$ARCH" = aarch64 ] && ARCH=arm64
+curl -sSL -o /tmp/kubectl "https://dl.k8s.io/release/v1.37.0/bin/linux/$ARCH/kubectl"
+chmod +x /tmp/kubectl
+/tmp/kubectl version --client
+'''
+      }
+    }
+    stage('Deploy') {
+      steps {
+        sh '/tmp/kubectl apply -f kubernetes/20-projects/app.yaml'
+        sh '/tmp/kubectl rollout status deployment/api -n showdown --timeout=180s'
+        sh '/tmp/kubectl rollout status deployment/frontend -n showdown --timeout=120s'
+      }
+    }
+    stage('Smoke test') {
+      steps {
+        sh 'curl -sf http://frontend.showdown.svc.cluster.local/api/info'
+      }
+    }
+  }
+  post {
+    success {
+      mail to: 'team@z2h.local', from: 'jenkins@z2h.local',
+           subject: "✅ Showdown deployed (build ${env.BUILD_NUMBER})",
+           body: "The Showdown app is deployed in namespace showdown and answers on /api/info.\nBuild: ${env.BUILD_URL}"
+    }
+    failure {
+      mail to: 'team@z2h.local', from: 'jenkins@z2h.local',
+           subject: "❌ Showdown deploy FAILED (build ${env.BUILD_NUMBER})",
+           body: "The deploy or the smoke test failed. Look at the build log.\nBuild: ${env.BUILD_URL}"
+    }
+  }
+}

@@ -217,6 +217,13 @@ curl -s localhost:9206/healthcheck.php; echo
 ```
 (The port-forward terminal also prints `Handling connection for 9206`.) Or open http://localhost:9206 in your browser. Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch Running but not Ready as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_status_ready{namespace="k-06-never-ready",condition="true"}
+```
+It stays 0 while the Pod is `Running`. That gap, running but not ready, is exactly what the Service ignores. Restarts stay flat, which is how you tell it from K03.
+
 ## 🎯 Key takeaways
 - **Readiness gates traffic; liveness restarts.** A failing readiness probe keeps the Pod out of the Service and never restarts it.
 - **`Running` is not `Ready`.** Read the `READY` column, not just `STATUS`.

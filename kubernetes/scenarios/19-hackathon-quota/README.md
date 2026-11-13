@@ -250,6 +250,13 @@ kubectl run test -n k-19-hackathon --image=busybox:1.36 --command -- sleep 60
 ```
 It is refused with the same `failed quota … must specify` message, right at your terminal, because no ReplicaSet sits in between to hide the error (the exact wording can differ by version). That is why the `visitor` Pod in this scenario declares its own requests and limits.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a quota that is nearly spent as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_resourcequota{namespace="k-19-hackathon"}
+```
+Each quota gives a `hard` (the limit) and a `used` series per resource. A team that watches `used / hard` knows the quota is about to bite before a deploy creates nothing.
+
 ## 🎯 Key takeaways
 - **A quota is a budget for a namespace.** Once it covers CPU or memory, every Pod there must declare `requests` and `limits`, and all of them together must fit.
 - **Refused Pods are never created.** The "no" comes from the API server, so there is no Pod to describe. The evidence lives on the **ReplicaSet** (`FailedCreate` events) and shows as `ReplicaFailure` on the Deployment.

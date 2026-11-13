@@ -1,0 +1,73 @@
+# Lean settings for kube-prometheus-stack on a laptop cluster (kind, Docker Desktop, minikube).
+# Used by scripts/install-monitoring.sh. Everything not listed here keeps the chart's default.
+
+# Alertmanager sends alert emails to the mail catcher in namespace "mail" (lab K20), never to the internet.
+# Only alerts labelled notify=email are mailed, so the chart's built-in alerts do not flood the inbox.
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: mailpit.mail.svc.cluster.local:1025
+      smtp_from: alertmanager@z2h.local
+      smtp_require_tls: false
+    route:
+      receiver: "null"
+      group_by: [alertname, namespace]
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 4h
+      routes:
+        - receiver: email
+          matchers:
+            - notify = "email"
+    receivers:
+      - name: "null"
+      - name: email
+        email_configs:
+          - to: oncall@z2h.local
+            send_resolved: true
+
+# Lab-only login. Never use a fixed password like this anywhere real.
+grafana:
+  adminPassword: z2h-grafana
+  defaultDashboardsTimezone: browser
+  sidecar:
+    dashboards:
+      searchNamespace: ALL      # load dashboards delivered as ConfigMaps from any namespace (lab K20)
+
+# Container and Pod numbers come from the kubelet (cAdvisor) and kube-state-metrics.
+# node-exporter needs host mounts that Docker Desktop refuses, so it stays off.
+nodeExporter:
+  enabled: false
+
+# On kind the control-plane parts listen on localhost only, so Prometheus could never scrape them
+# and their alerts would fire forever. Turn the scrapes and their rules off.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+defaultRules:
+  rules:
+    etcd: false
+    kubeControllerManager: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    kubeProxy: false
+
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+    # Pick up ServiceMonitors and rules from every namespace, with no special label needed.
+    # (The chart's default only picks up objects labelled with its own release name.)
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
