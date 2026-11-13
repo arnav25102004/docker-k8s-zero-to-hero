@@ -10,6 +10,9 @@
 - The `preStop` trick that real platforms use for truly zero-downtime deploys
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K06](images/lab-concept.svg)
+
 Change anything in the Pod template (image, env, ...) and the Deployment creates a **new ReplicaSet**, then shifts Pods over gradually:
 ```
  old RS (v1): ████  →  ████  →  ███   →  ██    →  █     →  (0)
@@ -97,6 +100,14 @@ kubectl rollout resume deployment/api           # ONE rollout containing both ch
 - Rollouts are only as safe as your **readiness probes** (K08).
 - Canary releases, blue/green, and automatic rollback on error spikes: **Argo Rollouts**, **Flagger**, or Gateway API weights (K12).
 - CI/CD pipelines run `kubectl rollout status --timeout=…` and fail the deploy if it doesn't finish.
+
+## 🏆 Challenge
+Roll out an image that does not exist (`z2h/api:9.9`) and watch the vote page while it happens. Does the site stay up? Then undo it in one command.
+
+<details><summary>Check your answer</summary>
+
+Yes, it stays up: the new Pod sits in `ImagePullBackOff`, never becomes Ready, and the old Pods keep serving. `kubectl rollout undo deployment/api` returns to the last good revision.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. replicas=4, maxSurge=1, maxUnavailable=0. Max Pods during a rollout? Min ready?</summary>

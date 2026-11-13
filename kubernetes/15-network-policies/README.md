@@ -9,6 +9,9 @@
 - Egress policies and the DNS gotcha
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K15](images/lab-concept.svg)
+
 ```
             ✅ 8080              ✅ 6379
  frontend ────────▶  api  ────────────▶ redis
@@ -95,6 +98,14 @@ kubectl exec -n netpol-lab frontend -- wget -qO- -T 3 http://api:8080/; echo
 - Start every namespace with **default deny** and add explicit allows. It's the Kubernetes version of a zero-trust network.
 - Forgetting DNS egress is the #1 NetworkPolicy outage ([scenario K13](../scenarios/13-lockdown-blocks-dns/README.md)).
 - Cilium and Calico add L7 rules (HTTP paths), FQDN egress rules (e.g. allow only `api.stripe.com`), and policy visualisation.
+
+## 🏆 Challenge
+From a Pod in `netpol-lab` that has no labels, try to reach Redis. Predict the result, then name the policy that lets the API in.
+
+<details><summary>Check your answer</summary>
+
+The connection times out: Redis only accepts the Pods its policy names. The policy is `redis-allow-api`, which allows traffic from Pods labelled `app=api`.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A namespace has no NetworkPolicies. What traffic is allowed?</summary>

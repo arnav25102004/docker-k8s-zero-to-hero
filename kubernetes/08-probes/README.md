@@ -9,6 +9,9 @@
 - The anti-pattern that turns a database blip into a full outage
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K08](images/lab-concept.svg)
+
 | Probe | Question | On failure | Should check dependencies? |
 |---|---|---|---|
 | **startupProbe** | Has the app finished booting? | keep waiting; kill after `failureThreshold` | no |
@@ -90,6 +93,14 @@ grpc:      { port: 9090 }                      # gRPC health checking protocol
 - Make probe endpoints **cheap**: no heavy queries, and respond in milliseconds.
 - Pair readiness with **graceful shutdown**: on SIGTERM, start failing readiness, finish in-flight requests, then exit.
 - Tune `timeoutSeconds`. The 1s default is too short for some JVM or Python apps under load and causes flapping.
+
+## 🏆 Challenge
+Write a readiness probe that asks for the path `/nope`. Predict `READY` and `RESTARTS`. Then make the *liveness* probe ask for `/nope` instead and predict again.
+
+<details><summary>Check your answer</summary>
+
+Readiness failing: `READY 0/1`, `RESTARTS 0` (no traffic, no restart). Liveness failing: `RESTARTS` keeps climbing, because the kubelet restarts the container.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A Pod is <code>Running</code> but shows <code>0/1</code> and RESTARTS is 0. Which probe is failing?</summary>

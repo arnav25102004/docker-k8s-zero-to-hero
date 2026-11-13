@@ -3,6 +3,9 @@
 > ⏱ 90–120 min · 🔴 Advanced · Uses everything from D01–K17
 
 ## 📖 The brief
+
+![Diagram: the idea behind lab K18](images/lab-concept.svg)
+
 Tonight is the final. The whole room, maybe the whole campus, will vote **live** in the 🐱 vs 🐶 Showdown. You're the platform engineer. The app must:
 
 1. survive Pod crashes, node maintenance, and a Redis restart **without losing a single vote**

@@ -11,6 +11,9 @@
 - Load the course image into your cluster (needed from Lab K04)
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K01](images/lab-concept.svg)
+
 ```
           kubectl ──HTTPS──▶ ┌──────────── CONTROL PLANE ────────────┐
                              │ kube-apiserver  ◀── the only front door │
@@ -112,6 +115,14 @@ kubectl delete pod smoke
 ## 🏭 In production
 - Managed Kubernetes (EKS, GKE, AKS) runs the control plane for you; you only see the worker nodes. The concepts and `kubectl` commands are identical.
 - Access is per-context and per-user, controlled by RBAC (Lab K14). In real companies you rarely have cluster-admin.
+
+## 🏆 Challenge
+Using only `kubectl`, find which node runs a CoreDNS Pod, and what that Pod's IP address is. Then say which of the control-plane Pods you would look at first if `kubectl get nodes` hung.
+
+<details><summary>Check your answer</summary>
+
+`kubectl get pods -n kube-system -o wide | grep coredns` shows the node and the IP. If `kubectl` itself hangs, look at the `kube-apiserver` Pod: everything goes through it.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. Which component decides which node a new Pod runs on?</summary>

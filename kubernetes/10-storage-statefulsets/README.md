@@ -9,6 +9,9 @@
 - Headless Services and per-Pod DNS
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K10](images/lab-concept.svg)
+
 ```
  Pod ──uses──▶ PVC "I need 1Gi, ReadWriteOnce"     (written by the developer)
                  │ bound to
@@ -78,6 +81,14 @@ kubectl exec redis-1 -- redis-cli get owner
 - `ReadWriteOnce` = one **node** at a time. Shared file storage needs `ReadWriteMany` (NFS, EFS, Azure Files).
 - Running databases on Kubernetes works, but needs backups, operators (CloudNativePG, Strimzi, etc.), and tested restore procedures. Many teams use managed databases instead.
 - A PVC stuck in **Pending** usually means a wrong or missing StorageClass, or no capacity ([scenario K10](../scenarios/10-kanboard-pvc-pending/README.md)).
+
+## 🏆 Challenge
+Let the `writer` Pod from this lab run for a minute, delete it, create it again from the same file, and show that `/data/log.txt` still has the old lines. Which object kept the data?
+
+<details><summary>Check your answer</summary>
+
+The PersistentVolumeClaim `notes-data`: the Pod is disposable, the claim and the disk behind it are not. `kubectl exec writer -- cat /data/log.txt` shows lines older than the new Pod.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. What's the difference between a PVC and a PV?</summary>

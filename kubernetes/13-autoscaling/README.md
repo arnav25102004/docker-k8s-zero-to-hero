@@ -9,6 +9,9 @@
 - How scale-up and scale-down behave (stabilisation windows)
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K13](images/lab-concept.svg)
+
 ```
 metrics-server ──(CPU per Pod)──▶ HPA controller: desired = ceil(current × actual% / target%)
                                         │
@@ -76,6 +79,14 @@ kubectl apply -f kubernetes/13-autoscaling/hpa.yaml     # restore
 - The HPA adds Pods, but Pods need **nodes**: pair it with **Cluster Autoscaler** or **Karpenter** so the cluster grows too.
 - Set `minReplicas` ≥ 2 for production availability, and make sure `maxReplicas` fits within your ResourceQuota.
 - Don't use HPA and manual `kubectl scale` on the same Deployment; the HPA will override you.
+
+## 🏆 Challenge
+Set the HPA's `minReplicas` to 3 and apply it without sending any load. Predict how many Pods you will have in a minute, and why.
+
+<details><summary>Check your answer</summary>
+
+Three: the HPA never lets the count fall below the minimum, so it scales the Deployment up on its own.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. HPA shows <code>&lt;unknown&gt;</code> for targets. Two likely causes?</summary>

@@ -10,6 +10,9 @@
 - Namespace guardrails: **LimitRange** and **ResourceQuota**
 
 ## 🧠 Concept in 60 seconds
+
+![Diagram: the idea behind lab K09](images/lab-concept.svg)
+
 ```yaml
 resources:
   requests: { cpu: 100m, memory: 128Mi }   # "reserve this for me". The scheduler uses it.
@@ -90,6 +93,14 @@ kubectl -n team-quota get rs -l app=many -o name | xargs kubectl -n team-quota d
 - **Memory:** set limit = request (or close to it). Predictable, no surprise OOMs under node pressure.
 - **CPU limits** are debated: they can cause throttling even when the node is idle. Many teams set CPU requests but no CPU limits for latency-sensitive services. Know your team's policy.
 - Base numbers on measurements (`kubectl top`, Prometheus, VPA recommendations), not guesses.
+
+## 🏆 Challenge
+Create a Pod that requests 100 CPUs. Predict its `STATUS` and name the event that explains it.
+
+<details><summary>Check your answer</summary>
+
+`Pending`, with a `FailedScheduling` event saying `Insufficient cpu`. A request is a reservation the scheduler must be able to honour.
+</details>
 
 ## ✅ Checkpoint
 <details><summary>1. A node runs at 10% real CPU, yet new Pods are Pending with "Insufficient cpu". How?</summary>
