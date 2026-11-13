@@ -104,9 +104,9 @@ Add a matching toleration to the Pod (if it should run there), remove the taint 
 Placement and maintenance, when they go wrong:
 - [S1.1](../scenarios/1-architecture-and-pod-lifecycle/1-excalidraw-pending/README.md): a Pod stuck Pending
 - [S2.3](../scenarios/2-workloads/3-watchman-skipped-a-gate/README.md): a DaemonSet that skips a tainted node
-- [S1.x1](../scenarios/1-architecture-and-pod-lifecycle/x1-ai-trainer-needs-gpu/README.md): a Pod that needs a GPU
-- [S1.x2](../scenarios/1-architecture-and-pod-lifecycle/x2-whoami-anti-affinity/README.md): anti-affinity with one replica too many
-- [S5.x4](../scenarios/5-scaling-self-healing-and-releases/x4-robot-that-cannot-move-the-stalls/README.md): a PodDisruptionBudget that refuses every eviction
+- [S1.x1](../scenarios/1-architecture-and-pod-lifecycle/exercises/1-ai-trainer-needs-gpu/README.md): a Pod that needs a GPU
+- [S1.x2](../scenarios/1-architecture-and-pod-lifecycle/exercises/2-whoami-anti-affinity/README.md): anti-affinity with one replica too many
+- [S5.x4](../scenarios/5-scaling-self-healing-and-releases/exercises/4-robot-that-cannot-move-the-stalls/README.md): a PodDisruptionBudget that refuses every eviction
 
 ## 🧹 Cleanup
 ```bash

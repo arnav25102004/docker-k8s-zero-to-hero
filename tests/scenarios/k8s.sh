@@ -32,7 +32,7 @@ INDEX="$REPO/kubernetes/scenarios/index.tsv"
 # or nothing (everything). Resolves each to a row of index.tsv: id, legacy, path.
 RUN=""
 if [ "$#" -eq 0 ]; then
-  RUN="$(awk -F'\t' 'NR>1 {print $2}' "$INDEX")"
+  RUN="$(awk -F'\t' 'NR>1 && $4!="question" {print $2}' "$INDEX")"
 else
   for a in "$@"; do
     k="$(printf '%s' "$a" | sed 's/^[sS]//')"
@@ -45,6 +45,7 @@ fi
 
 PASSED=""; FAILED=""
 for nn in $RUN; do
+  case "$nn" in q*) printf '== %s is a question exercise: no break/fix, nothing to run\n' "$(awk -F'\t' -v n="$nn" '$2==n {print $1}' "$INDEX")"; continue ;; esac
   row="$(awk -F'\t' -v n="$nn" '$2==n' "$INDEX")"
   sid="$(printf '%s' "$row" | cut -f1)"; rel="$(printf '%s' "$row" | cut -f3)"
   printf '== Scenario %s (old number %s)\n' "$sid" "$nn"

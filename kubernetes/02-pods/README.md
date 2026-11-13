@@ -135,7 +135,7 @@ Pods fail in a handful of ways. Meet them on purpose:
 - [S1.2](../scenarios/1-architecture-and-pod-lifecycle/2-image-typo/README.md): image typo: ImagePullBackOff
 - [S1.3](../scenarios/1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md): crash loop
 - [S1.4](../scenarios/1-architecture-and-pod-lifecycle/4-showdown-init-stuck/README.md): an init container that waits forever
-- [S1.x3](../scenarios/1-architecture-and-pod-lifecycle/x3-log-sidecar-half-ready/README.md): a sidecar that is never Ready
+- [S1.x3](../scenarios/1-architecture-and-pod-lifecycle/exercises/3-log-sidecar-half-ready/README.md): a sidecar that is never Ready
 
 ## 🧹 Cleanup
 ```bash

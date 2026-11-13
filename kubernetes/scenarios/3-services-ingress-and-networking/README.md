@@ -14,6 +14,16 @@ How traffic finds Pods: Services, DNS, ingress routing and Network Policies.
 | **S3.4** | [The route to the wrong stall](4-route-to-the-wrong-stall/README.md) ⏳ | Gateway API / Ingress routing | *One front door, two paths. One path leads to a stall that does not exist.* |
 | **S3.5** | [Security hardened the network. Now nothing can find anything.](5-lockdown-blocks-dns/README.md) | NetworkPolicy and DNS | *Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.* |
 
+## Exercises (self-paced, with hints)
+
+| # | Exercise | What it teaches |
+|---|---|---|
+| **S3.x1** | [Three ways into one Service](exercises/1-three-ways-in/README.md) | ClusterIP, port-forward, NodePort, port vs targetPort |
+| **S3.x2** | [Who is behind the Service?](exercises/2-who-is-behind-the-service/README.md) | EndpointSlices, label selectors, isolating a Pod for debugging |
+| **S3.x3** | [Where did these variables come from?](exercises/3-where-did-these-variables-come-from/README.md) | Service environment variables, Pod start order, DNS as the better way |
+| **S3.x4** | [Same name, another namespace](exercises/4-same-name-another-namespace/README.md) | cluster DNS, search domains, namespaces, FQDN |
+| **S3.x5** | [Lock the vault, then give one friend the key](exercises/5-lock-the-vault/README.md) | NetworkPolicy, default deny, podSelector, allow rules |
+
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

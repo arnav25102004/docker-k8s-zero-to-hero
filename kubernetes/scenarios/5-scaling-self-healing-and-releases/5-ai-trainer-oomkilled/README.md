@@ -251,5 +251,5 @@ cd .. && ./cleanup.sh
 ## Next →
 Next, the next section: [S6.1](../../6-namespaces-quotas-helm-and-troubleshooting/1-applied-here-looking-there/README.md): The deploy said "created". The cluster says "No resources found". Both are telling the truth.
 
-🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../../6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../../6-namespaces-quotas-helm-and-troubleshooting/exercises/1-stall-that-asked-for-too-much/README.md).
 

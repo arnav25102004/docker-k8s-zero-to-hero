@@ -21,7 +21,7 @@ Thirty scenarios, grouped into **six sections of five**. Open a section folder a
 
 > 🕐 **Four minutes only works if the next scenario is already broken.** Open a second terminal and run the *next* `break.sh` while you talk through the current lesson (each scenario has its own namespace). Scenarios marked ⏳ take longer to set up or to fix: start those one scenario early.
 
-**How to read an id:** `S2.3` is Section 2, scenario 3. `S5.x1` is Section 5, exercise 1. The folder is `kubernetes/scenarios/2-workloads/3-…`.
+**How to read an id:** `S2.3` is Section 2, scenario 3, in `kubernetes/scenarios/2-workloads/3-…`. `S5.x1` is Section 5, exercise 1, in that section's `exercises/` folder (`5-…/exercises/1-…`). Every section has at least five exercises.
 
 
 ---
@@ -38,10 +38,12 @@ How a Pod comes to life, and which component notices when it does not: scheduler
 | **S1.4** | [Stuck before it starts](1-architecture-and-pod-lifecycle/4-showdown-init-stuck/README.md) | init containers, Pod phases | *Cats vs Dogs is waiting for its database. Forever.* |
 | **S1.5** | [The Pod that will not leave](1-architecture-and-pod-lifecycle/5-pod-that-will-not-leave/README.md) | API server, finalizers, termination | *You said delete. Kubernetes said yes. The Pod did not get the message.* |
 
-**Exercises for this section** (self-paced, with hints, in the second slot):
-- [S1.x1 · The trainer wants a GPU](1-architecture-and-pod-lifecycle/x1-ai-trainer-needs-gpu/README.md): GPU request: Pending, node selection
-- [S1.x2 · One replica too many](1-architecture-and-pod-lifecycle/x2-whoami-anti-affinity/README.md): anti-affinity: one replica too many
-- [S1.x3 · Half ready](1-architecture-and-pod-lifecycle/x3-log-sidecar-half-ready/README.md): multi-container Pod: half ready
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S1.x1 · The trainer wants a GPU](1-architecture-and-pod-lifecycle/exercises/1-ai-trainer-needs-gpu/README.md): GPU request: Pending, node selection
+- [S1.x2 · One replica too many](1-architecture-and-pod-lifecycle/exercises/2-whoami-anti-affinity/README.md): anti-affinity: one replica too many
+- [S1.x3 · Half ready](1-architecture-and-pod-lifecycle/exercises/3-log-sidecar-half-ready/README.md): multi-container Pod: half ready
+- [S1.x4 · Follow a Pod's birth](1-architecture-and-pod-lifecycle/exercises/4-follow-a-pods-birth/README.md): the scheduler, the kubelet and the container runtime, read from Events
+- [S1.x5 · Read the cluster you are standing on](1-architecture-and-pod-lifecycle/exercises/5-read-the-cluster-you-stand-on/README.md): control-plane components, node components, DaemonSets in kube-system, kubelet and runtime versions
 
 ---
 
@@ -57,6 +59,13 @@ Deployments and ReplicaSets, StatefulSets, DaemonSets, Jobs and CronJobs: the ri
 | **S2.4** | [The nightly reset that gave up](2-workloads/4-leaderboard-reset-job/README.md) | Job: retries, backoffLimit | *The midnight reset ran. Three times. Then gave up.* |
 | **S2.5** | [The nightly reset that never started](2-workloads/5-nightly-reset-that-never-started/README.md) ⏳ | CronJob: schedule, suspend | *It is scheduled for every minute. It has been "every minute" for three weeks. Nothing has run.* |
 
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S2.x1 · Delete the owner, keep the Pods](2-workloads/exercises/1-delete-the-owner-keep-the-pods/README.md): ReplicaSet, ownerReferences, selectors, --cascade=orphan
+- [S2.x2 · The Pod that comes back with the same name](2-workloads/exercises/2-pod-that-comes-back-with-the-same-name/README.md): StatefulSet, stable Pod names, headless Service, ordered start and stop
+- [S2.x3 · A watchman for chosen gates only](2-workloads/exercises/3-watchman-for-chosen-gates-only/README.md): DaemonSet, nodeSelector, node labels
+- [S2.x4 · Six tasks, two hands](2-workloads/exercises/4-six-tasks-two-hands/README.md): Job, completions, parallelism, restartPolicy
+- [S2.x5 · Run the nightly job right now](2-workloads/exercises/5-run-the-nightly-job-right-now/README.md): CronJob, create job --from, suspend, concurrencyPolicy
+
 ---
 
 ## Section 3: Services, ingress and networking
@@ -70,6 +79,13 @@ How traffic finds Pods: Services, DNS, ingress routing and Network Policies.
 | **S3.3** | [Same cluster, same name, "never heard of it"](3-services-ingress-and-networking/3-showdown-dns-namespaces/README.md) | DNS across namespaces | *The Redis is running. The app is running. And the app swears Redis does not exist.* |
 | **S3.4** | [The route to the wrong stall](3-services-ingress-and-networking/4-route-to-the-wrong-stall/README.md) ⏳ | Gateway API / Ingress routing | *One front door, two paths. One path leads to a stall that does not exist.* |
 | **S3.5** | [Security hardened the network. Now nothing can find anything.](3-services-ingress-and-networking/5-lockdown-blocks-dns/README.md) | NetworkPolicy and DNS | *Security locked the app down so it can only talk to Redis. And now the app cannot even find Redis.* |
+
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S3.x1 · Three ways into one Service](3-services-ingress-and-networking/exercises/1-three-ways-in/README.md): ClusterIP, port-forward, NodePort, port vs targetPort
+- [S3.x2 · Who is behind the Service?](3-services-ingress-and-networking/exercises/2-who-is-behind-the-service/README.md): EndpointSlices, label selectors, isolating a Pod for debugging
+- [S3.x3 · Where did these variables come from?](3-services-ingress-and-networking/exercises/3-where-did-these-variables-come-from/README.md): Service environment variables, Pod start order, DNS as the better way
+- [S3.x4 · Same name, another namespace](3-services-ingress-and-networking/exercises/4-same-name-another-namespace/README.md): cluster DNS, search domains, namespaces, FQDN
+- [S3.x5 · Lock the vault, then give one friend the key](3-services-ingress-and-networking/exercises/5-lock-the-vault/README.md): NetworkPolicy, default deny, podSelector, allow rules
 
 ---
 
@@ -85,11 +101,12 @@ ConfigMaps and Secrets, persistent storage, RBAC and Pod security.
 | **S4.4** | [The bot has an ID card, but the door stays shut](4-config-storage-and-security/4-leaderboard-bot-forbidden/README.md) | RBAC, ServiceAccounts | *The bot has a valid ID card. The API still says: not allowed.* |
 | **S4.5** | [The rule that turned the lights off](4-config-storage-and-security/5-notice-board-runasnonroot/README.md) | securityContext: runAsNonRoot | *Security turned on one rule. The notice board went dark.* |
 
-**Exercises for this section** (self-paced, with hints, in the second slot):
-- [S4.x1 · Locked down and locked out](4-config-storage-and-security/x1-notice-board-readonly-fs/README.md): read-only root filesystem
-- [S4.x2 · The maintenance van wants the master key](4-config-storage-and-security/x2-maintenance-van-wants-the-master-key/README.md): Pod Security: baseline
-- [S4.x3 · The checklist](4-config-storage-and-security/x3-the-checklist/README.md): Pod Security: restricted checklist
-- [S4.x4 · The locked-down kitchen](4-config-storage-and-security/x4-the-locked-down-kitchen/README.md): Pod Security: boss
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S4.x1 · Locked down and locked out](4-config-storage-and-security/exercises/1-notice-board-readonly-fs/README.md): read-only root filesystem
+- [S4.x2 · The maintenance van wants the master key](4-config-storage-and-security/exercises/2-maintenance-van-wants-the-master-key/README.md): Pod Security: baseline
+- [S4.x3 · The checklist](4-config-storage-and-security/exercises/3-the-checklist/README.md): Pod Security: restricted checklist
+- [S4.x4 · The locked-down kitchen](4-config-storage-and-security/exercises/4-the-locked-down-kitchen/README.md): Pod Security: boss
+- [S4.x5 · The file that outlived the Pod](4-config-storage-and-security/exercises/5-the-file-that-outlived-the-pod/README.md): PersistentVolumeClaim, volumes, StorageClass, data outliving a Pod
 
 ---
 
@@ -105,12 +122,12 @@ Probes and self-healing, autoscaling, rolling updates and deployment strategies.
 | **S5.4** | [The Friday release](5-scaling-self-healing-and-releases/4-showdown-bad-rollout/README.md) | rolling update held back, rollback | *Friday, 6 PM. The release goes out. Nobody notices… because Kubernetes saved you.* |
 | **S5.5** | [No error, no goodbye (Kubernetes edition)](5-scaling-self-healing-and-releases/5-ai-trainer-oomkilled/README.md) ⏳ | resource limits, OOM kill | *Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.* |
 
-**Exercises for this section** (self-paced, with hints, in the second slot):
-- [S5.x1 · The doorbell on the wrong door](5-scaling-self-healing-and-releases/x1-doorbell-on-the-wrong-door/README.md): readiness: wrong door
-- [S5.x2 · The biryani that needs 20 seconds](5-scaling-self-healing-and-releases/x2-biryani-that-needs-20-seconds/README.md): liveness: too early
-- [S5.x3 · Two probes, two mistakes](5-scaling-self-healing-and-releases/x3-two-probes-two-mistakes/README.md): two probes, two faults
-- [S5.x4 · The robot that cannot move the stalls](5-scaling-self-healing-and-releases/x4-robot-that-cannot-move-the-stalls/README.md): PodDisruptionBudget
-- [S5.x5 · The autoscaler pointing at nobody](5-scaling-self-healing-and-releases/x5-autoscaler-pointing-at-nobody/README.md): autoscaler: wrong target
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S5.x1 · The doorbell on the wrong door](5-scaling-self-healing-and-releases/exercises/1-doorbell-on-the-wrong-door/README.md): readiness: wrong door
+- [S5.x2 · The biryani that needs 20 seconds](5-scaling-self-healing-and-releases/exercises/2-biryani-that-needs-20-seconds/README.md): liveness: too early
+- [S5.x3 · Two probes, two mistakes](5-scaling-self-healing-and-releases/exercises/3-two-probes-two-mistakes/README.md): two probes, two faults
+- [S5.x4 · The robot that cannot move the stalls](5-scaling-self-healing-and-releases/exercises/4-robot-that-cannot-move-the-stalls/README.md): PodDisruptionBudget
+- [S5.x5 · The autoscaler pointing at nobody](5-scaling-self-healing-and-releases/exercises/5-autoscaler-pointing-at-nobody/README.md): autoscaler: wrong target
 
 ---
 
@@ -126,19 +143,21 @@ Namespaces and resource quotas, Helm releases, labels and annotations, and the h
 | **S6.4** | [Two stalls, one signboard](6-namespaces-quotas-helm-and-troubleshooting/4-two-stalls-one-signboard/README.md) | labels, selectors, annotations | *Some customers get hot chai. Some get… yesterday's.* |
 | **S6.5** | [The limit nobody wrote](6-namespaces-quotas-helm-and-troubleshooting/5-surprise-limitrange-oom/README.md) | LimitRange: what ran vs what you wrote | *"Nobody set a memory limit. The app still got killed for exceeding it."* |
 
-**Exercises for this section** (self-paced, with hints, in the second slot):
-- [S6.x1 · The stall that asked for too much](6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much/README.md): LimitRange maximum
-- [S6.x2 · Who gets evicted first](6-namespaces-quotas-helm-and-troubleshooting/x2-who-gets-evicted-first/README.md): QoS classes and eviction order
+**Exercises for this section** (self-paced, with hints, in the second slot; in each section's `exercises/` folder):
+- [S6.x1 · The stall that asked for too much](6-namespaces-quotas-helm-and-troubleshooting/exercises/1-stall-that-asked-for-too-much/README.md): LimitRange maximum
+- [S6.x2 · Who gets evicted first](6-namespaces-quotas-helm-and-troubleshooting/exercises/2-who-gets-evicted-first/README.md): QoS classes and eviction order
+- [S6.x3 · Roll a release back](6-namespaces-quotas-helm-and-troubleshooting/exercises/3-roll-a-release-back/README.md): helm install, upgrade, history, rollback, values
+- [S6.x4 · Find it by label](6-namespaces-quotas-helm-and-troubleshooting/exercises/4-find-it-by-label/README.md): labels, selectors (equality and set-based), annotations, kubectl -l
 
 ---
 
 ## 🏁 The finale and the projects (second slot)
-- **Finale: [S6.x3 · The Friday 5 PM outage (the finale)](6-namespaces-quotas-helm-and-troubleshooting/x3-friday-5pm-outage/README.md)**: *Friday, 5 PM. Three things broke. Nobody knows that yet.* Three faults at once, about 30 minutes. Run it after the six sections, when the class has met each kind of fault alone.
+- **Finale: [S6.x5 · The Friday 5 PM outage (the finale)](6-namespaces-quotas-helm-and-troubleshooting/exercises/5-friday-5pm-outage/README.md)**: *Friday, 5 PM. Three things broke. Nobody knows that yet.* Three faults at once, about 30 minutes. Run it after the six sections, when the class has met each kind of fault alone.
 - **Two projects** (lab exercises 5 and 6): [Project 1, Canteen Rush](../projects/project-1-canteen-rush/README.md) (deploy, scale, update) and [Project 2, Canteen Rush packaged](../projects/project-2-canteen-helm/README.md) (config, secrets, Jobs, CronJobs, Helm). Students then build their own.
 
 **Every scenario has a `./check.sh`** in its folder. Run it whenever you like: it only looks, never changes anything, and tells you in one line whether you are done.
 
-Each scenario lives in its own namespace, named after its original code (for example `k-08-oomkilled`), so nothing touches your lab work. All images and sizes are in [IMAGES.md](IMAGES.md). A machine-readable list is in [`index.tsv`](index.tsv).
+Each scenario lives in its own namespace, named after its original code (for example `k-08-oomkilled`), so nothing touches your lab work and nothing in your cluster or tests had to change when the folders were reorganised. All images and sizes are in [IMAGES.md](IMAGES.md). A machine-readable list is in [`index.tsv`](index.tsv).
 
 ## How a session runs
 
@@ -178,7 +197,7 @@ Things to know before you start:
 - **S5.3 installs metrics-server only if your cluster has none**, and removes it again afterwards only if it installed it. Run S5.3 on its own (not alongside other scenarios): adding or removing metrics-server briefly changes the cluster's API list.
 - **S6.3 needs Helm** (`helm version` must work). **S3.4 needs a Gateway controller**: install it once with `./scripts/install-gateway.sh` (about 1 GB of memory). Both say so and stop if they are missing.
 - **S2.5 takes up to a minute and a half to show its fix**, because a CronJob only fires on the minute. Start the fix, then talk while you wait.
-- **S6.x3 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the six sections, when the class has seen each kind of fault on its own.
+- **S6.x5 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the six sections, when the class has seen each kind of fault on its own.
 - **S1.5 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.sh` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
 - **S6.1 changes your kubeconfig's current namespace** (that is its fix). `./cleanup.sh` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
 - **S4.x2 to S4.x4 label their namespace with a Pod Security level.** Pod Security Admission is built into Kubernetes 1.25 and later, so it needs nothing installed. S4.x4 also pulls two small nginx images.
@@ -309,7 +328,7 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | S6.5 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | S6.x1 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | S6.x2 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| S6.x3 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| S6.x5 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

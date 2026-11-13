@@ -290,5 +290,5 @@ This deletes the namespace and, only if this scenario installed it, metrics-serv
 ## Next →
 Next, in this section: [S5.4](../4-showdown-bad-rollout/README.md): Friday, 6 PM. The release goes out. Nobody notices… because Kubernetes saved you.
 
-🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../../6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../../6-namespaces-quotas-helm-and-troubleshooting/exercises/1-stall-that-asked-for-too-much/README.md).
 

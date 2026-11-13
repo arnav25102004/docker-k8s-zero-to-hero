@@ -18,11 +18,11 @@ Probes and self-healing, autoscaling, rolling updates and deployment strategies.
 
 | # | Exercise | What it teaches |
 |---|---|---|
-| **S5.x1** | [The doorbell on the wrong door](x1-doorbell-on-the-wrong-door/README.md) | readiness: wrong door |
-| **S5.x2** | [The biryani that needs 20 seconds](x2-biryani-that-needs-20-seconds/README.md) | liveness: too early |
-| **S5.x3** | [Two probes, two mistakes](x3-two-probes-two-mistakes/README.md) | two probes, two faults |
-| **S5.x4** | [The robot that cannot move the stalls](x4-robot-that-cannot-move-the-stalls/README.md) | PodDisruptionBudget |
-| **S5.x5** | [The autoscaler pointing at nobody](x5-autoscaler-pointing-at-nobody/README.md) | autoscaler: wrong target |
+| **S5.x1** | [The doorbell on the wrong door](exercises/1-doorbell-on-the-wrong-door/README.md) | readiness: wrong door |
+| **S5.x2** | [The biryani that needs 20 seconds](exercises/2-biryani-that-needs-20-seconds/README.md) | liveness: too early |
+| **S5.x3** | [Two probes, two mistakes](exercises/3-two-probes-two-mistakes/README.md) | two probes, two faults |
+| **S5.x4** | [The robot that cannot move the stalls](exercises/4-robot-that-cannot-move-the-stalls/README.md) | PodDisruptionBudget |
+| **S5.x5** | [The autoscaler pointing at nobody](exercises/5-autoscaler-pointing-at-nobody/README.md) | autoscaler: wrong target |
 
 ⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
 

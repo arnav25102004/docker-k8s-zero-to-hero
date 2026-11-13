@@ -254,5 +254,5 @@ cd .. && ./cleanup.sh
 ## Next →
 Next, in this section: [S5.2](../2-showdown-slow-start/README.md): A perfectly healthy app keeps getting killed, again and again, every few seconds.
 
-🏋️ **More reps on this idea (optional):** the practice lane S5.x1 to S5.x3 ("Ready or alive?"), starting at [S5.x1](../x1-doorbell-on-the-wrong-door/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S5.x1 to S5.x3 ("Ready or alive?"), starting at [S5.x1](../exercises/1-doorbell-on-the-wrong-door/README.md).
 

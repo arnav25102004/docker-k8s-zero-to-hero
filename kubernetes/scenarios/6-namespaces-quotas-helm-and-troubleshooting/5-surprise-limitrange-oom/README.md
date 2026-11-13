@@ -308,7 +308,7 @@ cd .. && ./cleanup.sh
 </details>
 
 ## Next →
-That was the last of the 30 core scenarios. Back to the [scenario guide](../../README.md): the exercises, the [finale (S6.x3)](../x3-friday-5pm-outage/README.md) and the two projects.
+That was the last of the 30 core scenarios. Back to the [scenario guide](../../README.md): the exercises, the [finale (S6.x5)](../exercises/5-friday-5pm-outage/README.md) and the two projects.
 
-🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../x1-stall-that-asked-for-too-much/README.md).
+🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../exercises/1-stall-that-asked-for-too-much/README.md).
 
