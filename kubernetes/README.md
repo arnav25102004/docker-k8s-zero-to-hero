@@ -156,7 +156,7 @@ Remove everything when you are done:
 | K19 | [🔔 See Everything: Helm, Prometheus & Grafana](19-observability/README.md) (after K13; many scenarios link to it) | 60m | 🟡 |
 | K20 | [🏁 Build Real Things: two 30-minute projects with Jenkins and monitoring](20-projects/README.md) | 70m | 🟡→🔴 |
 | 🏁 | [**The two projects: Canteen Rush** (lab exercises 5 and 6): build them with us, then build your own](projects/README.md) | 2 × 2.5h | 🟡→🔴 |
-| 🔥 | [Break-and-fix scenarios: 30 core in six sections (4 min each), 14 exercises and a finale](scenarios/README.md) (separate from the labs above) | 2h + exercises | 🟢→🔴 |
+| 🔥 | [Break-and-fix scenarios: 30 core in six sections (4 min each), plus 30 exercises, five per section](scenarios/README.md) (separate from the labs above) | 2h + exercises | 🟢→🔴 |
 
 ## How the labs and the scenarios fit together
 | You want to… | Go to |

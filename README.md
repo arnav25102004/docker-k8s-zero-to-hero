@@ -18,7 +18,7 @@ Hands-on labs for complete beginners: students, teachers, career-switchers, and 
 ## 🎯 Who this is for
 - **Never touched a terminal?** Start at [00-setup](00-setup/README.md), then **Track 0 · Git** ([G00](git/00-foundations/README.md)), then [D00 Docker Foundations](docker/00-foundations/README.md). Each track opens with the why and how, using stories and diagrams, before any command. Every command after that is given and explained.
 - **Used Docker a bit?** Jump to [D05 production Dockerfiles](docker/05-production-dockerfiles/README.md) or [Kubernetes K01](kubernetes/01-cluster-tour/README.md).
-- **Know the basics, want the debugging muscle?** Go straight to the [45 Kubernetes break-and-fix scenarios](kubernetes/scenarios/README.md). Each starts from a diagram, makes you predict, then lets you investigate with `kubectl`; a `./check.sh` tells you when you are done.
+- **Know the basics, want the debugging muscle?** Go straight to the [Kubernetes scenarios](kubernetes/scenarios/README.md): 30 break-and-fix scenarios in six sections, plus 30 exercises. Each starts from a diagram, makes you predict, then lets you investigate with `kubectl`; a `./check.sh` tells you when you are done.
 - **Teaching this?** Read [🎤 SHOWTIME.md](SHOWTIME.md), a keynote-style run-of-show with timings, lines, and "wow" moments.
 
 ## 🐱🐶 The star of the show: *The Showdown*
@@ -93,7 +93,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K19 🔔](kubernetes/19-observability/README.md) | **see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
 | [🏁 Projects](kubernetes/projects/README.md) | **two end-to-end projects for your CV**: deploy, scale and update an app (lab exercise 5); config, secrets, Jobs, CronJobs and a Helm chart (lab exercise 6) | 🚀 build ours, then build your own |
 | [K20 🏁](kubernetes/20-projects/README.md) | **two 30-minute projects**: Jenkins ships to your cluster, monitoring emails you when it breaks | 📬 build it live, break it, get the email |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents**: **30 core scenarios in six syllabus sections, 4 minutes each**, plus 14 exercises and a 30-minute finale | 🧯 every one has a diagram, a `check.sh`, and a test |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **30 core scenarios in six syllabus sections, 4 minutes each**, plus 30 exercises (five per section, a 30-minute finale among them) | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
 ```bash
@@ -107,7 +107,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 
 ## 🧪 Tested, not just written
-Every Kubernetes scenario has an automated test, and all of them pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
+Every Kubernetes break-and-fix scenario has an automated test that runs against a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37); the read-and-answer question exercises have none. One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
 
 ## 🔥 The Troubleshooting Arena
 ```bash
@@ -116,7 +116,7 @@ Every Kubernetes scenario has an automated test, and all of them pass on a real 
 ```
 Docker and Kubernetes scenarios are run by hand from their folders: see [docker/scenarios/README.md](docker/scenarios/README.md) and [kubernetes/scenarios/README.md](kubernetes/scenarios/README.md). `./labs.sh docker clean` and `./labs.sh k8s clean` reset them all.
 
-68 real-world incidents (8 Git, 15 Docker, 45 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
+83 real-world incidents and exercises (8 Git, 15 Docker, 60 Kubernetes): committed secrets, rejected pushes and lost commits in Git; leaked keys and vanishing data in Docker; crash loops, OOM kills, DNS failures, broken selectors, RBAC denials, NetworkPolicy outages, stuck rollouts, and more. Each has a story, symptoms, hints, and a hidden answer. Then level up with 35 more in [troubleshoot-kubernetes-like-a-pro](https://github.com/vellankikoti/troubleshoot-kubernetes-like-a-pro).
 
 ## 📁 Repository layout
 ```
@@ -128,7 +128,7 @@ docker-k8s-zero-to-hero/
 │   └── frontend/            nginx reverse proxy tier
 ├── git/                     G00–G07 + troubleshooting/ (8 scenarios) + scripts/lab-start.sh
 ├── docker/                  D00–D11 + scenarios/ (15 scenarios)
-├── kubernetes/              K00–K20 + stack/ (shared manifests) + scenarios/ (45 scenarios)
+├── kubernetes/              K00–K20 + stack/ (shared manifests) + scenarios/ (6 sections: 30 scenarios + 30 exercises)
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · install-metrics-server.sh · install-monitoring.sh · install-jenkins.sh · load-image.sh · link-check.py
 ├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check
