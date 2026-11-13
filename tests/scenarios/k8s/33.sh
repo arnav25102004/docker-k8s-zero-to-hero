@@ -2,7 +2,7 @@
 # Spec for scenario K33 (33-route-to-the-wrong-stall). Needs the Gateway controller (scripts/install-gateway.sh). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-33-gateway"
-CHECK33="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/33-route-to-the-wrong-stall" && pwd)/check.sh"
+CHECK33="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/3-services-ingress-and-networking/4-route-to-the-wrong-stall" && pwd)/check.sh"
 if ! kubectl get gatewayclass eg >/dev/null 2>&1; then
   printf '  installing the Gateway controller (Envoy Gateway): a couple of minutes the first time\n'
   bash "$REPO/scripts/install-gateway.sh" >/dev/null 2>&1 || { printf 'scripts/install-gateway.sh failed: run it by hand to see why\n' >&2; exit 1; }

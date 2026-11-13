@@ -2,7 +2,7 @@
 # Spec for scenario K37 (37-pod-that-will-not-leave). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-37-stuck-pod"
-CHECK37="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/37-pod-that-will-not-leave" && pwd)/check.sh"
+CHECK37="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/1-architecture-and-pod-lifecycle/5-pod-that-will-not-leave" && pwd)/check.sh"
 
 broken() {
   assert_eq "$([ -n "$(kubectl get pod old-stall -n k-37-stuck-pod -o jsonpath='{.metadata.deletionTimestamp}' 2>&1)" ] && echo yes || echo no)" "yes" "the Pod has been asked to delete (it has a deletionTimestamp)"

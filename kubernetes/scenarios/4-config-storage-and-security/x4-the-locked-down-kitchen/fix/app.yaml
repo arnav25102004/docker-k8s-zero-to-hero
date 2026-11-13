@@ -1,0 +1,47 @@
+# S4.x4 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kitchen
+  namespace: k-45-lockdown
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kitchen
+  template:
+    metadata:
+      labels:
+        app: kitchen
+    spec:
+      terminationGracePeriodSeconds: 1
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: stall
+          image: nginxinc/nginx-unprivileged:1.27.5-alpine
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kitchen
+  namespace: k-45-lockdown
+spec:
+  selector:
+    app: kitchen
+  ports:
+    - port: 80
+      targetPort: 8080

@@ -71,7 +71,7 @@ Write a Job that runs six Pods to completion, three at a time, and is stopped if
 
 ## 🔥 Now break it
 When a Job gives up:
-- [K28](../scenarios/28-leaderboard-reset-job/README.md): the nightly reset that ran three times and quit
+- [S2.4](../scenarios/2-workloads/4-leaderboard-reset-job/README.md): the nightly reset that ran three times and quit
 
 ## 🧹 Cleanup
 ```bash

@@ -97,7 +97,7 @@ kubectl delete pod -l app=quarantine
 ## 🏭 In production
 - Run **≥ 2–3 replicas** of anything user-facing, so a Pod or node failure is a non-event.
 - Add **PodDisruptionBudgets** (K17) so maintenance never takes all replicas at once.
-- Kubernetes *tries* to maintain desired state. If there's no room, new Pods stay **Pending** ([scenario K01](../scenarios/01-excalidraw-pending/README.md)).
+- Kubernetes *tries* to maintain desired state. If there's no room, new Pods stay **Pending** ([scenario S1.1](../scenarios/1-architecture-and-pod-lifecycle/1-excalidraw-pending/README.md)).
 
 ## 🏆 Challenge
 Scale `api` to 5. Then delete two of its Pods in one command. Predict how many Pods exist ten seconds later, and which object noticed.

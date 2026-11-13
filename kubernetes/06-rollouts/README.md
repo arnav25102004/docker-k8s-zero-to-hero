@@ -121,8 +121,8 @@ The new Pod never became Ready, and `maxUnavailable: 0` forbids removing old Pod
 
 ## 🔥 Now break it
 A release can go wrong while visitors are watching:
-- [K11](../scenarios/11-showdown-bad-rollout/README.md): a bad rollout that Kubernetes holds back safely
-- [K07](../scenarios/07-showdown-slow-start/README.md): an app that needs time to start
+- [S5.4](../scenarios/5-scaling-self-healing-and-releases/4-showdown-bad-rollout/README.md): a bad rollout that Kubernetes holds back safely
+- [S5.2](../scenarios/5-scaling-self-healing-and-releases/2-showdown-slow-start/README.md): an app that needs time to start
 
 ## 🧹 Cleanup
 Keep the stack for K07, or: `kubectl delete -f kubernetes/06-rollouts/deployment.yaml -f kubernetes/stack/`

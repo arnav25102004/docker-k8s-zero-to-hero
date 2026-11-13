@@ -75,12 +75,12 @@ Open http://localhost:9090, **Graph**, and run these one at a time:
 | Which Pods are stuck Pending? | `kube_pod_status_phase{phase="Pending"} == 1` |
 | Who uses the most CPU? | `topk(5, sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=""}[2m])))` |
 
-Each row is a scenario you already know: restarts are K03 and K07, OOM kills are K08 and K20, Pending is K09 and K16 to K18. Now you can see them **before** a user complains.
+Each row is a scenario you already know: restarts are S1.3 and S5.2, OOM kills are S5.5 and S6.5, Pending Pods are S1.1, S1.x1 and S1.x2. Now you can see them **before** a user complains.
 
 ### Step 5: Alerts
 Open **Alerts** in the Prometheus UI. A rule is a query plus a condition. Every red line there is a question someone decided was worth waking a person for. In real teams they go to Slack, email or a pager: that is Alertmanager's job, and in this setup it mails a local inbox (lab [K20](../20-projects/README.md) makes you read those emails).
 
-A real alert waits before it fires, so one blip does not wake anyone. Try it: run scenario [K03](../scenarios/03-showdown-crashloop/README.md) (a crash loop) and watch **KubePodCrashLooping**. It goes *pending* first and only turns *firing* after several minutes, because the rule says "for 15 minutes". That patience is on purpose.
+A real alert waits before it fires, so one blip does not wake anyone. Try it: run scenario [S1.3](../scenarios/1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md) (a crash loop) and watch **KubePodCrashLooping**. It goes *pending* first and only turns *firing* after several minutes, because the rule says "for 15 minutes". That patience is on purpose.
 
 ### Step 6: Helm, the second half
 ```bash
@@ -106,13 +106,13 @@ Without opening a dashboard, write the one query that lists every Pod whose cont
 container_memory_working_set_bytes{container!=""}
   / on (namespace, pod, container) kube_pod_container_resource_limits{resource="memory"} > 0.8
 ```
-Usage divided by limit, matched on the same Pod and container. Anything above 0.8 is close to being OOM-killed (K08, K20). Scenario [K20](../scenarios/20-surprise-limitrange-oom/README.md) is exactly this failure.
+Usage divided by limit, matched on the same Pod and container. Anything above 0.8 is close to being OOM-killed (S5.5, S6.5). Scenario [S6.5](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/5-surprise-limitrange-oom/README.md) is exactly this failure.
 </details>
 
 ## 🔥 Now break it
 Every scenario can now be watched, not only read with `kubectl`. These carry a short "👀 See it in monitoring" tip with the exact query:
-- [K01](../scenarios/01-excalidraw-pending/README.md) a Pod stuck Pending · [K02](../scenarios/02-image-typo/README.md) a bad image name · [K03](../scenarios/03-showdown-crashloop/README.md) a crash loop
-- [K08](../scenarios/08-ai-trainer-oomkilled/README.md) and [K20](../scenarios/20-surprise-limitrange-oom/README.md) memory kills · [K11](../scenarios/11-showdown-bad-rollout/README.md) a stuck rollout · [K25](../scenarios/25-showdown-hpa-not-scaling/README.md) the autoscaler
+- [S1.1](../scenarios/1-architecture-and-pod-lifecycle/1-excalidraw-pending/README.md) a Pod stuck Pending · [S1.2](../scenarios/1-architecture-and-pod-lifecycle/2-image-typo/README.md) a bad image name · [S1.3](../scenarios/1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md) a crash loop
+- [S5.5](../scenarios/5-scaling-self-healing-and-releases/5-ai-trainer-oomkilled/README.md) and [S6.5](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/5-surprise-limitrange-oom/README.md) memory kills · [S5.4](../scenarios/5-scaling-self-healing-and-releases/4-showdown-bad-rollout/README.md) a stuck rollout · [S5.3](../scenarios/5-scaling-self-healing-and-releases/3-showdown-hpa-not-scaling/README.md) the autoscaler
 
 ## ✅ Checkpoint
 <details><summary>1. <code>kubectl top</code> and Prometheus both show CPU. What does Prometheus add?</summary>

@@ -1,0 +1,55 @@
+# S4.1 break (3/4): the "Campus Today" page. Its settings come from the ConfigMap ui-settings.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: theme
+  namespace: k-23-dark-mode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: theme
+  template:
+    metadata:
+      labels:
+        app: theme
+    spec:
+      containers:
+        - name: theme
+          image: python:3.12-alpine
+          command: ["python", "/app/app.py"]
+          envFrom:
+            - configMapRef:
+                name: ui-settings
+          # On shutdown, wait 5 s before stopping the app. This keeps the old Pod serving until the
+          # Service stops sending it traffic, so a restart leaves no gap for visitors.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: theme-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: theme
+  namespace: k-23-dark-mode
+spec:
+  selector:
+    app: theme
+  ports:
+    - port: 80
+      targetPort: 8080

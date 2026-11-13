@@ -1,0 +1,14 @@
+# S1.5 scenario manifest
+apiVersion: v1
+kind: Pod
+metadata:
+  name: old-stall
+  namespace: k-37-stuck-pod
+  finalizers:
+    - z2h.example/cleanup-lock
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: stall
+      image: hashicorp/http-echo:1.0.0
+      args: ["-text=🧁 Closing time. Almost."]

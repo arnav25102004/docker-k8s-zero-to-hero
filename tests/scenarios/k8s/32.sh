@@ -2,7 +2,7 @@
 # Spec for scenario K32 (32-label-on-the-wrong-object). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-32-wrong-object"
-CHECK32="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/32-label-on-the-wrong-object" && pwd)/check.sh"
+CHECK32="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/2-workloads/1-label-on-the-wrong-object" && pwd)/check.sh"
 
 endpoint_addrs32() { kubectl get endpointslices -n k-32-wrong-object -l kubernetes.io/service-name=samosa -o jsonpath='{..addresses}' 2>&1; }
 

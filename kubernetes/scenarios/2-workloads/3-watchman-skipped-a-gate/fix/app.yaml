@@ -1,0 +1,29 @@
+# S2.3 scenario manifest
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: watchman
+  namespace: k-16-daemonset
+  labels: { app: watchman }
+spec:
+  selector:
+    matchLabels: { app: watchman }
+  template:
+    metadata:
+      labels: { app: watchman }
+    spec:
+      terminationGracePeriodSeconds: 1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane   # the control plane's own "keep out" sign
+          operator: Exists
+          effect: NoSchedule
+        - key: z2h-vip                                 # the "reserved" sign someone hung on one gate
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: watchman
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🔦 Watchman on duty"]
+          resources:
+            requests: { cpu: 5m, memory: 8Mi }
+            limits: { memory: 32Mi }

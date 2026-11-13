@@ -1,0 +1,48 @@
+# S4.x3 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart
+  namespace: k-44-checklist
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart
+  template:
+    metadata:
+      labels:
+        app: cart
+    spec:
+      terminationGracePeriodSeconds: 1
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: stall
+          image: hashicorp/http-echo:1.0.0
+          args: ["-text=🛒 Kitchen cart, fully compliant (soon)."]
+          ports:
+            - containerPort: 5678
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            periodSeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart
+  namespace: k-44-checklist
+spec:
+  selector:
+    app: cart
+  ports:
+    - port: 80
+      targetPort: 5678

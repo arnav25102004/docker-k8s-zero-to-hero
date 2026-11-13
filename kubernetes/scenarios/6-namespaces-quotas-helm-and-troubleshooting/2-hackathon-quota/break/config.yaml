@@ -1,0 +1,84 @@
+# S6.2 break (2/4): the "Hackathon team links" page for Homer, written for this course.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-config
+  namespace: k-19-hackathon
+data:
+  config.yml: |
+    title: "Hackathon team links"
+    subtitle: "BengaluruBuild 24h · Block C, Room 204"
+    header: true
+    footer: '<p>Chai counter closes at 2 AM. Demos start at 9 AM sharp. Sleep is optional, commits are not.</p>'
+    columns: "3"
+    connectivityCheck: false
+    theme: default
+    colors:
+      light:
+        highlight-primary: "#3367d6"
+        highlight-secondary: "#4285f4"
+        highlight-hover: "#5a95f5"
+        background: "#f5f5f5"
+        card-background: "#ffffff"
+        text: "#363636"
+        text-header: "#ffffff"
+        text-title: "#303030"
+        text-subtitle: "#424242"
+        card-shadow: rgba(0, 0, 0, 0.1)
+        link: "#3273dc"
+        link-hover: "#363636"
+      dark:
+        highlight-primary: "#3367d6"
+        highlight-secondary: "#4285f4"
+        highlight-hover: "#5a95f5"
+        background: "#131313"
+        card-background: "#2b2b2b"
+        text: "#eaeaea"
+        text-header: "#ffffff"
+        text-title: "#fafafa"
+        text-subtitle: "#f5f5f5"
+        card-shadow: rgba(0, 0, 0, 0.4)
+        link: "#3273dc"
+        link-hover: "#ffdd57"
+    services:
+      - name: "The teams"
+        icon: "fas fa-users"
+        items:
+          - name: "Team Filter Kaapi"
+            subtitle: "Order coffee by voice, in Kannada"
+            tag: "AI"
+            url: "#"
+          - name: "Team Dosa Debuggers"
+            subtitle: "Finds the bug before the masala dosa goes cold"
+            tag: "DevTools"
+            url: "#"
+          - name: "Team Namma Metro Live"
+            subtitle: "Which coach is the emptiest? Ask the crowd"
+            tag: "Maps"
+            url: "#"
+          - name: "Team Traffic Whisperers"
+            subtitle: "Tells you when the Silk Board jam will break"
+            tag: "Data"
+            url: "#"
+      - name: "Judges' corner"
+        icon: "fas fa-gavel"
+        items:
+          - name: "Scoring sheet"
+            subtitle: "Idea, build, demo, and one point for style"
+            url: "#"
+          - name: "Demo order"
+            subtitle: "Five minutes each. The chai bell rings at 4:30"
+            tag: "9 AM"
+            url: "#"
+      - name: "Survival kit"
+        icon: "fas fa-mug-hot"
+        items:
+          - name: "Wi-Fi password"
+            subtitle: "Ask the volunteer in the orange T-shirt"
+            url: "#"
+          - name: "Power strips"
+            subtitle: "Block C, behind the projector. Return them!"
+            url: "#"
+          - name: "Nap room"
+            subtitle: "Room 210. Set an alarm. Seriously."
+            url: "#"

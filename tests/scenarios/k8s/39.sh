@@ -2,7 +2,7 @@
 # Spec for scenario K39 (39-robot-that-cannot-move-the-stalls). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-39-idli-robot"
-SCEN39="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/39-robot-that-cannot-move-the-stalls" && pwd)"
+SCEN39="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/x4-robot-that-cannot-move-the-stalls" && pwd)"
 
 allowed39() { kubectl get pdb idli-pdb -n k-39-idli-robot -o jsonpath='{.status.disruptionsAllowed}' 2>/dev/null; }
 

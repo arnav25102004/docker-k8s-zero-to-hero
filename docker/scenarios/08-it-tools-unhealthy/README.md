@@ -23,7 +23,7 @@ Think of the **floor manager** of a hotel who knocks on a guest's door every few
 ## 🏢 Where you'll meet this at work
 - **Load balancers** that stop sending traffic to servers that fail their health check (SRE, platform team).
 - **Docker Compose `depends_on: condition: service_healthy`**, where one service waits for another to be healthy before it starts (developer).
-- **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([K06](../../../kubernetes/scenarios/06-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([K07](../../../kubernetes/scenarios/07-showdown-slow-start/README.md)).
+- **Kubernetes liveness and readiness probes**, the same idea at cluster scale. A wrong readiness probe keeps a healthy app from ever getting visitors ([S5.1](../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/1-kanboard-never-ready/README.md)), and an impatient liveness probe restarts a perfectly good app forever ([S5.2](../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/2-showdown-slow-start/README.md)).
 
 ## 💥 Break it
 > 🪟 Git Bash on Windows: run `export MSYS_NO_PATHCONV=1` once in this terminal before typing any command below (the scripts already set it for themselves).

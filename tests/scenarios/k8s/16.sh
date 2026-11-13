@@ -2,7 +2,7 @@
 # Spec for scenario K16 (16-watchman-skipped-a-gate). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-16-daemonset"
-CHECK16="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/16-watchman-skipped-a-gate" && pwd)/check.sh"
+CHECK16="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/2-workloads/3-watchman-skipped-a-gate" && pwd)/check.sh"
 
 nodes16() { kubectl get nodes --no-headers | wc -l | tr -d ' '; }
 want16() { local r; r="$(kubectl get daemonset watchman -n k-16-daemonset -o jsonpath='{.status.desiredNumberScheduled}' 2>/dev/null)"; echo "${r:-0}"; }

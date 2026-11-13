@@ -165,7 +165,7 @@ Remove everything when you are done:
 | **Practise** it by fixing something broken | the matching scenarios: each lab ends with a "🔥 Now break it" list |
 | **Get fast at debugging** | the [scenarios](scenarios/README.md) on their own: every scenario has a diagram, a prediction step, a hint ladder, and a `./check.sh` |
 
-Lab numbers (K00–K20) and scenario numbers (K01–K45) are two separate lists that happen to share a prefix. Scenario links always say `scenarios/`.
+Lab numbers (K00–K20) and the scenarios (numbered `S1.1` to `S6.5` by section) are two separate lists, so a "K" always means a lab and an "S" always means a scenario.
 
 Every lab opens its concept with a diagram and gives you a 🏆 challenge to solve before the quiz. To check that the lab manifests still work on your cluster: `./tests/labs/validate-labs.sh` (throwaway cluster only; it starts no Pods).
 

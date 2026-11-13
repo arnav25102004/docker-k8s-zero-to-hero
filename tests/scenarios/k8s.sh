@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: ./tests/scenarios/k8s.sh [NN ...]   (no args = all present scenarios)
+# Usage: ./tests/scenarios/k8s.sh [S2.3 | 2 | 08 ...]   (no args = all scenarios; a section digit runs the whole section)
 # For each scenario NN: sources tests/scenarios/k8s/NN.sh (defines NAMESPACES,
 # broken() and fixed()) and runs two full break/fix cycles. Only runs against the
 # throwaway cluster: export KUBECONFIG=$HOME/.kube/z2h-test.config
@@ -25,30 +25,33 @@ require_test_cluster || exit 1
 # and then every scenario's Pods sit Pending. This cluster is the throwaway one, so clear it.
 kubectl taint nodes --all z2h-vip- >/dev/null 2>&1 || true
 
-if [ "$#" -gt 0 ]; then
-  NUMS="$*"
+INDEX="$REPO/kubernetes/scenarios/index.tsv"
+[ -f "$INDEX" ] || { printf 'Missing %s\n' "$INDEX" >&2; exit 1; }
+
+# Accepts: S2.3, 2.3, S5.x1 (one scenario), 2 or S2 (a whole section), the old two-digit number (08),
+# or nothing (everything). Resolves each to a row of index.tsv: id, legacy, path.
+RUN=""
+if [ "$#" -eq 0 ]; then
+  RUN="$(awk -F'\t' 'NR>1 {print $2}' "$INDEX")"
 else
-  NUMS=""
-  for d in "$REPO"/kubernetes/scenarios/[0-9][0-9]-*/; do
-    [ -d "$d" ] || continue
-    b="$(basename "$d")"
-    NUMS="$NUMS ${b%%-*}"
+  for a in "$@"; do
+    k="$(printf '%s' "$a" | sed 's/^[sS]//')"
+    m="$(awk -F'\t' -v k="$k" 'NR>1 { id=substr($1,2); if (id==k || $2==k || index(id, k ".")==1) print $2 }' "$INDEX")"
+    if [ -z "$m" ]; then printf 'Unknown scenario: %s (try S2.3, 2, or 08)\n' "$a" >&2; exit 1; fi
+    RUN="$RUN
+$m"
   done
 fi
 
-if [ -z "${NUMS# }" ]; then
-  printf 'No scenarios found under kubernetes/scenarios/ (and none given on the command line).\n' >&2
-  exit 1
-fi
-
 PASSED=""; FAILED=""
-for nn in $NUMS; do
-  printf '== Scenario %s\n' "$nn"
-  dir=""
-  for d in "$REPO"/kubernetes/scenarios/"$nn"-*/; do [ -d "$d" ] && dir="${d%/}"; done
+for nn in $RUN; do
+  row="$(awk -F'\t' -v n="$nn" '$2==n' "$INDEX")"
+  sid="$(printf '%s' "$row" | cut -f1)"; rel="$(printf '%s' "$row" | cut -f3)"
+  printf '== Scenario %s (old number %s)\n' "$sid" "$nn"
+  dir="$REPO/kubernetes/scenarios/$rel"
   spec="$REPO/tests/scenarios/k8s/$nn.sh"
-  if [ -z "$dir" ]; then printf '  folder kubernetes/scenarios/%s-* not found\n' "$nn"; FAILED="$FAILED $nn"; continue; fi
-  if [ ! -f "$spec" ]; then printf '  missing %s\n' "$spec"; FAILED="$FAILED $nn"; continue; fi
+  if [ ! -d "$dir" ]; then printf '  folder %s not found\n' "$dir"; FAILED="$FAILED $sid"; continue; fi
+  if [ ! -f "$spec" ]; then printf '  missing %s\n' "$spec"; FAILED="$FAILED $sid"; continue; fi
   if (
     NAMESPACES=""
     # shellcheck source=/dev/null
@@ -56,9 +59,9 @@ for nn in $NUMS; do
     # shellcheck disable=SC2086
     run_cycle_k8s "$dir" "k$nn" $NAMESPACES
   ); then
-    PASSED="$PASSED $nn"
+    PASSED="$PASSED $sid"
   else
-    FAILED="$FAILED $nn"
+    FAILED="$FAILED $sid"
   fi
 done
 

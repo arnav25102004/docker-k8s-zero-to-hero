@@ -2,7 +2,7 @@
 # Spec for scenario K24 (24-nightly-reset-that-never-started). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-24-cronjob"
-CHECK24="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/24-nightly-reset-that-never-started" && pwd)/check.sh"
+CHECK24="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/2-workloads/5-nightly-reset-that-never-started" && pwd)/check.sh"
 
 check_passes24() {
   local i

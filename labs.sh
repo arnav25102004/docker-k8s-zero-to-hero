@@ -43,7 +43,7 @@ list() {
   for d in "$DOCKER_DIR"/[0-9]*/; do printf '  %s\n' "$(title_of "$d")"; done
   echo
   bold "☸️  Kubernetes scenarios (run them by hand: kubernetes/scenarios/README.md)"
-  for d in "$K8S_DIR"/[0-9]*/; do printf '  %s\n' "$(title_of "$d")"; done
+  for d in "$K8S_DIR"/[0-9]*/; do printf '  %s\n' "$(basename "$d")"; done
 }
 
 # ------------------------------------------------------------------- git --
@@ -85,7 +85,7 @@ k8s_clean() {
     return 0
   fi
   echo "Cleaning Kubernetes scenarios (current kubectl context: $(kubectl config current-context 2>/dev/null || echo none))"
-  for c in "$K8S_DIR"/[0-9]*/cleanup.sh; do
+  for c in "$K8S_DIR"/[0-9]*/*/cleanup.sh; do
     [ -f "$c" ] && bash "$c" 2>&1
   done
 }

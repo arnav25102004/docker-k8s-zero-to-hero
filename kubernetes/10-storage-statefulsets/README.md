@@ -80,7 +80,7 @@ kubectl exec redis-1 -- redis-cli get owner
 - **Reclaim policy:** `Delete` (default for dynamic volumes) destroys the disk when the PVC is deleted; `Retain` keeps it. Know which one your databases use.
 - `ReadWriteOnce` = one **node** at a time. Shared file storage needs `ReadWriteMany` (NFS, EFS, Azure Files).
 - Running databases on Kubernetes works, but needs backups, operators (CloudNativePG, Strimzi, etc.), and tested restore procedures. Many teams use managed databases instead.
-- A PVC stuck in **Pending** usually means a wrong or missing StorageClass, or no capacity ([scenario K10](../scenarios/10-kanboard-pvc-pending/README.md)).
+- A PVC stuck in **Pending** usually means a wrong or missing StorageClass, or no capacity ([scenario S4.3](../scenarios/4-config-storage-and-security/3-kanboard-pvc-pending/README.md)).
 
 ## 🏆 Challenge
 Let the `writer` Pod from this lab run for a minute, delete it, create it again from the same file, and show that `/data/log.txt` still has the old lines. Which object kept the data?

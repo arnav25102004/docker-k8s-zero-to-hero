@@ -93,7 +93,7 @@ It's ~250 lines of standard-library Python plus one HTML page: no frameworks, no
 | [K19 🔔](kubernetes/19-observability/README.md) | **see everything**: Helm, Prometheus, Grafana, alerts | 🔔 an alert wakes you, a graph explains it |
 | [🏁 Projects](kubernetes/projects/README.md) | **two end-to-end projects for your CV**: deploy, scale and update an app (lab exercise 5); config, secrets, Jobs, CronJobs and a Helm chart (lab exercise 6) | 🚀 build ours, then build your own |
 | [K20 🏁](kubernetes/20-projects/README.md) | **two 30-minute projects**: Jenkins ships to your cluster, monitoring emails you when it breaks | 📬 build it live, break it, get the email |
-| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents** (K01–K45): **30 core scenarios in six syllabus sections, 4 minutes each**, plus 14 exercises and a 30-minute finale | 🧯 every one has a diagram, a `check.sh`, and a test |
+| [🔥 Kubernetes scenarios](kubernetes/scenarios/README.md) | **45 break-and-fix incidents**: **30 core scenarios in six syllabus sections, 4 minutes each**, plus 14 exercises and a 30-minute finale | 🧯 every one has a diagram, a `check.sh`, and a test |
 
 ## 🚀 Quick start
 ```bash
@@ -107,7 +107,7 @@ open http://localhost:8080            # 🐱 vs 🐶  (Linux: xdg-open; or just 
 ```
 
 ## 🧪 Tested, not just written
-Every Kubernetes scenario has an automated test, and K01 to K45 pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
+Every Kubernetes scenario has an automated test, and all of them pass on a real [kind](https://kind.sigs.k8s.io/) cluster (Kubernetes v1.37). One command (`./tests/scenarios/k8s.sh`) runs each scenario twice: break it, check the symptom, fix it, check it is fixed, clean up, and make sure nothing is left behind. The harness lives in [`tests/scenarios/`](tests/scenarios/); it needs a throwaway cluster and refuses to run against any other. The lab manifests (K02 to K18) have a lighter check: `./tests/labs/validate-labs.sh` asks the cluster's API server to validate every file, without starting a single Pod. The platform table in the [scenario guide](kubernetes/scenarios/README.md) says honestly what has been run where.
 
 ## 🔥 The Troubleshooting Arena
 ```bash

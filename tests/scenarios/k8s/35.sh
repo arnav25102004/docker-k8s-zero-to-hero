@@ -2,7 +2,7 @@
 # Spec for scenario K35 (35-biryani-that-needs-20-seconds). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-35-slow-biryani"
-CHECK35="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/35-biryani-that-needs-20-seconds" && pwd)/check.sh"
+CHECK35="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/x2-biryani-that-needs-20-seconds" && pwd)/check.sh"
 
 restarts35() { kubectl get pods -n k-35-slow-biryani -l app=biryani -o jsonpath='{range .items[*]}{.status.containerStatuses[0].restartCount}{"\n"}{end}' 2>/dev/null | awk '{s+=$1} END{print s+0}'; }
 events35() { kubectl get events -n k-35-slow-biryani -o jsonpath='{.items[*].message}' 2>&1; }

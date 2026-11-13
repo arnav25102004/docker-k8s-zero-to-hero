@@ -1,0 +1,46 @@
+id	legacy	path	kind	title
+S1.1	01	1-architecture-and-pod-lifecycle/1-excalidraw-pending	core	The whiteboard that never starts
+S1.2	02	1-architecture-and-pod-lifecycle/2-image-typo	core	The one-letter typo
+S1.3	03	1-architecture-and-pod-lifecycle/3-showdown-crashloop	core	The loop
+S1.4	26	1-architecture-and-pod-lifecycle/4-showdown-init-stuck	core	Stuck before it starts
+S1.5	37	1-architecture-and-pod-lifecycle/5-pod-that-will-not-leave	core	The Pod that will not leave
+S1.x1	17	1-architecture-and-pod-lifecycle/x1-ai-trainer-needs-gpu	exercise	The trainer wants a GPU
+S1.x2	18	1-architecture-and-pod-lifecycle/x2-whoami-anti-affinity	exercise	One replica too many
+S1.x3	29	1-architecture-and-pod-lifecycle/x3-log-sidecar-half-ready	exercise	Half ready
+S2.1	32	2-workloads/1-label-on-the-wrong-object	core	The label on the wrong object
+S2.2	15	2-workloads/2-stall-that-opens-one-at-a-time	core	The stall that opens one at a time
+S2.3	16	2-workloads/3-watchman-skipped-a-gate	core	The watchman who skipped a gate
+S2.4	28	2-workloads/4-leaderboard-reset-job	core	The nightly reset that gave up
+S2.5	24	2-workloads/5-nightly-reset-that-never-started	core	The nightly reset that never started
+S3.1	04	3-services-ingress-and-networking/1-it-tools-no-endpoints	core	Running is not reachable
+S3.2	05	3-services-ingress-and-networking/2-excalidraw-wrong-port	core	Right Pod, wrong door
+S3.3	12	3-services-ingress-and-networking/3-showdown-dns-namespaces	core	Same cluster, same name, "never heard of it"
+S3.4	33	3-services-ingress-and-networking/4-route-to-the-wrong-stall	core	The route to the wrong stall
+S3.5	13	3-services-ingress-and-networking/5-lockdown-blocks-dns	core	Security hardened the network. Now nothing can find anything.
+S4.1	23	4-config-storage-and-security/1-dark-mode-not-applied	core	Dark mode is on. The site is still white.
+S4.2	09	4-config-storage-and-security/2-adminer-missing-secret	core	The container that never got created
+S4.3	10	4-config-storage-and-security/3-kanboard-pvc-pending	core	The task board is waiting for a disk that will never arrive
+S4.4	14	4-config-storage-and-security/4-leaderboard-bot-forbidden	core	The bot has an ID card, but the door stays shut
+S4.5	21	4-config-storage-and-security/5-notice-board-runasnonroot	core	The rule that turned the lights off
+S4.x1	22	4-config-storage-and-security/x1-notice-board-readonly-fs	exercise	Locked down and locked out
+S4.x2	43	4-config-storage-and-security/x2-maintenance-van-wants-the-master-key	exercise	The maintenance van wants the master key
+S4.x3	44	4-config-storage-and-security/x3-the-checklist	exercise	The checklist
+S4.x4	45	4-config-storage-and-security/x4-the-locked-down-kitchen	exercise	The locked-down kitchen
+S5.1	06	5-scaling-self-healing-and-releases/1-kanboard-never-ready	core	Running, healthy, and never any visitors
+S5.2	07	5-scaling-self-healing-and-releases/2-showdown-slow-start	core	The impatient guard
+S5.3	25	5-scaling-self-healing-and-releases/3-showdown-hpa-not-scaling	core	The autoscaler that shrugs
+S5.4	11	5-scaling-self-healing-and-releases/4-showdown-bad-rollout	core	The Friday release
+S5.5	08	5-scaling-self-healing-and-releases/5-ai-trainer-oomkilled	core	No error, no goodbye (Kubernetes edition)
+S5.x1	34	5-scaling-self-healing-and-releases/x1-doorbell-on-the-wrong-door	exercise	The doorbell on the wrong door
+S5.x2	35	5-scaling-self-healing-and-releases/x2-biryani-that-needs-20-seconds	exercise	The biryani that needs 20 seconds
+S5.x3	36	5-scaling-self-healing-and-releases/x3-two-probes-two-mistakes	exercise	Two probes, two mistakes
+S5.x4	39	5-scaling-self-healing-and-releases/x4-robot-that-cannot-move-the-stalls	exercise	The robot that cannot move the stalls
+S5.x5	41	5-scaling-self-healing-and-releases/x5-autoscaler-pointing-at-nobody	exercise	The autoscaler pointing at nobody
+S6.1	38	6-namespaces-quotas-helm-and-troubleshooting/1-applied-here-looking-there	core	Applied here, looking there
+S6.2	19	6-namespaces-quotas-helm-and-troubleshooting/2-hackathon-quota	core	The deploy that created nothing
+S6.3	27	6-namespaces-quotas-helm-and-troubleshooting/3-upgrade-that-broke-the-stall	core	The upgrade that broke the stall
+S6.4	31	6-namespaces-quotas-helm-and-troubleshooting/4-two-stalls-one-signboard	core	Two stalls, one signboard
+S6.5	20	6-namespaces-quotas-helm-and-troubleshooting/5-surprise-limitrange-oom	core	The limit nobody wrote
+S6.x1	40	6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much	exercise	The stall that asked for too much
+S6.x2	42	6-namespaces-quotas-helm-and-troubleshooting/x2-who-gets-evicted-first	exercise	Who gets evicted first
+S6.x3	30	6-namespaces-quotas-helm-and-troubleshooting/x3-friday-5pm-outage	finale	The Friday 5 PM outage (the finale)

@@ -73,7 +73,7 @@ kubectl patch deploy api --type=json -p='[
  {"op":"replace","path":"/spec/template/spec/containers/0/livenessProbe/failureThreshold","value":2}]'
 kubectl get pods -l app=api -w
 ```
-🔍 The new Pods never finish booting (20s) before liveness kills them (~6s): an endless **CrashLoopBackOff** of a perfectly good app. Lots of real outages look exactly like this after someone adds a "simple" liveness probe ([scenario K07](../scenarios/07-showdown-slow-start/README.md)).
+🔍 The new Pods never finish booting (20s) before liveness kills them (~6s): an endless **CrashLoopBackOff** of a perfectly good app. Lots of real outages look exactly like this after someone adds a "simple" liveness probe ([scenario S5.2](../scenarios/5-scaling-self-healing-and-releases/2-showdown-slow-start/README.md)).
 
 Restore:
 ```bash
