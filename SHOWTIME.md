@@ -152,7 +152,7 @@ Close with the checklist on screen: *"Every line on this list is something you *
 | Problem | Turn it into a lesson |
 |---|---|
 | Image pull is slow | *"This is why we pre-pull and why image size matters"* → preview of Lab D05. Instructor: run `docker/scenarios/preload.sh` (Kubernetes: `kubernetes/scenarios/preload.sh`) the day before ([Docker checklist](docker/scenarios/README.md), [Kubernetes checklist](kubernetes/scenarios/README.md#instructor-preload-checklist)) |
-| Pod stuck `Pending` | Run `kubectl describe pod` live: *"Let's debug it together"* → [scenario K01](kubernetes/scenarios/01-excalidraw-pending/README.md) |
+| Pod stuck `Pending` | Run `kubectl describe pod` live: *"Let's debug it together"* → [scenario S1.1](kubernetes/scenarios/1-architecture-and-pod-lifecycle/1-excalidraw-pending/README.md) |
 | A typo breaks something | Leave it! Ask the room to find it. Best teaching moment of the day. |
 | Phones can't connect | Hotspot plan B, or `kubectl port-forward --address 0.0.0.0`, or demo solo and use the curl voting loop |
 | Laptop dies | Killercoda: the whole course runs in a browser |

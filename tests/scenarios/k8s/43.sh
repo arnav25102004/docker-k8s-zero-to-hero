@@ -2,7 +2,7 @@
 # Spec for scenario K43 (43-maintenance-van-wants-the-master-key). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-43-van"
-CHECK43="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/43-maintenance-van-wants-the-master-key" && pwd)/check.sh"
+CHECK43="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/4-config-storage-and-security/x2-maintenance-van-wants-the-master-key" && pwd)/check.sh"
 
 ready43() { local r; r="$(kubectl get deployment van -n k-43-van -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }
 rsmsg43() { kubectl get rs -n k-43-van -l app=van -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].message}' 2>&1; }

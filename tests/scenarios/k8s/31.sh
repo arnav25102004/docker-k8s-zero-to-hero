@@ -2,7 +2,7 @@
 # Spec for scenario K31 (31-two-stalls-one-signboard). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-31-two-stalls"
-CHECK31="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/31-two-stalls-one-signboard" && pwd)/check.sh"
+CHECK31="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/6-namespaces-quotas-helm-and-troubleshooting/4-two-stalls-one-signboard" && pwd)/check.sh"
 
 endpoint_pods31() { kubectl get endpointslices -n k-31-two-stalls -l kubernetes.io/service-name=chai -o jsonpath='{range .items[*].endpoints[*]}{.targetRef.name}{"\n"}{end}' 2>&1; }
 

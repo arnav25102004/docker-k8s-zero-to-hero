@@ -114,11 +114,11 @@ BestEffort, then Burstable Pods using more than their request, and Guaranteed la
 
 ## 🔥 Now break it
 Requests, limits and quotas cause some of the most confusing failures:
-- [K08](../scenarios/08-ai-trainer-oomkilled/README.md): an OOM kill with no error
-- [K19](../scenarios/19-hackathon-quota/README.md): a deploy that creates nothing (quota)
-- [K20](../scenarios/20-surprise-limitrange-oom/README.md): a limit nobody wrote (LimitRange)
-- [K40](../scenarios/40-stall-that-asked-for-too-much/README.md): a limit above the namespace maximum
-- [K42](../scenarios/42-who-gets-evicted-first/README.md): who gets evicted first (QoS)
+- [S5.5](../scenarios/5-scaling-self-healing-and-releases/5-ai-trainer-oomkilled/README.md): an OOM kill with no error
+- [S6.2](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/2-hackathon-quota/README.md): a deploy that creates nothing (quota)
+- [S6.5](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/5-surprise-limitrange-oom/README.md): a limit nobody wrote (LimitRange)
+- [S6.x1](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much/README.md): a limit above the namespace maximum
+- [S6.x2](../scenarios/6-namespaces-quotas-helm-and-troubleshooting/x2-who-gets-evicted-first/README.md): who gets evicted first (QoS)
 
 ## 🧹 Cleanup
 ```bash

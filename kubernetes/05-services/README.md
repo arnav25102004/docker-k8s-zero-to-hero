@@ -117,7 +117,7 @@ Fix it and watch the UI recover:
 ```bash
 kubectl patch svc api -p '{"spec":{"selector":{"app":"api"}}}'
 ```
-🔍 **Pods running ≠ service working.** A selector/label mismatch is one of the most common production outages ([scenario K04](../scenarios/04-it-tools-no-endpoints/README.md)).
+🔍 **Pods running ≠ service working.** A selector/label mismatch is one of the most common production outages ([scenario S3.1](../scenarios/3-services-ingress-and-networking/1-it-tools-no-endpoints/README.md)).
 
 ## 🏭 In production
 - Services talk to each other via **names**, never Pod IPs.

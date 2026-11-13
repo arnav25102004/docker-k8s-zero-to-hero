@@ -2,7 +2,7 @@
 # Spec for scenario K15 (15-stall-that-opens-one-at-a-time). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-15-statefulset"
-CHECK15="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/15-stall-that-opens-one-at-a-time" && pwd)/check.sh"
+CHECK15="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/2-workloads/2-stall-that-opens-one-at-a-time" && pwd)/check.sh"
 
 pods15() { kubectl get pods -n k-15-statefulset -l app=stall --no-headers 2>/dev/null | wc -l | tr -d ' '; }
 ready15() { local r; r="$(kubectl get statefulset stall -n k-15-statefulset -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }

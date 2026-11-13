@@ -2,7 +2,7 @@
 # Spec for scenario K44 (44-the-checklist). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-44-checklist"
-CHECK44="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/44-the-checklist" && pwd)/check.sh"
+CHECK44="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/4-config-storage-and-security/x3-the-checklist" && pwd)/check.sh"
 
 ready44() { local r; r="$(kubectl get deployment cart -n k-44-checklist -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }
 rsmsg44() { kubectl get rs -n k-44-checklist -l app=cart -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].message}' 2>&1; }

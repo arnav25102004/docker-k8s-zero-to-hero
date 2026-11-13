@@ -2,7 +2,7 @@
 # Spec for scenario K42 (42-who-gets-evicted-first). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-42-qos"
-CHECK42="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/42-who-gets-evicted-first" && pwd)/check.sh"
+CHECK42="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/6-namespaces-quotas-helm-and-troubleshooting/x2-who-gets-evicted-first" && pwd)/check.sh"
 
 ready42() { local r; r="$(kubectl get deployment cache -n k-42-qos -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"; echo "${r:-0}"; }
 rsmsg42() { kubectl get rs -n k-42-qos -l app=cache -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].message}' 2>&1; }

@@ -90,7 +90,7 @@ sleep 5; kubectl get pods -l app=api        # new Pod: CreateContainerConfigErro
 kubectl describe pod -l app=api | grep -i -A2 'warning' | head -4
 kubectl rollout undo deploy/api
 ```
-[Scenario K09](../scenarios/09-adminer-missing-secret/README.md) shows the same `CreateContainerConfigError` with a missing Secret.
+[Scenario S4.2](../scenarios/4-config-storage-and-security/2-adminer-missing-secret/README.md) shows the same `CreateContainerConfigError` with a missing Secret.
 
 ## 🏭 In production
 - Don't keep real Secrets in Git as plain YAML. Use **External Secrets Operator** (AWS Secrets Manager, Vault, GCP, Azure), **Sealed Secrets**, or the **Secrets Store CSI driver**.

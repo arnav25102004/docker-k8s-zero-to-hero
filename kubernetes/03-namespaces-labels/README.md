@@ -13,7 +13,7 @@
 
 - A **namespace** is a folder for objects: names must be unique *within* a namespace. It's also the unit for access control (RBAC), quotas, and network policies.
 - A **label** is a key/value tag on an object (`app=shop`, `env=prod`).
-- A **selector** is a query over labels (`app=shop,env=prod`). Deployments find their Pods by selector, and Services find their endpoints by selector. **A wrong label equals a broken app** ([scenario K04](../scenarios/04-it-tools-no-endpoints/README.md)).
+- A **selector** is a query over labels (`app=shop,env=prod`). Deployments find their Pods by selector, and Services find their endpoints by selector. **A wrong label equals a broken app** ([scenario S3.1](../scenarios/3-services-ingress-and-networking/1-it-tools-no-endpoints/README.md)).
 
 ## 🧪 Hands-on
 

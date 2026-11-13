@@ -1,0 +1,67 @@
+# S6.5: scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showdown
+  namespace: k-20-limitrange
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: showdown
+  template:
+    metadata:
+      labels:
+        app: showdown
+    spec:
+      containers:
+        - name: showdown
+          image: python:3.12-alpine
+          command:
+            - python
+            - -c
+            - |
+              import runpy
+              # Load the vote history into memory at start (40 MiB; every byte is touched, so it is really used).
+              vote_history = bytearray(b"x") * (40 * 1024 * 1024)
+              runpy.run_path("/app/app.py", run_name="__main__")
+          env:
+            - name: PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 2
+          resources:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: showdown-code
+            items:
+              - key: app.py
+                path: app.py
+              - key: index.html
+                path: static/index.html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showdown
+  namespace: k-20-limitrange
+spec:
+  selector:
+    app: showdown
+  ports:
+    - port: 80
+      targetPort: 8080

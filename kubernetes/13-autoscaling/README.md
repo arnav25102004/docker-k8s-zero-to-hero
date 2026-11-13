@@ -96,8 +96,8 @@ metrics-server isn't installed or working, or the Pods have no CPU **requests** 
 
 ## 🔥 Now break it
 When the autoscaler shrugs:
-- [K25](../scenarios/25-showdown-hpa-not-scaling/README.md): the autoscaler says unknown
-- [K41](../scenarios/41-autoscaler-pointing-at-nobody/README.md): an autoscaler pointing at a Deployment that does not exist
+- [S5.3](../scenarios/5-scaling-self-healing-and-releases/3-showdown-hpa-not-scaling/README.md): the autoscaler says unknown
+- [S5.x5](../scenarios/5-scaling-self-healing-and-releases/x5-autoscaler-pointing-at-nobody/README.md): an autoscaler pointing at a Deployment that does not exist
 
 ## 🧹 Cleanup
 ```bash

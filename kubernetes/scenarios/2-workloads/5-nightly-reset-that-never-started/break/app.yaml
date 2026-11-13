@@ -1,0 +1,22 @@
+# S2.5 scenario manifest
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-reset
+  namespace: k-24-cronjob
+spec:
+  schedule: "* * * * *"          # every minute, so a "night" fits in a class
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: reset
+              image: busybox:1.36
+              command: ["sh", "-c", "echo '🧹 resetting the leaderboard…'; sleep 2; echo '✅ leaderboard reset'"]

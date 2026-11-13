@@ -1,0 +1,129 @@
+# S1.x3 break (1/3): what the web container serves and how it is configured. Nothing is wrong here.
+# The nginx config sends the access log to a file in a folder shared inside the Pod.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-conf
+  namespace: k-29-sidecar
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name _;
+      access_log /var/log/web/access.log;
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hostel-board-page
+  namespace: k-29-sidecar
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hostel Notice Board</title>
+    <style>
+      :root { --board:#1f3d33; --chalk:#f4f1e6; --dim:#b9c9bf; --yellow:#f2d366; --pink:#f29ab3; --blue:#8fd0f2; }
+      * { box-sizing: border-box; }
+      body { margin:0; padding:22px; background:var(--board); color:var(--chalk); font:20px/1.45 "Trebuchet MS",system-ui,sans-serif; }
+      h1 { text-align:center; margin:0; font-size:40px; letter-spacing:1px; }
+      .sub { text-align:center; margin:4px 0 18px; color:var(--dim); font-size:18px; }
+      .wrap { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; max-width:1050px; margin:0 auto; }
+      section { border:3px dashed var(--dim); border-radius:10px; padding:16px 18px; }
+      section h2 { margin:0 0 8px; font-size:24px; color:var(--yellow); }
+      .days { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+      .days button { font:inherit; font-size:16px; padding:3px 10px; border:2px solid var(--chalk); border-radius:6px; background:transparent; color:var(--chalk); cursor:pointer; }
+      .days button.on { background:var(--chalk); color:var(--board); }
+      #menu li { margin:2px 0; }
+      .slots { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+      .slot { font:inherit; font-size:16px; padding:8px 4px; border:2px solid var(--blue); border-radius:8px; background:transparent; color:var(--blue); cursor:pointer; }
+      .slot.taken { background:var(--pink); border-color:var(--pink); color:var(--board); }
+      .note { margin:6px 0; font-size:18px; }
+      .big { font-size:34px; color:var(--blue); }
+      footer { text-align:center; margin-top:22px; color:var(--dim); font-size:16px; }
+    </style>
+    </head>
+    <body>
+    <h1>🏠 Hostel Notice Board</h1>
+    <p class="sub">Mess menu, laundry slots and quiet hours. Every name and time here is made up.</p>
+    <div class="wrap">
+      <section>
+        <h2>🍛 Mess menu</h2>
+        <div class="days" id="days"></div>
+        <ul id="menu"></ul>
+      </section>
+      <section>
+        <h2>🧺 Laundry slots</h2>
+        <p class="note">Tap a slot to book it. Tap again to give it back.</p>
+        <div class="slots" id="slots"></div>
+      </section>
+      <section>
+        <h2>🤫 Quiet hours</h2>
+        <p class="note">Quiet hours start at 10 pm. Time left today:</p>
+        <p class="big" id="left">--:--:--</p>
+        <p class="note">Guitars are allowed on the terrace. Speakers are not.</p>
+      </section>
+      <section>
+        <h2>📌 Odds and ends</h2>
+        <ul>
+          <li>Lost: one blue umbrella, last seen in the common room.</li>
+          <li>The Wi-Fi password changes on the 1st. Ask your warden.</li>
+          <li>Water tank cleaning on Sunday, 10 am to noon.</li>
+        </ul>
+      </section>
+    </div>
+    <footer>Served from a ConfigMap. No internet needed. <span id="clock"></span></footer>
+    <script>
+    var menu = {
+      Mon: ['Idli and sambar', 'Rice, dal, beans poriyal', 'Chapati and kurma'],
+      Tue: ['Pongal and vada', 'Lemon rice, curd, pickle', 'Dosa and chutney'],
+      Wed: ['Upma', 'Rice, rasam, cabbage curry', 'Pulao and raita'],
+      Thu: ['Poori and potato masala', 'Rice, sambar, appalam', 'Chapati and dal'],
+      Fri: ['Bread and omelette', 'Veg biryani and raita', 'Fried rice and gobi']
+    };
+    var day = 'Mon';
+    function showMenu() {
+      var d = document.getElementById('days'); d.innerHTML = '';
+      Object.keys(menu).forEach(function (k) {
+        var b = document.createElement('button'); b.textContent = k;
+        if (k === day) b.className = 'on';
+        b.onclick = function () { day = k; showMenu(); };
+        d.appendChild(b);
+      });
+      var m = document.getElementById('menu'); m.innerHTML = '';
+      ['Breakfast: ', 'Lunch: ', 'Dinner: '].forEach(function (label, i) {
+        var li = document.createElement('li'); li.textContent = label + menu[day][i]; m.appendChild(li);
+      });
+    }
+    var times = ['6 am', '8 am', '10 am', '12 pm', '2 pm', '4 pm'];
+    var taken = {};
+    function showSlots() {
+      var s = document.getElementById('slots'); s.innerHTML = '';
+      times.forEach(function (t) {
+        var b = document.createElement('button'); b.className = 'slot' + (taken[t] ? ' taken' : '');
+        b.textContent = taken[t] ? t + ' (yours)' : t;
+        b.onclick = function () { taken[t] = !taken[t]; showSlots(); };
+        s.appendChild(b);
+      });
+    }
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    function tick() {
+      var now = new Date(), q = new Date(now); q.setHours(22, 0, 0, 0);
+      var ms = q - now;
+      document.getElementById('left').textContent = ms > 0
+        ? two(Math.floor(ms / 3600000)) + ':' + two(Math.floor(ms / 60000) % 60) + ':' + two(Math.floor(ms / 1000) % 60)
+        : 'Quiet hours are on 🤫';
+      document.getElementById('clock').textContent = now.toLocaleTimeString();
+    }
+    showMenu(); showSlots(); tick(); setInterval(tick, 1000);
+    </script>
+    </body>
+    </html>

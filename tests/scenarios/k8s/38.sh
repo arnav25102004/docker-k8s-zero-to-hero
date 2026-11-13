@@ -2,7 +2,7 @@
 # Spec for scenario K38 (38-applied-here-looking-there). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-38-night-canteen"
-CHECK38="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/38-applied-here-looking-there" && pwd)/check.sh"
+CHECK38="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/6-namespaces-quotas-helm-and-troubleshooting/1-applied-here-looking-there" && pwd)/check.sh"
 
 current_ns38() { local n; n="$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)"; echo "${n:-default}"; }
 

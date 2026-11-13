@@ -64,7 +64,7 @@ kubectl exec -n rbac-lab api-client -- sh -c '
   echo "--- list secrets (forbidden):"
   curl -s --cacert $CA -H "Authorization: Bearer $TOKEN" $API/api/v1/namespaces/rbac-lab/secrets | grep -E "\"(reason|message)\""'
 ```
-🔍 `403 Forbidden` with a clear message: `User "system:serviceaccount:rbac-lab:pod-reader" cannot list resource "secrets"...`. That's exactly what you'll see in logs when an operator or CI job lacks permissions ([scenario K14](../scenarios/14-leaderboard-bot-forbidden/README.md)).
+🔍 `403 Forbidden` with a clear message: `User "system:serviceaccount:rbac-lab:pod-reader" cannot list resource "secrets"...`. That's exactly what you'll see in logs when an operator or CI job lacks permissions ([scenario S4.4](../scenarios/4-config-storage-and-security/4-leaderboard-bot-forbidden/README.md)).
 
 ### Step 4: Grant one more permission, the least-privilege way
 ```bash

@@ -1,0 +1,12 @@
+# S6.2 break (1/4): the organisers' setup for this namespace.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: hackathon-quota
+  namespace: k-19-hackathon
+spec:
+  hard:
+    requests.cpu: 500m
+    requests.memory: 256Mi
+    limits.cpu: "1"
+    limits.memory: 512Mi

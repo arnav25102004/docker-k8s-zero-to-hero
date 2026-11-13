@@ -132,10 +132,10 @@ Over `localhost`, because they share the Pod's network namespace. They can also 
 
 ## 🔥 Now break it
 Pods fail in a handful of ways. Meet them on purpose:
-- [K02](../scenarios/02-image-typo/README.md): image typo: ImagePullBackOff
-- [K03](../scenarios/03-showdown-crashloop/README.md): crash loop
-- [K26](../scenarios/26-showdown-init-stuck/README.md): an init container that waits forever
-- [K29](../scenarios/29-log-sidecar-half-ready/README.md): a sidecar that is never Ready
+- [S1.2](../scenarios/1-architecture-and-pod-lifecycle/2-image-typo/README.md): image typo: ImagePullBackOff
+- [S1.3](../scenarios/1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md): crash loop
+- [S1.4](../scenarios/1-architecture-and-pod-lifecycle/4-showdown-init-stuck/README.md): an init container that waits forever
+- [S1.x3](../scenarios/1-architecture-and-pod-lifecycle/x3-log-sidecar-half-ready/README.md): a sidecar that is never Ready
 
 ## 🧹 Cleanup
 ```bash

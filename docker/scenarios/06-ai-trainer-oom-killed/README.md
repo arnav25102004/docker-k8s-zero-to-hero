@@ -15,7 +15,7 @@ It's exam week at Christ University and your final-year project is a "model" tha
 **Now the bug's world.** A container is just a process on a machine that many other things share. When one of them stops without saying why, you do not guess: you read what you wrote down (the files) and what Docker recorded (`docker inspect`, logs, exit codes), and compare the two.
 
 ## 🏢 Where you'll meet this at work
-- **Kubernetes**: a Pod that restarts again and again with nothing useful in its logs (SRE, platform team; this is [scenario K08](../../../kubernetes/scenarios/08-ai-trainer-oomkilled/README.md)).
+- **Kubernetes**: a Pod that restarts again and again with nothing useful in its logs (SRE, platform team; this is [scenario S5.5](../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/5-ai-trainer-oomkilled/README.md)).
 - **A service that runs fine on a laptop and dies in production**, with nothing in its logs (developer).
 - **Data jobs on big files**: a nightly batch loads a file that grew this month (data engineer).
 

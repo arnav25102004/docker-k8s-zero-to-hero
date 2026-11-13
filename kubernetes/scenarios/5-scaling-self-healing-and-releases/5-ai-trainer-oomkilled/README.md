@@ -1,0 +1,255 @@
+# S5.5 · No error, no goodbye (Kubernetes edition)
+
+*Your AI model was training. Then it vanished. No error. No goodbye. And Kubernetes keeps bringing it back to die again.*
+
+⏱ 10 min · beginner · an "AI trainer" script (`python:3.12-alpine`, about 19 MB) · memory requests and limits, OOMKilled, exit code 137
+
+⬇️ First run downloads about 19 MB (Python). A slow first download is normal: do it on good Wi-Fi, before the session.
+
+Output columns and wording can differ a little between kubectl, container runtimes and clusters (kind, minikube, Docker Desktop, playgrounds). The ideas never change.
+
+## 📖 The story
+It's exam week at Christ University and Meera's final-year project is a "model" that learns from a big dataset. She deploys the training to the lab's Kubernetes cluster and goes for a filter coffee. When she comes back, the training never finishes: the Pod keeps restarting, and each time the output stops at epoch 3 of 6. No red error, no traceback, nothing. Her teammate says, *"Maybe Python crashed?"* Python did not crash. Someone else ended it. This is the Docker story from [D06](../../../../docker/scenarios/06-ai-trainer-oom-killed/README.md), and this time Kubernetes tells you who.
+
+![Diagram: the setup for S5.5, who talks to whom and what your mission is](../../images/k08-context.svg)
+
+## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in S5.5](../../images/k08-oom-silent-kill.svg)
+
+A cluster node's memory is shared by many Pods. To stop one greedy container from eating the whole machine, Kubernetes lets you set a **memory limit** on it. Under the hood it is a Linux **cgroup**: a fence the kernel builds around the container's processes.
+
+Think of a hostel mess with one plate per student. Take more than one plate and the warden quietly takes your tray away. He doesn't write you a letter.
+
+- A **request** (`requests.memory`) is what the scheduler reserves for you when it picks a node.
+- A **limit** (`limits.memory`) is the fence. Inside it the program keeps asking for memory and gets it, until the fence is full.
+- Then the kernel's **OOM killer** (OOM = Out Of Memory) ends the process with `SIGKILL` (signal 9). A SIGKILL cannot be caught, so the program never prints an error. The exit code is **137 = 128 + 9**.
+- Kubernetes notes it as `OOMKilled` and the **kubelet** (the node's agent; the Pod's `restartPolicy` is `Always`) **restarts** the container, which gets killed again, and again (`CrashLoopBackOff`).
+
+```
+ epoch 1 ──▶ epoch 2 ──▶ epoch 3 ──▶ 💥 memory over the 64Mi fence ──▶ SIGKILL (137)
+                                      ▲                                     │
+                                      └──────── Kubernetes restarts it ◀────┘
+```
+
+## 🏢 Where you'll meet this at work
+- **A Java service whose heap is bigger than the Pod's limit:** it runs fine on a laptop and dies in production (developer, SRE).
+- **ML and data jobs on a growing file:** the nightly batch loads a file that grew this month (data engineer, ML engineer).
+- **A "right-sizing" review:** a platform team sets limits from measured peak usage (`kubectl top`, Prometheus) and alerts on `OOMKilled` events.
+
+## 💥 Break it
+```bash
+cd break && ./break.sh
+```
+What the room should see: the script says the trainer was deployed, but the training never finishes. The Pod keeps restarting and its `RESTARTS` count keeps climbing. There is **no web page and no port to open** in this scenario (it isn't a web app), so everything we do, finding the problem and checking the fix, happens in the terminal with `logs` and `describe`.
+
+## 🔮 Predict first (60 seconds)
+The trainer needs more memory than its limit allows. Before you look:
+1. Will `kubectl logs` show an error?
+2. Which exit code do you expect?
+
+<details><summary>Check your prediction</summary>
+
+1. No. The kernel kills the process with SIGKILL, which gives it no chance to log anything.
+2. 137 (128 + 9, where 9 is SIGKILL).
+</details>
+
+## 🔍 Investigate
+Guess first, then run these **in order**.
+
+**1. What is the Pod doing?** Watch it for a minute: this is the symptom.
+```bash
+kubectl get pods -n k-08-oomkilled -w
+```
+```
+NAME                       READY   STATUS             RESTARTS      AGE
+trainer-85967484bf-nvtmh   1/1     Running            1 (3s ago)    6s
+trainer-85967484bf-nvtmh   0/1     OOMKilled          1 (4s ago)    7s
+trainer-85967484bf-nvtmh   0/1     CrashLoopBackOff   1 (14s ago)   20s
+trainer-85967484bf-nvtmh   1/1     Running            2 (15s ago)   21s
+trainer-85967484bf-nvtmh   0/1     OOMKilled          2 (17s ago)   23s
+trainer-85967484bf-nvtmh   0/1     CrashLoopBackOff   2 (14s ago)   36s
+trainer-85967484bf-nvtmh   1/1     Running            3 (25s ago)   47s
+trainer-85967484bf-nvtmh   0/1     OOMKilled          3 (28s ago)   50s
+```
+(Shortened: this is what you see if you start watching a few seconds after `break.sh`, and it keeps going. Ages and Pod names will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod lives only about 2 seconds each time, `RESTARTS` climbs, and the waits between restarts grow (`CrashLoopBackOff`, as in [S1.3](../../1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md)). Nobody typed `kubectl delete`. On some clusters the `STATUS` word is `Error` instead of `OOMKilled`: it is the same kill.
+
+<details><summary>💡 Hint</summary>
+A container that dies by itself usually leaves an error behind. This one left nothing. What could have ended it silently, without a word? And what does Kubernetes know about how much memory this container is allowed to use?
+</details>
+
+**2. Who ended it?** `describe` records the last state of the container that died.
+```bash
+kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -A4 'Last State'
+```
+```
+    Last State:     Terminated
+      Reason:       OOMKilled
+      Exit Code:    137
+      Started:      Sun, 08 Nov 2026 09:58:50 +0530
+      Finished:     Sun, 08 Nov 2026 09:58:52 +0530
+```
+(Times will differ.) There is the answer in Kubernetes' own words: `Reason: OOMKilled`, `Exit Code: 137`. The container ran for only 2 seconds (`Started` to `Finished`). On a few setups the reason is shown as `Error` instead of `OOMKilled` (a runtime race on some setups); the exit code **137** is the constant clue.
+
+**3. What did the program say before it died?** Read the last words of the container that was killed.
+```bash
+kubectl logs -n k-08-oomkilled -l app=trainer --previous
+```
+```
+epoch 1/6 ... loading 25 MB
+epoch 2/6 ... loading 25 MB
+epoch 3/6 ... loading 25 MB
+```
+The log stops in the middle of epoch 3, with no error message. A program that crashed on its own would usually say something. This one never got the chance. (If you see `unable to retrieve container logs`, you caught the Pod in the gap between two restarts: wait a few seconds and run it again.)
+
+**4. What fence did we give it?** Look at the memory settings in the Deployment.
+```bash
+kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A4 ' resources:'
+```
+```
+        resources:
+          limits:
+            memory: 64Mi
+          requests:
+            memory: 64Mi
+```
+The limit is **64Mi** (about 67 MB). Does the program need more than that? Each epoch loads 25 MB, six epochs: 150 MB.
+
+## 🪤 The tempting wrong fix: restart it
+"Just restart the trainer."
+```bash
+kubectl delete pods -n k-08-oomkilled -l app=trainer
+kubectl get pods -n k-08-oomkilled -w
+```
+The new Pod runs the same training under the same 64Mi fence and is killed at the same epoch. Nothing about a restart changes how much memory the job needs. (Ctrl+C to stop watching.)
+
+## 🩺 Root cause
+<details><summary>Reveal after the room guesses</summary>
+
+The training needs about **150 MB** (6 epochs x 25 MB, plus about 10 MB for Python itself); the container's memory limit is **64Mi** (about 67 MB). When epoch 3 pushed memory past the fence, the kernel's OOM killer sent SIGKILL. Python never saw it coming, so there was no error in the logs. Kubernetes recorded `OOMKilled`, exit code 137, and the kubelet restarted the container, which hit the same wall at the same place.
+
+Calibration (roughly, from about 10 MB for a bare Python 3.12 process plus 25 MB per epoch): after epoch 2 it holds about 60 MB, which still fits; epoch 3 needs about 85 MB and cannot. Allocation (150 MB) minus limit (about 67 MB) leaves a big overshoot, so the kill is certain, and the log ended at epoch 3 in every one of 5 consecutive runs of `break.sh` on the test cluster (kind), and on every restart.
+</details>
+
+## 🔧 Fix it
+```bash
+cd ../fix && ./fix.sh
+```
+The script waits for the new Pod and for the training to finish (about 10 seconds). What changed: only the memory settings. Compare the two files:
+```bash
+diff ../break/app.yaml app.yaml
+```
+```
+33,34c33,34
+<             requests: { memory: 64Mi }
+<             limits: { memory: 64Mi }
+---
+>             requests: { memory: 200Mi }
+>             limits: { memory: 256Mi }
+```
+The limit goes from 64Mi to **256Mi**: the real need (150 MB of data + about 10 MB for Python) plus headroom. The request is raised to 200Mi so the scheduler reserves what the program really uses. When the model is finished the script simply waits (`sleep`), so the Pod stays `Running` instead of exiting and being restarted.
+
+By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+```bash
+kubectl apply -f app.yaml
+```
+Kubernetes starts a new Pod with the bigger limit and removes the old one. Wait about 10 seconds before you start verifying.
+
+## ✅ Verify it yourself
+Short on time? `cd .. && ./check.sh` says in one line whether you are done. It only looks, it never changes anything. The steps below show you *why* it says so.
+
+There is no web page to open, so we read the proof. Is the Pod up and stable?
+```bash
+kubectl get pods -n k-08-oomkilled
+```
+```
+NAME                       READY   STATUS    RESTARTS   AGE
+trainer-79f66877c4-xsgxf   1/1     Running   0          7s
+```
+(The age and Pod name will differ.) One Pod, `1/1` Ready, `0` restarts, and it stays that way. Did the training finish?
+```bash
+kubectl logs -n k-08-oomkilled -l app=trainer
+```
+```
+epoch 1/6 ... loading 25 MB
+epoch 2/6 ... loading 25 MB
+epoch 3/6 ... loading 25 MB
+epoch 4/6 ... loading 25 MB
+epoch 5/6 ... loading 25 MB
+epoch 6/6 ... loading 25 MB
+✅ model trained
+```
+Past epoch 3 and all the way to `model trained`. And the new limit is in place:
+```bash
+kubectl get deploy trainer -n k-08-oomkilled -o yaml | grep -A4 ' resources:'
+```
+```
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 200Mi
+```
+Finally, `describe` has no `Last State` any more (nothing was killed) and the restart count is 0:
+```bash
+kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -E 'State:|Restart Count'
+```
+```
+    State:          Running
+    Restart Count:  0
+```
+
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../../19-observability/README.md)), watch an out-of-memory kill as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_container_status_last_terminated_reason{namespace="k-08-oomkilled",reason="OOMKilled"} == 1
+```
+In Grafana, **Kubernetes / Compute Resources / Pod** shows memory climbing to the limit and dropping to zero, a sawtooth. The query `container_memory_working_set_bytes{namespace="k-08-oomkilled"}` is the line you are looking at.
+
+## 🎯 Key takeaways
+- A memory **limit** is a hard fence (a cgroup). Go over it and the kernel kills the process, with no warning to the program.
+- Exit code **137 = 128 + 9 = SIGKILL**. `Reason: OOMKilled` in `kubectl describe` names the culprit (on some setups it shows as `Error`, still 137).
+- The logs of an OOM kill just *stop*. Absence of an error is itself the clue.
+- Debug path: `get pods` (OOMKilled / CrashLoopBackOff) → `describe` (Last State, 137) → `logs --previous` (stops mid-epoch) → the limit in the Deployment.
+- Set limits from measured usage plus headroom (`kubectl top`, Prometheus), and alert on OOM kills.
+
+## 🏋️ Now you try (optional, 3 minutes)
+After the fix, same Deployment, one more experiment. Predict first, then check.
+1. Lower the limit back to `64Mi` on the *fixed* Deployment:
+   ```bash
+   kubectl set resources deployment trainer -n k-08-oomkilled --requests=memory=64Mi --limits=memory=64Mi
+   ```
+   Will the new Pod survive? What do you expect `RESTARTS` and `Last State` to say?
+2. Why did the command set the request too? Which of the two numbers does the OOM kill look at?
+
+<details><summary>Answers</summary>
+
+1. No: the script needs more than 64 Mi, so it is killed again (`OOMKilled`, exit 137) and `RESTARTS` climbs.
+2. A request above the limit is rejected, so both had to come down. The kill looks only at the **limit**; the request is what the scheduler uses to place the Pod.
+</details>
+
+## 💎 Lifelong lesson
+> Exit 137 means someone killed it. In Kubernetes, `describe` tells you who.
+
+## 🧹 Clean up
+```bash
+cd .. && ./cleanup.sh
+```
+
+## 🧪 Quick recap (3 questions)
+1. What does `OOMKilled` mean?
+2. Who enforces a memory limit?
+3. What exit code means "killed by SIGKILL"?
+
+<details><summary>Answers</summary>
+
+1. The container used more memory than its limit, so the kernel killed it.
+2. The Linux kernel, not Kubernetes.
+3. 137.
+</details>
+
+## Next →
+Next, the next section: [S6.1](../../6-namespaces-quotas-helm-and-troubleshooting/1-applied-here-looking-there/README.md): The deploy said "created". The cluster says "No resources found". Both are telling the truth.
+
+🏋️ **More reps on this idea (optional):** the practice lane S6.x1 to S6.x2 ("Resources"), starting at [S6.x1](../../6-namespaces-quotas-helm-and-troubleshooting/x1-stall-that-asked-for-too-much/README.md).
+

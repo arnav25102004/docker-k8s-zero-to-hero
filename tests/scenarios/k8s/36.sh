@@ -2,7 +2,7 @@
 # Spec for scenario K36 (36-two-probes-two-mistakes). Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-36-two-probes"
-CHECK36="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/36-two-probes-two-mistakes" && pwd)/check.sh"
+CHECK36="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/5-scaling-self-healing-and-releases/x3-two-probes-two-mistakes" && pwd)/check.sh"
 
 restarts36() { kubectl get pods -n k-36-two-probes -l app=thali -o jsonpath='{range .items[*]}{.status.containerStatuses[0].restartCount}{"\n"}{end}' 2>/dev/null | awk '{s+=$1} END{print s+0}'; }
 events36() { kubectl get events -n k-36-two-probes -o jsonpath='{.items[*].message}' 2>&1; }

@@ -2,7 +2,7 @@
 # Spec for scenario K27 (27-upgrade-that-broke-the-stall). Needs helm. Sourced by tests/scenarios/k8s.sh.
 # shellcheck disable=SC2034  # read by tests/scenarios/k8s.sh
 NAMESPACES="k-27-helm"
-CHECK27="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/27-upgrade-that-broke-the-stall" && pwd)/check.sh"
+CHECK27="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../kubernetes/scenarios/6-namespaces-quotas-helm-and-troubleshooting/3-upgrade-that-broke-the-stall" && pwd)/check.sh"
 command -v helm >/dev/null 2>&1 || { printf 'helm is needed for scenario K27\n' >&2; exit 1; }
 
 img27() { kubectl get deployment stall -n k-27-helm -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null; }

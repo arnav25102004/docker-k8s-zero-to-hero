@@ -110,7 +110,7 @@ kubectl scale deployment api -n showdown --replicas=3
 ```
 
 ### Step 5: Incident 2, a bad release (8 min)
-This is a scenario you already know ([K03](../scenarios/03-showdown-crashloop/README.md), [K11](../scenarios/11-showdown-bad-rollout/README.md)), now seen from the control room:
+This is a scenario you already know ([S1.3](../scenarios/1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md), [S5.4](../scenarios/5-scaling-self-healing-and-releases/4-showdown-bad-rollout/README.md)), now seen from the control room:
 ```bash
 kubectl set env deployment/api -n showdown PORT=eighty
 kubectl rollout status deployment/api -n showdown --timeout=60s
