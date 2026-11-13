@@ -23,6 +23,9 @@ It turns out the cook was hired before the rule existed, and he can only work as
 ![Diagram: the setup for K45, who talks to whom and what your mission is](../images/k45-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K45](../images/k45-psa-then-root-image.svg)
+
 Two different checks can stop a Pod:
 
 1. **Admission** (the gate): is the Pod *allowed* to be created? (K43, K44.)

@@ -14,6 +14,9 @@ It's the night before the Christ University fest and Ravi deploys the "Cats vs D
 ![Diagram: the setup for K07, who talks to whom and what your mission is](../images/k07-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K07](../images/k07-slow-start-liveness.svg)
+
 Kubernetes has three kinds of health check ("probes"), and each asks a different question:
 
 - **Startup probe:** "Has the app *finished starting*?" Until it passes, the other probes wait.

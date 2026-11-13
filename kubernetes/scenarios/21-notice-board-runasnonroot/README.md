@@ -14,6 +14,9 @@ Lakshmi runs the **Campus notice board**, a page that lists fest dates, the cant
 ![Diagram: the setup for K21, who talks to whom and what your mission is](../images/k21-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K21](../images/k21-runasnonroot-image.svg)
+
 By default, a container in Kubernetes runs as whatever user its image says, and many images say **root**, the all-powerful user. If a root process is hijacked, the attacker starts with a lot of power. So security teams ask: "never run as root".
 
 - `securityContext.runAsNonRoot: true` is a **guard** on the Pod: "refuse to start any container that would run as user 0 (root)".

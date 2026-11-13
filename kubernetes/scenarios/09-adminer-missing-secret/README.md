@@ -14,6 +14,9 @@ Ravi's team uses Adminer, a small web page for peeking into the project database
 ![Diagram: the setup for K09, who talks to whom and what your mission is](../images/k09-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K09](../images/k09-missing-secret-env.svg)
+
 A Pod can take its settings from a **Secret**: a small object that holds sensitive values such as passwords, kept out of your YAML and your image.
 
 - In the Deployment, an environment variable says "fill `DB_PASSWORD` from Secret `adminer-db`, key `password`".

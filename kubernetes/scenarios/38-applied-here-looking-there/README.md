@@ -20,6 +20,9 @@ It is not haunted. It is serving customers right now, perfectly happily, in the 
 ![Diagram: the setup for K38, who talks to whom and what your mission is](../images/k38-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K38](../images/k38-wrong-namespace.svg)
+
 Every `kubectl` command is aimed by two things:
 - the **context**: *which cluster* (and which user) you are talking to;
 - the **namespace**: *which room inside that cluster* you are looking in.

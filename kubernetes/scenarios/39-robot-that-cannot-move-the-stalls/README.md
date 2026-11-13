@@ -18,6 +18,9 @@ Every night a maintenance robot needs to move one stall to a new home (this is w
 ![Diagram: the setup for K39, who talks to whom and what your mission is](../images/k39-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K39](../images/k39-pdb-blocks-eviction.svg)
+
 Pods get disrupted in two ways:
 - **Involuntary:** a machine dies. You cannot stop that.
 - **Voluntary:** somebody *chooses* to move Pods, for node maintenance, a cluster upgrade, or the autoscaler removing a node.

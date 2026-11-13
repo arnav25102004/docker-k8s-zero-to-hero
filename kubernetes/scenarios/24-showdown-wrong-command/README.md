@@ -14,6 +14,9 @@ Priya is helping the Christ University fest team ship the "Cats vs Dogs" poll fo
 ![Diagram: the setup for K24, who talks to whom and what your mission is](../images/k24-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K24](../images/k24-command-typo.svg)
+
 Starting a container is two steps, done by two different parties. The **kubelet** (the agent on each node) asks the container runtime to create the container, and the runtime then tries to **execute** the program it was told to run. Only after that does *your* code run, and only your code writes to `kubectl logs`.
 
 - If the program can't be started at all (the file isn't there, or it isn't executable), the runtime reports the failure to the kubelet, and the kubelet records it as an **Event**. Your app never ran, so it has nothing to say.

@@ -14,6 +14,9 @@ It's exam week at Christ University and Meera's final-year project is a "model" 
 ![Diagram: the setup for K08, who talks to whom and what your mission is](../images/k08-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K08](../images/k08-oom-silent-kill.svg)
+
 A cluster node's memory is shared by many Pods. To stop one greedy container from eating the whole machine, Kubernetes lets you set a **memory limit** on it. Under the hood it is a Linux **cgroup**: a fence the kernel builds around the container's processes.
 
 Think of a hostel mess with one plate per student. Take more than one plate and the warden quietly takes your tray away. He doesn't write you a letter.

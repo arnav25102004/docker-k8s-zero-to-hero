@@ -23,6 +23,9 @@ The gate does not argue. It simply does not let the van in. The form is filed, a
 ![Diagram: the setup for K43, who talks to whom and what your mission is](../images/k43-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K43](../images/k43-psa-baseline.svg)
+
 **Pod Security Admission (PSA)** is a built-in gate. Label a namespace with one of three levels and the API server checks every new Pod against it:
 
 | Level | Meaning |

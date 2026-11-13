@@ -18,6 +18,9 @@ Last week Ravi opened a second stall, `stale-chai`, to test a new recipe. The te
 ![Diagram: the setup for K31, who talks to whom and what your mission is](../images/k31-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K31](../images/k31-loose-selector.svg)
+
 A Service has no idea which Deployment made a Pod. It knows one thing: a **label query**. "Send customers to every Ready Pod wearing *all* of these labels." Whoever created the Pod, wherever it came from, if the badge matches, it is in.
 
 - **Labels belong to Pods, not to their owners.** A leftover test Pod with the right label is a full member of the team.

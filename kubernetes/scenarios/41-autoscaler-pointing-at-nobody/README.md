@@ -22,6 +22,9 @@ The manager does not shout, does not quit. They just stand there, watching a sta
 ![Diagram: the setup for K41, who talks to whom and what your mission is](../images/k41-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K41](../images/k41-hpa-wrong-target.svg)
+
 An **HPA** has a `scaleTargetRef`: the *kind* and *name* of the thing to scale. It never owns Pods. It looks up the target, reads its Pods' CPU, and changes `replicas`. If the name is wrong, the HPA cannot find anything to scale, and it says so in its **conditions** (`AbleToScale: False`, reason `FailedGetScale`).
 
 In [K25](../25-showdown-hpa-not-scaling/README.md) the target was right and the *numbers* were missing. Here the numbers do not matter yet: there is nothing to read them from.

@@ -14,6 +14,9 @@ It's the night before the Christ University hackathon final. Lakshmi's team lead
 ![Diagram: the setup for K28, who talks to whom and what your mission is](../images/k28-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K28](../images/k28-job-wrong-hostname.svg)
+
 A **Deployment** keeps something running forever. A **Job** is for work that should *finish*: a database backup, a report, a reset. It runs a Pod to completion and then it is done.
 
 - If the Pod fails, the Job starts a **new** Pod and tries again. It waits a little longer before each retry (10 seconds, then 20, and so on).

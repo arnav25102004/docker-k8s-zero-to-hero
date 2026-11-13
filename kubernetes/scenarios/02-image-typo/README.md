@@ -14,6 +14,9 @@ It's the night before the Christ University fest demo. Ravi is tidying the white
 ![Diagram: the setup for K02, who talks to whom and what your mission is](../images/k02-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K02](../images/k02-bad-image-name.svg)
+
 A container needs an **image** (the packaged app). Kubernetes doesn't carry images around: each **node** has an agent, the **kubelet**, and the kubelet **pulls** the image from a **registry** (Docker Hub here) onto its own node before starting the container.
 
 - If the pull fails, the kubelet doesn't give up. It tries again, but waits a bit longer each time: about 10 s, 20 s, 40 s… up to 5 minutes. Think of it as redialling a busy number, with longer and longer pauses.

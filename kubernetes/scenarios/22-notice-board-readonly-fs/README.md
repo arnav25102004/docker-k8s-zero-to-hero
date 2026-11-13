@@ -14,6 +14,9 @@ Lakshmi runs the **Exam Week Board** (the college notice board for exam season),
 ![Diagram: the setup for K22, who talks to whom and what your mission is](../images/k22-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K22](../images/k22-readonly-filesystem.svg)
+
 A container's filesystem is the image's files, plus a thin writable layer on top. By default a running program can change anything in there. That is convenient, but it also means an attacker who hijacks the program can drop in tools, edit config files or plant scripts.
 
 - `readOnlyRootFilesystem: true` (a container `securityContext` setting) makes the container's whole root filesystem **read-only**. Nothing can be created or changed there, by the app or by an attacker.

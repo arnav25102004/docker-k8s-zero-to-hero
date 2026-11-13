@@ -24,6 +24,9 @@ Someone gave each manager the wrong instructions. One is told to check a page th
 ![Diagram: the setup for K36, who talks to whom and what your mission is](../images/k36-context.svg)
 
 ## 🧠 The concept
+
+![Diagram: how the fault works in K36](../images/k36-two-probes-two-faults.svg)
+
 Nothing new, which is the point. Two probes can fail **independently**, and each leaves a different fingerprint:
 
 | What you see | Which probe | Because |

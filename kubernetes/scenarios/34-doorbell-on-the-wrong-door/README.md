@@ -18,6 +18,9 @@ It is knocking on the right house, but the wrong door. Nobody told the inspector
 ![Diagram: the setup for K34, who talks to whom and what your mission is](../images/k34-context.svg)
 
 ## 🧠 The concept: why, what, how
+
+![Diagram: how the fault works in K34](../images/k34-probe-wrong-port.svg)
+
 A **readiness probe** is the "OPEN" sign. Every few seconds the kubelet (the agent on each node) knocks on a door you described, a port and a path, and asks: "ready for customers?"
 
 - **Yes:** the Pod is `Ready` and the Service sends it traffic.
