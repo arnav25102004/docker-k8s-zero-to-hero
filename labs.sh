@@ -5,7 +5,7 @@
 #   ./labs.sh git 02              break Git scenario G-02 (sandbox in /tmp/z2h-git-ts)
 #   ./labs.sh git 02 fix
 #   ./labs.sh docker clean        run every docker/scenarios/*/cleanup.sh
-#   ./labs.sh k8s clean           run every kubernetes/scenarios/*/cleanup.sh
+#   ./labs.sh k8s clean           run every Kubernetes scenario's cleanup.py
 #   (Docker and Kubernetes scenarios are run by hand: see
 #    docker/scenarios/README.md and kubernetes/scenarios/README.md)
 #   ./labs.sh list
@@ -85,8 +85,8 @@ k8s_clean() {
     return 0
   fi
   echo "Cleaning Kubernetes scenarios (current kubectl context: $(kubectl config current-context 2>/dev/null || echo none))"
-  for c in "$K8S_DIR"/[0-9]*/*/cleanup.sh; do
-    [ -f "$c" ] && bash "$c" 2>&1
+  for c in "$K8S_DIR"/[0-9]*/*/cleanup.py "$K8S_DIR"/[0-9]*/exercises/*/cleanup.py; do
+    [ -f "$c" ] && python3 "$c" 2>&1
   done
 }
 

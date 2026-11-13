@@ -139,7 +139,7 @@ diff ../break/app.yaml app.yaml
 >           image: excalidraw/excalidraw:latest@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
 ```
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -202,7 +202,7 @@ The reason flips between `ErrImagePull` and `ImagePullBackOff` as Kubernetes bac
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

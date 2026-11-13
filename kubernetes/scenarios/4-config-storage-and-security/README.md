@@ -24,6 +24,6 @@ ConfigMaps and Secrets, persistent storage, RBAC and Pod security.
 | **S4.x4** | [The locked-down kitchen](exercises/4-the-locked-down-kitchen/README.md) | Pod Security: boss |
 | **S4.x5** | [The file that outlived the Pod](exercises/5-the-file-that-outlived-the-pod/README.md) | PersistentVolumeClaim, volumes, StorageClass, data outliving a Pod |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

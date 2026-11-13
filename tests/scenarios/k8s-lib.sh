@@ -154,6 +154,12 @@ nothing_left_k8s() {
   [ -z "$left" ]
 }
 
+# _script PY SH: the Python script is the real one; its bash twin is only a fallback
+# (set Z2H_USE_BASH=1 to test the bash scripts instead).
+_script() {
+  if [ -z "${Z2H_USE_BASH:-}" ] && [ -f "$1" ]; then printf '%s' "$1"; else printf '%s' "$2"; fi
+}
+
 # run_cycle_k8s DIR ID NS...: cleanup -> break -> broken -> fix -> fixed -> cleanup
 # -> nothing left. Twice. broken() and fixed() must be defined by the caller.
 # If any step fails, the scenario's cleanup.sh runs before returning, so a failed
@@ -162,7 +168,9 @@ nothing_left_k8s() {
 run_cycle_k8s() {
   local dir="$1"
   _run_cycle_k8s "$@" && return 0
-  bash "$dir/cleanup.sh" >/dev/null 2>&1
+  local c
+  c="$(_script "$dir/cleanup.py" "$dir/cleanup.sh")"
+  case "$c" in *.py) python3 "$c" ;; *) bash "$c" ;; esac >/dev/null 2>&1
   return 1
 }
 
@@ -191,14 +199,14 @@ _run_cycle_k8s() {
   case "$id" in k[0-2][0-9] | k30) [ -f "$dir/check.sh" ] && GENERIC_CHECK="$dir/check.sh" ;; esac
   for n in 1 2; do
     printf '  -- cycle %s/2\n' "$n"
-    _step cleanup "$n" "$dir/cleanup.sh" || return 1
-    _step break.sh "$n" "$dir/break/break.sh" || return 1
+    _step cleanup "$n" "$(_script "$dir/cleanup.py" "$dir/cleanup.sh")" || return 1
+    _step break "$n" "$(_script "$dir/break/run.py" "$dir/break/break.sh")" || return 1
     _check broken "$n" broken || return 1
     _check "check.sh while broken" "$n" _generic_check_broken || return 1
-    _step fix.sh "$n" "$dir/fix/fix.sh" || return 1
+    _step fix "$n" "$(_script "$dir/fix/run.py" "$dir/fix/fix.sh")" || return 1
     _check fixed "$n" fixed || return 1
     _check "check.sh after the fix" "$n" _generic_check_fixed || return 1
-    _step "final cleanup" "$n" "$dir/cleanup.sh" || return 1
+    _step "final cleanup" "$n" "$(_script "$dir/cleanup.py" "$dir/cleanup.sh")" || return 1
     nothing_left_k8s "$id" "$@" || { printf '  FAILED at step: nothing-left check (cycle %s)\n' "$n"; return 1; }
   done
   return 0

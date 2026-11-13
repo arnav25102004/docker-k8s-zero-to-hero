@@ -127,7 +127,7 @@ It checks that both Pods are Ready, **and then watches for 12 seconds** to be su
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

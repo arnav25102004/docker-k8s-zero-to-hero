@@ -105,7 +105,7 @@ It checks that the CronJob is not suspended **and** that a run has succeeded (`l
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

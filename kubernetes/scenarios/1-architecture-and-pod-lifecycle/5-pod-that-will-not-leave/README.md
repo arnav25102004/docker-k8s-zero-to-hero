@@ -133,7 +133,7 @@ A green message means the Pod is really gone.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 The cleanup lifts the finalizer first, which is what lets the namespace be deleted at all. (A namespace with a stuck Pod would otherwise be stuck too.)
 

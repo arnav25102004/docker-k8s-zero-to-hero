@@ -144,7 +144,7 @@ kubectl get cm ui-settings -n k-23-dark-mode -o jsonpath='{range .metadata.manag
 Container started: 2026-11-09T00:02:02Z
 ConfigMap changed:  2026-11-09T00:02:03Z
 ```
-(The second command only reads *when* the patch happened from the ConfigMap's bookkeeping; it changes nothing.) (Times will differ, and the gap is only a couple of seconds here because `break.sh` patches the ConfigMap right after the page is ready; in real life it is often days.) The container started **before** the ConfigMap changed. The Pod is older than the change.
+(The second command only reads *when* the patch happened from the ConfigMap's bookkeeping; it changes nothing.) (Times will differ, and the gap is only a couple of seconds here because `break/run.py` patches the ConfigMap right after the page is ready; in real life it is often days.) The container started **before** the ConfigMap changed. The Pod is older than the change.
 
 ## 🪤 The tempting wrong fix: wait a bit longer
 "Config changes take a moment to arrive."
@@ -180,7 +180,7 @@ kubectl get deploy theme -n k-23-dark-mode -o jsonpath='{.spec.template.metadata
 ```
 (The time will differ.) The new Pod started *after* the ConfigMap changed, so it copied `dark`.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both):
+By hand (this replaces `python3 run.py`, so you don't need to run both):
 ```bash
 kubectl rollout restart deployment/theme -n k-23-dark-mode
 kubectl rollout status deployment/theme -n k-23-dark-mode
@@ -257,7 +257,7 @@ dark
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

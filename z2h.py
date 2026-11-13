@@ -10,8 +10,9 @@
     python3 z2h.py test   S1.2           run the automated break/fix test (throwaway cluster only)
 
 Ids: S1.2 = Kubernetes section 1, scenario 2 (S1.x1 = exercise 1). D02 = Docker scenario 2.
-The scenario scripts themselves are bash; this file only finds the right one and runs it,
-so you never have to remember a folder path. On Windows, use Git Bash or WSL.
+Kubernetes break, fix and cleanup are Python (they run kubectl for you). check.sh and the
+Docker scripts are bash; on Windows use Git Bash or WSL for those.
+This file only finds the right script and runs it, so you never have to remember a folder path.
 """
 import csv
 import os
@@ -23,12 +24,12 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 K8S = os.path.join(ROOT, "kubernetes", "scenarios")
 DOCKER = os.path.join(ROOT, "docker", "scenarios")
 
-# action -> (sub-folder, script name)
+# action -> the scripts to try, in order (the Python one first; bash is the fallback)
 SCRIPTS = {
-    "break": ("break", "break.sh"),
-    "fix": ("fix", "fix.sh"),
-    "check": ("", "check.sh"),
-    "cleanup": ("", "cleanup.sh"),
+    "break": ("break/run.py", "break/break.sh"),
+    "fix": ("fix/run.py", "fix/fix.sh"),
+    "check": ("check.sh",),
+    "cleanup": ("cleanup.py", "cleanup.sh"),
 }
 
 
@@ -97,12 +98,15 @@ def run(action, scenario_id):
     if kind == "question" and action != "cleanup":
         sys.exit("%s is a question exercise: there is no script to run.\nOpen %s and follow the steps."
                  % (sid, os.path.join(folder, "README.md")))
-    sub, script = SCRIPTS[action]
-    path = os.path.join(folder, sub, script)
-    if not os.path.exists(path):
+    for name in SCRIPTS[action]:
+        path = os.path.join(folder, *name.split("/"))
+        if os.path.exists(path):
+            break
+    else:
         sys.exit("%s has no %s script." % (sid, action))
-    # Like the README says: break.sh runs from break/, fix.sh from fix/.
-    return subprocess.call([find_bash(), path], cwd=os.path.dirname(path))
+    # Like the README says: break runs from break/, fix from fix/.
+    runner = [sys.executable] if path.endswith(".py") else [find_bash()]
+    return subprocess.call(runner + [path], cwd=os.path.dirname(path))
 
 
 def main(argv):

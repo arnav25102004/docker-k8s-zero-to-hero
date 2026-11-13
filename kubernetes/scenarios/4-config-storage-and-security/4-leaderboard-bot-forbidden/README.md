@@ -153,7 +153,7 @@ The Role grants exactly what the 403 message asked for: `list` (and `get`) on `p
 ```
 (Shortened.) Three "players" are the 2 player Pods plus the bot itself. Press Ctrl+C in the second terminal.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the file from the `fix` folder.
 ```bash
 kubectl apply -f rbac.yaml
 ```
@@ -216,7 +216,7 @@ rolebinding.rbac.authorization.k8s.io/leaderboard-bot-reads-pods   Role/pod-read
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

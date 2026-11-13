@@ -161,7 +161,7 @@ diff ../break/app.yaml app.yaml
 ```
 Three things moved together: the **image** (built to run as user 101), the **container port** (8080: traditionally normal users can't use ports below 1024, though some platforms relax this, and this image uses 8080 anyway) and the Service's **targetPort** (so traffic still reaches the right port; the Service itself still answers on 80). The `securityContext` was not touched. The page is mounted at the same path, `/usr/share/nginx/html`, in both images.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -244,7 +244,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9221
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · beginner · labels, selectors (equality and set-based), annotations, kubectl -l
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 Labels are short key/value tags on any object: `app=shop`, `env=prod`. Selectors then find or act on groups of objects: list them, delete them, point a Service at them. **Annotations** are also key/value notes, but they are for humans and tools, and cannot be selected on.

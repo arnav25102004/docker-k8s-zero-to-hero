@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · beginner · the scheduler, the kubelet and the container runtime, read from Events
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 You type `kubectl run` and a Pod appears. It feels like one thing happening, but it is a relay race: the API server writes it down, the scheduler picks a node, the kubelet on that node starts it, and the container runtime does the actual work. The cluster keeps a diary of every handover. It is called Events.

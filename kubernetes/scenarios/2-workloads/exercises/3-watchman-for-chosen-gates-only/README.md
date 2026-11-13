@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · intermediate · DaemonSet, nodeSelector, node labels
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 The college has several gates. Security wants watchmen only at the gates that are open at night. A DaemonSet runs one Pod per node, and a `nodeSelector` narrows that down to nodes carrying a label. Label a node and a watchman appears. Remove the label and he goes home.

@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · intermediate · CronJob, create job --from, suspend, concurrencyPolicy
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A CronJob creates a Job on a schedule. Nobody wants to wait until 3 AM to find out whether it works, so Kubernetes lets you fire it by hand, and lets you pause it when something is wrong.

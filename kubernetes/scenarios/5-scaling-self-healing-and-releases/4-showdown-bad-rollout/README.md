@@ -170,9 +170,9 @@ Expect the visitor to stay ✅ v1.0.0 the whole time: there was no outage to rep
 ```bash
 kubectl rollout undo deployment/showdown -n k-11-bad-rollout
 ```
-It tells the Deployment to go back to the previous revision's Pod template. The old ReplicaSet already has 3 Ready Pods, so they simply stay, and the crash-looping Pod is removed. (`fix.sh` runs exactly this, then waits for the rollout to finish. kubectl may print a long warning about `kubectl apply`; it is harmless here.)
+It tells the Deployment to go back to the previous revision's Pod template. The old ReplicaSet already has 3 Ready Pods, so they simply stay, and the crash-looping Pod is removed. (`fix/run.py` runs exactly this, then waits for the rollout to finish. kubectl may print a long warning about `kubectl apply`; it is harmless here.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both):
+By hand (this replaces `python3 run.py`, so you don't need to run both):
 ```bash
 kubectl rollout undo deployment/showdown -n k-11-bad-rollout
 kubectl rollout status deployment/showdown -n k-11-bad-rollout
@@ -251,7 +251,7 @@ It stays above zero while the new version never becomes Ready, and the old Pods 
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

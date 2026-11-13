@@ -147,7 +147,7 @@ A green message means every address behind the Service is fresh. The visitor log
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

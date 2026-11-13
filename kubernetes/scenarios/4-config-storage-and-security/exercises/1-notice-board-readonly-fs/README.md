@@ -167,7 +167,7 @@ One `emptyDir` volume (scratch space that lives as long as the Pod), mounted at 
 
 **How we found the exact path.** We did not guess. The first crash named `/tmp/proxy_temp`, so we mounted an `emptyDir` at `/tmp` and restarted. If the next error had named another path (for example `/var/cache/nginx`), we would have added a second mount and repeated. In this image there was no next error: nginx-unprivileged keeps its pid file and all its temp folders (`client_temp`, `proxy_temp`, `fastcgi_temp`, `uwsgi_temp`, `scgi_temp`) under `/tmp`, and logs to the console. You can see them listed in the verify step below. (The plain `nginx` image would also want `/var/cache/nginx` and `/var/run`; this unprivileged image does not.) Mount the **minimum** you find, not "everything just in case".
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -269,7 +269,7 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9222
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

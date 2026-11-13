@@ -72,7 +72,7 @@ trainer-85967484bf-nvtmh   0/1     CrashLoopBackOff   2 (14s ago)   36s
 trainer-85967484bf-nvtmh   1/1     Running            3 (25s ago)   47s
 trainer-85967484bf-nvtmh   0/1     OOMKilled          3 (28s ago)   50s
 ```
-(Shortened: this is what you see if you start watching a few seconds after `break.sh`, and it keeps going. Ages and Pod names will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod lives only about 2 seconds each time, `RESTARTS` climbs, and the waits between restarts grow (`CrashLoopBackOff`, as in [S1.3](../../1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md)). Nobody typed `kubectl delete`. On some clusters the `STATUS` word is `Error` instead of `OOMKilled`: it is the same kill.
+(Shortened: this is what you see if you start watching a few seconds after `break/run.py`, and it keeps going. Ages and Pod names will differ, and `-w` prints a new line on every change. Press Ctrl+C when you've seen enough.) The Pod lives only about 2 seconds each time, `RESTARTS` climbs, and the waits between restarts grow (`CrashLoopBackOff`, as in [S1.3](../../1-architecture-and-pod-lifecycle/3-showdown-crashloop/README.md)). Nobody typed `kubectl delete`. On some clusters the `STATUS` word is `Error` instead of `OOMKilled`: it is the same kill.
 
 <details><summary>💡 Hint</summary>
 A container that dies by itself usually leaves an error behind. This one left nothing. What could have ended it silently, without a word? And what does Kubernetes know about how much memory this container is allowed to use?
@@ -128,7 +128,7 @@ The new Pod runs the same training under the same 64Mi fence and is killed at th
 
 The training needs about **150 MB** (6 epochs x 25 MB, plus about 10 MB for Python itself); the container's memory limit is **64Mi** (about 67 MB). When epoch 3 pushed memory past the fence, the kernel's OOM killer sent SIGKILL. Python never saw it coming, so there was no error in the logs. Kubernetes recorded `OOMKilled`, exit code 137, and the kubelet restarted the container, which hit the same wall at the same place.
 
-Calibration (roughly, from about 10 MB for a bare Python 3.12 process plus 25 MB per epoch): after epoch 2 it holds about 60 MB, which still fits; epoch 3 needs about 85 MB and cannot. Allocation (150 MB) minus limit (about 67 MB) leaves a big overshoot, so the kill is certain, and the log ended at epoch 3 in every one of 5 consecutive runs of `break.sh` on the test cluster (kind), and on every restart.
+Calibration (roughly, from about 10 MB for a bare Python 3.12 process plus 25 MB per epoch): after epoch 2 it holds about 60 MB, which still fits; epoch 3 needs about 85 MB and cannot. Allocation (150 MB) minus limit (about 67 MB) leaves a big overshoot, so the kill is certain, and the log ended at epoch 3 in every one of 5 consecutive runs of `break/run.py` on the test cluster (kind), and on every restart.
 </details>
 
 ## 🔧 Fix it
@@ -149,7 +149,7 @@ diff ../break/app.yaml app.yaml
 ```
 The limit goes from 64Mi to **256Mi**: the real need (150 MB of data + about 10 MB for Python) plus headroom. The request is raised to 200Mi so the scheduler reserves what the program really uses. When the model is finished the script simply waits (`sleep`), so the Pod stays `Running` instead of exiting and being restarted.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -233,7 +233,7 @@ After the fix, same Deployment, one more experiment. Predict first, then check.
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

@@ -24,6 +24,6 @@ Probes and self-healing, autoscaling, rolling updates and deployment strategies.
 | **S5.x4** | [The robot that cannot move the stalls](exercises/4-robot-that-cannot-move-the-stalls/README.md) | PodDisruptionBudget |
 | **S5.x5** | [The autoscaler pointing at nobody](exercises/5-autoscaler-pointing-at-nobody/README.md) | autoscaler: wrong target |
 
-⏳ = start its `break.sh` one scenario early: it takes longer than a minute to set up or to fix.
+⏳ = start its `break/run.py` one scenario early: it takes longer than a minute to set up or to fix.
 
 ← [All sections](../README.md)

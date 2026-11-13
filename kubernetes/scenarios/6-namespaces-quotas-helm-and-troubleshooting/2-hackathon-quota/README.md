@@ -181,7 +181,7 @@ diff ../break/app.yaml app.yaml
 ```
 The Pod template changed, so the Deployment created a **new** ReplicaSet, and this one's Pods are allowed in. (The old, empty ReplicaSet stays around with 0 Pods; that is the Deployment's rollback history.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): from the `fix` folder, apply the corrected file.
+By hand (this replaces `python3 run.py`, so you don't need to run both): from the `fix` folder, apply the corrected file.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -269,7 +269,7 @@ Each quota gives a `hard` (the limit) and a `used` series per resource. A team t
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

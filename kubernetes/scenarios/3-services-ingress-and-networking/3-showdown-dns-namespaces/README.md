@@ -167,7 +167,7 @@ diff ../break/app.yaml app.yaml
 ```
 One real change: the value of `REDIS_HOST`. The `<service>.<namespace>.svc.cluster.local` form works from any namespace. (The first lines are only comments.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -249,7 +249,7 @@ Or open http://localhost:9212 in your browser and vote. Press Ctrl+C in the seco
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

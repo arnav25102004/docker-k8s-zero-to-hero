@@ -4,7 +4,7 @@
 
 ⏱ about 12 min · intermediate · helm install, upgrade, history, rollback, values
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A Helm chart is a package of Kubernetes YAML with blanks (values). A **release** is one install of that chart. Every upgrade creates a new revision, and `helm rollback` returns to an earlier one. It is the "undo" button for the whole application. Needs `helm` on your machine. It uses the chart you met in S6.3.

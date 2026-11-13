@@ -33,7 +33,7 @@ Think of seating at a wedding: "no two cousins at one table" works until you hav
    node A [whoami]     node B [whoami][whoami]                  all 3 run, spread as well as possible
 ```
 
-**Why this scenario has "nodes + 1" replicas.** `break.sh` counts the nodes that accept ordinary Pods and asks for one more Pod than that. On a 3-node kind cluster the control-plane node is tainted (see [S2.3](../../../2-workloads/3-watchman-skipped-a-gate/README.md)), so only 2 nodes count and you get **3 replicas**. On a 1-node cluster (minikube, Docker Desktop, many playgrounds) you get **2 replicas**. Either way, exactly one Pod has no room.
+**Why this scenario has "nodes + 1" replicas.** `break/run.py` counts the nodes that accept ordinary Pods and asks for one more Pod than that. On a 3-node kind cluster the control-plane node is tainted (see [S2.3](../../../2-workloads/3-watchman-skipped-a-gate/README.md)), so only 2 nodes count and you get **3 replicas**. On a 1-node cluster (minikube, Docker Desktop, many playgrounds) you get **2 replicas**. Either way, exactly one Pod has no room.
 
 ## 🏢 Where you'll meet this at work
 - **High availability.** "Spread my replicas over different nodes (or zones) so one failure doesn't take the service down" (SRE, platform team).
@@ -140,7 +140,7 @@ The Deployment still wants one more replica than there is room for, so it create
 ## 🩺 Root cause
 <details><summary>Reveal after the room guesses</summary>
 
-The Deployment has a **required** pod anti-affinity on `kubernetes.io/hostname` ("never two whoami Pods on one node"), and `break.sh` asked for **one more replica than there are nodes that accept Pods**. The scheduler placed one Pod per node, then had no node left that satisfied the rule. It recorded `didn't match pod anti-affinity rules` and left the last Pod `Pending`. Because the other Pods serve traffic, the Service never went down: the only symptoms are fewer copies than you asked for (`2/3` ready) and the visitor counting fewer answering Pods.
+The Deployment has a **required** pod anti-affinity on `kubernetes.io/hostname` ("never two whoami Pods on one node"), and `break/run.py` asked for **one more replica than there are nodes that accept Pods**. The scheduler placed one Pod per node, then had no node left that satisfied the rule. It recorded `didn't match pod anti-affinity rules` and left the last Pod `Pending`. Because the other Pods serve traffic, the Service never went down: the only symptoms are fewer copies than you asked for (`2/3` ready) and the visitor counting fewer answering Pods.
 
 The rule is fine for 2 replicas on 2 nodes. It is a time bomb for "scale to 3", or for a cluster that loses a node.
 
@@ -157,11 +157,11 @@ diff ../break/app.yaml app.yaml
 ```
 ```
 1,2c1,2
-< # S1.x2 break (1/2): whoami says which Pod answered. break.sh scales it up after this file is applied,
+< # S1.x2 break (1/2): whoami says which Pod answered. break/run.py scales it up after this file is applied,
 < # so there is no "replicas:" here on purpose (a later kubectl apply must never reset the scale).
 ---
 > # S1.x2 fix: the same whoami, but "different nodes" is a preference (preferred podAntiAffinity), not a rule.
-> # Still no "replicas:" on purpose: apply keeps whatever scale break.sh set.
+> # Still no "replicas:" on purpose: apply keeps whatever scale break/run.py set.
 9a10,13
 >   # Recreate, not a rolling update: the old Pods still carry the old hard rule, and a hard rule also
 >   # keeps NEW Pods away from them, so a rolling update could never find room for its first new Pod.
@@ -184,7 +184,7 @@ diff ../break/app.yaml app.yaml
 The **hard rule becomes a preference**: "spread out if you can". Two details worth knowing:
 
 - **Why `Recreate`?** A hard rule also keeps *new* Pods away from the *old* Pods that still carry it. A normal rolling update would start a new Pod first, find every node blocked by an old Pod, and wait forever. `Recreate` stops the old Pods, then starts the new ones. For a few seconds nothing answers, and the visitor goes quiet or shows a `❌`. That is acceptable for a demo; in production you would avoid `Recreate` by freeing capacity (adding a node) or fixing the rule *before* scaling up. (Once the rule is a preference, later updates can roll normally.)
-- **The replica count stays.** The fix files have no `replicas:` line, so `kubectl apply` leaves the scale that `break.sh` set.
+- **The replica count stays.** The fix files have no `replicas:` line, so `kubectl apply` leaves the scale that `break/run.py` set.
 
 Start the visitor in a second terminal **before** running the fix to watch the moment live. After the fix it ends like this (shortened):
 ```
@@ -195,7 +195,7 @@ Start the visitor in a second terminal **before** running the fix to watch the m
 ```
 (The two `❌` lines are the old, still-broken state: 2 of 3 Pods. The pause before the first `✅` is the `Recreate` gap, a few seconds with no line while the old Pods are gone and the new ones start. The Pod names are new because the Pods were replaced. Depending on timing you may also see a `❌ only 1 of 3` or `0 of 3` line there.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -262,7 +262,7 @@ The `Hostname:` line is the Pod that answered. Note that `port-forward` connects
 
 ## 🧹 Clean up
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

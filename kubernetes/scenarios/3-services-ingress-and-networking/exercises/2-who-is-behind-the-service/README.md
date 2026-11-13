@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · intermediate · EndpointSlices, label selectors, isolating a Pod for debugging
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 A Service has no list of Pods. It has a **selector**, and Kubernetes keeps a list of matching, Ready Pod IPs (EndpointSlices). Change one Pod's label and it drops out of that list instantly, but the Pod keeps running, so you can poke at it. This is how you debug a misbehaving Pod without losing the evidence.

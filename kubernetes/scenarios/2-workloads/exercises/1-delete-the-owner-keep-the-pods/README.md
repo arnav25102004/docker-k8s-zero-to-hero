@@ -4,7 +4,7 @@
 
 ⏱ about 10 min · intermediate · ReplicaSet, ownerReferences, selectors, --cascade=orphan
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 Pods do not belong to a Deployment by magic. A ReplicaSet counts the Pods that match its label selector, and creates or deletes until the count is right. Each Pod it creates carries a note saying who owns it (`ownerReferences`). What happens to the Pods if the owner is removed, but the Pods are told to stay?

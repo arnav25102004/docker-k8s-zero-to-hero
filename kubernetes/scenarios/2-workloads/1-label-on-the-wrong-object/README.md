@@ -139,7 +139,7 @@ Then replay the trap from above: delete a Pod and confirm the replacement is sti
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

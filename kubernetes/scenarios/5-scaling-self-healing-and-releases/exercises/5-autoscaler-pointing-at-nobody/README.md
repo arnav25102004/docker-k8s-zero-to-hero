@@ -100,7 +100,7 @@ It checks the HPA reports `AbleToScale: True`. Whether it also has CPU numbers d
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

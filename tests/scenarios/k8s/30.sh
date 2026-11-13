@@ -51,15 +51,15 @@ run_cycle_k8s() {
   _k30_two_cycles "$@" || return 1
   shift 2
   printf '  -- cycle 3/3 (fix 1 by hand, then fix.sh)\n'
-  _step cleanup 3 "$dir/cleanup.sh" || return 1
-  _step break.sh 3 "$dir/break/break.sh" || return 1
+  _step cleanup 3 "$(_script "$dir/cleanup.py" "$dir/cleanup.sh")" || return 1
+  _step break 3 "$(_script "$dir/break/run.py" "$dir/break/break.sh")" || return 1
   _check broken 3 broken || return 1
   kubectl set image deployment/redis -n "$NS30" redis=redis:7.4.12-alpine >/dev/null 2>&1 \
     || { printf '  FAILED at step: kubectl set image (cycle 3)\n'; return 1; }
   kubectl rollout status deployment/redis -n "$NS30" --timeout=180s >/dev/null 2>&1 \
     || { printf '  FAILED at step: redis rollout after set image (cycle 3)\n'; return 1; }
-  _step fix.sh 3 "$dir/fix/fix.sh" || return 1
+  _step fix 3 "$(_script "$dir/fix/run.py" "$dir/fix/fix.sh")" || return 1
   _check fixed 3 fixed || return 1
-  _step "final cleanup" 3 "$dir/cleanup.sh" || return 1
+  _step "final cleanup" 3 "$(_script "$dir/cleanup.py" "$dir/cleanup.sh")" || return 1
   nothing_left_k8s "$id" "$@" || { printf '  FAILED at step: nothing-left check (cycle 3)\n'; return 1; }
 }

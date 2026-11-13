@@ -214,7 +214,7 @@ What you saw in the second terminal (shortened: the first lines of the log are c
 ```
 (The app's `REDIS_HOST` was already `redis`, so the app and its start-up check now both use the same name.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -302,7 +302,7 @@ curl -s localhost:9226/api/results
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

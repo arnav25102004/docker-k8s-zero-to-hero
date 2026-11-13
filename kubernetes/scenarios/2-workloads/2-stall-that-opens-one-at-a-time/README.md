@@ -105,7 +105,7 @@ It checks that all three are Ready and the visitor shows ✅.
 
 ## 🧹 Clean up
 ```bash
-./cleanup.sh
+python3 cleanup.py
 ```
 
 ## Next →

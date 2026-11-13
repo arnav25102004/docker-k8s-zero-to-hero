@@ -4,7 +4,7 @@
 
 ⏱ about 12 min · intermediate · StatefulSet, stable Pod names, headless Service, ordered start and stop
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 Some programs, like databases, need to know who they are: "I am number 1, my friend is number 0". A Deployment gives Pods random names. A StatefulSet gives them fixed ones (`name-0`, `name-1`, ...), starts them in order, and brings a deleted one back under the same name.

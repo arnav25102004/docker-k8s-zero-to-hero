@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · beginner · control-plane components, node components, DaemonSets in kube-system, kubelet and runtime versions
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 Every scenario so far assumed a working cluster. This exercise is a guided tour of that cluster, using only read commands. Nothing is created, so there is nothing to clean up.

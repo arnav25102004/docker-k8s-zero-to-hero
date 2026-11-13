@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
-"""Applies the fix for this scenario. Run it from this folder:  python3 run.py
+"""S4.5 fix: the board runs on an image that starts as a normal user (nginx-unprivileged, port 8080). The policy stays.
 
-It just runs fix.sh next to it (bash is needed; on Windows use Git Bash or WSL)."""
+Run it from this folder:  python3 run.py"""
 import os
-import shutil
-import subprocess
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
-bash = shutil.which("bash")
-if not bash:
-    sys.exit("bash was not found. On Windows, open Git Bash (or WSL) and try again.")
-sys.exit(subprocess.call([bash, os.path.join(here, "fix.sh")], cwd=here))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
+import scenario_lib as z  # noqa: E402
+
+NS = "k-21-nonroot"
+
+z.need_cluster()
+z.say("Switching the board to an image that runs as a normal user…")
+# A Pod template can be changed in place: the Deployment replaces the stuck Pods with new ones.
+z.apply_files(os.path.join(HERE, "app.yaml"))
+z.say("Waiting for the rollout (the first time, the nginx-unprivileged image downloads now: up to a minute or two)…")
+if z.kubectl_show("rollout", "status", "deployment/board", "-n", NS, "--timeout=180s") != 0:
+    z.die("The board didn't roll out. Check: kubectl get pods -n " + NS)
+z.show_next("✅ Fixed. Now verify it yourself:",
+            "kubectl get pods -n " + NS,
+            z.forward_hint(NS, "board", 9221))

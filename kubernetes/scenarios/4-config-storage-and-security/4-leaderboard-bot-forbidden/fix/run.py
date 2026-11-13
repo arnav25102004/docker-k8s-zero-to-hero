@@ -1,14 +1,27 @@
 #!/usr/bin/env python3
-"""Applies the fix for this scenario. Run it from this folder:  python3 run.py
+"""S4.4 fix: give the bot's ServiceAccount a Role (get, list on pods) through a RoleBinding.
 
-It just runs fix.sh next to it (bash is needed; on Windows use Git Bash or WSL)."""
+Run it from this folder:  python3 run.py"""
 import os
-import shutil
-import subprocess
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
-bash = shutil.which("bash")
-if not bash:
-    sys.exit("bash was not found. On Windows, open Git Bash (or WSL) and try again.")
-sys.exit(subprocess.call([bash, os.path.join(here, "fix.sh")], cwd=here))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
+import scenario_lib as z  # noqa: E402
+
+NS = "k-14-forbidden"
+
+
+def bot_ok():
+    # The bot's newest log line is a ✅ line (it runs every 5 s; no restart needed).
+    return z.logs_contain(NS, "✅", "bot", "--tail=1")
+
+
+z.need_cluster()
+z.say("Granting the bot permission to read Pods (Role + RoleBinding)…")
+z.apply_files(os.path.join(HERE, "rbac.yaml"))
+z.must_wait("the bot to read the Pods (✅)", 60, bot_ok,
+            "The bot still isn't succeeding. Check: kubectl logs bot -n " + NS)
+z.show_next("✅ Fixed. Now verify it yourself:",
+            "kubectl logs bot -n %s --tail=3" % NS,
+            "kubectl auth can-i list pods -n %s --as=system:serviceaccount:%s:leaderboard-bot" % (NS, NS))

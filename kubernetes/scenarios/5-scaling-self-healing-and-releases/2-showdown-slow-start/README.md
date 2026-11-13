@@ -164,7 +164,7 @@ diff ../break/app.yaml app.yaml
 ```
 The startup probe checks `/healthz` every 5 seconds and tolerates 12 failures: the app has up to 60 seconds. Liveness and readiness wait until it passes, then liveness works as before and still protects against a hang later.
 
-By hand (this replaces `./fix.sh`, so you don't need to run both): apply the fixed file from the `fix` folder.
+By hand (this replaces `python3 run.py`, so you don't need to run both): apply the fixed file from the `fix` folder.
 ```bash
 kubectl apply -f app.yaml
 ```
@@ -243,7 +243,7 @@ A steady staircase of restarts, one every few seconds. Compare with S1.3: same c
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

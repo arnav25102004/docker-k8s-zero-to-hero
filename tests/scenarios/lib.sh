@@ -65,8 +65,9 @@ no_images() {
 
 # _step LABEL N SCRIPT: run a script, capture output, show its tail on failure.
 _step() {
-  local label="$1" n="$2" script="$3" out
-  out=$(bash "$script" 2>&1) && return 0
+  local label="$1" n="$2" script="$3" out runner=bash
+  case "$script" in *.py) runner=python3 ;; esac
+  out=$($runner "$script" 2>&1) && return 0
   printf '  FAILED at step: %s (cycle %s)\n' "$label" "$n"
   printf '%s\n' "$out" | tail -n 20 | sed 's/^/    | /'
   return 1

@@ -191,7 +191,7 @@ We do the app team's fix, because one app needs more, and explicit values always
 
 Two LimitRange details worth knowing. In its YAML, the key `default` means the default **limit** and `defaultRequest` means the default **request** (as the `describe` columns showed). And defaults are applied only **when a Pod is created**: if the platform team edits the LimitRange, existing Pods keep what they got until they are recreated, for example with `kubectl rollout restart deployment/showdown -n k-20-limitrange`.
 
-`fix.sh` applies the change below; here is exactly what is different from the broken file:
+`fix/run.py` applies the change below; here is exactly what is different from the broken file:
 ```bash
 diff ../break/app.yaml app.yaml
 ```
@@ -205,7 +205,7 @@ diff ../break/app.yaml app.yaml
 ```
 (Run it from the `fix` folder; the comment lines differ, the real change is the five new lines.)
 
-By hand (this replaces `./fix.sh`, so you don't need to run both):
+By hand (this replaces `python3 run.py`, so you don't need to run both):
 ```bash
 kubectl apply -f app.yaml
 kubectl rollout status deployment/showdown -n k-20-limitrange --timeout=180s
@@ -292,7 +292,7 @@ Before you touch anything, answer from the YAML alone, then confirm with one com
 ## 🧹 Clean up
 Press Ctrl+C in the port-forward terminal first, then:
 ```bash
-cd .. && ./cleanup.sh
+cd .. && python3 cleanup.py
 ```
 
 ## 🧪 Quick recap (3 questions)

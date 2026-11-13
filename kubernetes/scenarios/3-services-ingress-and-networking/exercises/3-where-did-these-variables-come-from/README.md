@@ -4,7 +4,7 @@
 
 ⏱ about 8 min · intermediate · Service environment variables, Pod start order, DNS as the better way
 
-This is a **question exercise**: there is no `break.sh`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
+This is a **question exercise**: there is no `break/run.py`. You set the scene with the commands below, answer the questions with `kubectl`, then check the answers. Stuck? Open a hint first.
 
 ## 📖 The story
 In the Cats vs Dogs app you may have met a strange `REDIS_PORT=tcp://10.96.0.12:6379`. Nobody wrote it. Kubernetes adds environment variables for every Service that already exists when a Pod starts. It is an old feature, and it has a catch.
