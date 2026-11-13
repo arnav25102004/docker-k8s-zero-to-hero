@@ -26,6 +26,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "the safety rule to count both Pods" 60 budget_ready \
   || die "The safety rule did not settle. Run cleanup.sh and try again."
 
-show_next \
-  "The idli stall is open and happy. Tonight the maintenance robot needs to move one Pod. Send it in: ./evict.sh" \
-  "./evict.sh"
+scene_set

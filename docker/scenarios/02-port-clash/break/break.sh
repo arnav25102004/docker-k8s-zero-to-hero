@@ -32,6 +32,4 @@ run_shown docker run -d --name d02-tools -p 8102:80 "$TOOLS_IMAGE" || true
 wait_for "IT-Tools to be created" 15 tools_created \
   || die "Unexpected state for d02-tools. Run cleanup.sh and try again."
 
-show_next \
-  "Excalidraw works at http://localhost:8102, but the error above says IT-Tools could not start." \
-  "docker ps -a --filter name=d02-"
+scene_set

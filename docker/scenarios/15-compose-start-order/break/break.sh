@@ -19,6 +19,4 @@ docker compose -p d15 -f "$HERE/compose.yaml" up -d \
 wait_for "the app to give up" 30 app_exited \
   || die "The app didn't exit as expected. Check: docker compose -p d15 ps -a"
 
-show_next \
-  "Compose said everything started. Open http://localhost:8115 (playground: the port 8115 URL): the page can't be reached." \
-  "docker compose -p d15 ps -a"
+scene_set

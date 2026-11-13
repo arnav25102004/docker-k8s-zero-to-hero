@@ -28,6 +28,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "the Service to pick up all three Pods" 60 all_pods_behind_service \
   || die "The Service did not pick up all three Pods in time. Run cleanup.sh and try again."
 
-show_next \
-  "The visitor is getting chai, but not always the same chai. Watch it with: kubectl logs -f visitor -n k-31-two-stalls (Ctrl+C to stop)." \
-  "kubectl get pods -n k-31-two-stalls --show-labels"
+scene_set

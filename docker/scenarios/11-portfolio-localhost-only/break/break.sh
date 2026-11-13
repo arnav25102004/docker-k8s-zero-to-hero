@@ -26,6 +26,4 @@ docker run -d --name d11-portfolio --label z2h.scenario=d11 -p 8111:8000 d11-por
 wait_for "the portfolio container to start" 30 up_inside \
   || die "The container didn't start. Check: docker logs d11-portfolio"
 
-show_next \
-  "The container is running. Open http://localhost:8111 (playground: the port 8111 URL): the page does not load." \
-  "curl localhost:8111"
+scene_set

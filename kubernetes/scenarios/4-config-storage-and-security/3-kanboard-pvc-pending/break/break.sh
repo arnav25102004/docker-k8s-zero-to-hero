@@ -38,6 +38,4 @@ wait_for "the Kanboard Pod to be Pending" 60 pod_pending \
 wait_for "the visitor to report a failure" 60 visitor_failing \
   || die "The visitor never reported a failure. Run cleanup.sh and try again."
 
-show_next \
-  "The task board is waiting for a disk that will never arrive. Watch the visitor with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

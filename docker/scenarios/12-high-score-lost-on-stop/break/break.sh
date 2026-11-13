@@ -39,6 +39,4 @@ docker start d12-game >/dev/null || die "docker start failed."
 wait_for "the game server to come back" 30 app_answers \
   || die "The server didn't come back. Check: docker logs d12-game"
 
-show_next \
-  "The game is back. Open http://localhost:8112 (playground: the port 8112 URL): Lakshmi, Ravi and Meera were on the board a moment ago. Look at the Top 5." \
-  "curl localhost:8112/api/scores"
+scene_set

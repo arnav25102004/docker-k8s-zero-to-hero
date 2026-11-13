@@ -159,6 +159,20 @@ Namespaces and resource quotas, Helm releases, labels and annotations, and the h
 
 Each scenario lives in its own namespace, named after its original code (for example `k-08-oomkilled`), so nothing touches your lab work and nothing in your cluster or tests had to change when the folders were reorganised. All images and sizes are in [IMAGES.md](IMAGES.md). A machine-readable list is in [`index.tsv`](index.tsv).
 
+## The short way: one command for everything
+
+You never need to remember a folder path. `z2h.py` (plain Python 3, no packages) finds the scenario for you:
+
+```bash
+python3 z2h.py list              # every scenario, by section
+python3 z2h.py break S1.2        # set the scene
+python3 z2h.py check S1.2        # "am I done?" (read-only)
+python3 z2h.py fix S1.2          # apply the fix
+python3 z2h.py cleanup S1.2      # remove everything it created
+```
+
+It runs the same scripts described below; use whichever you prefer. `break` ends with one line, "the scene is set", and says nothing about the cause: finding it is the exercise.
+
 ## How a session runs
 
 1. **Instructor explains**: read the story and the concept in the scenario's `README.md`.

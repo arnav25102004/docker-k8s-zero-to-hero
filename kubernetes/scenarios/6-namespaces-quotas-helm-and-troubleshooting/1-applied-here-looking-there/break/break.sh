@@ -23,6 +23,4 @@ wait_for "the night canteen to be Ready (the first download can take a minute)" 
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The deploy said 'created'. Now look for your Pods the way you always do: kubectl get pods" \
-  "kubectl get pods"
+scene_set

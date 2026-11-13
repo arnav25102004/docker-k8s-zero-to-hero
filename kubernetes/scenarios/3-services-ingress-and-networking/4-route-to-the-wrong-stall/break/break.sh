@@ -34,6 +34,4 @@ URL="http://$(proxy_svc).envoy-gateway-system.svc.cluster.local"
 sed "s#@URL@#$URL#g" "$HERE/visitor.yaml" | kubectl apply -f - >/dev/null || die "Could not start the visitor."
 wait_for "the visitor to start" 180 visitor_up || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "Two stalls, one front door, two paths: /chai and /dosa. The visitor asks for both. Watch it with: kubectl logs -f visitor -n k-33-gateway (Ctrl+C to stop)." \
-  "kubectl get gateway,httproute,svc -n k-33-gateway"
+scene_set

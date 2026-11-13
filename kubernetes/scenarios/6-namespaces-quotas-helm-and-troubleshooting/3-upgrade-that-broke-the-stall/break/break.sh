@@ -26,6 +26,4 @@ helm upgrade stall "$HERE/../chart/stall" -n "$NS" --set image.tag=9.9.9 >/dev/n
   || die "helm upgrade failed. Run cleanup.sh and try again."
 wait_for "the new Pod to fail its image pull" 120 bad_pod || die "The upgrade did not break as expected. Run cleanup.sh and try again."
 
-show_next \
-  "Helm says the upgrade was deployed. The visitor still sees the stall. Something is not right. Look: helm list -n k-27-helm" \
-  "helm history stall -n k-27-helm   ·   kubectl get pods -n k-27-helm"
+scene_set

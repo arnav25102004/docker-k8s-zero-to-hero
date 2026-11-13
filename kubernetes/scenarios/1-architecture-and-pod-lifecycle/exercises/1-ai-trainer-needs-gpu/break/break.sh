@@ -23,6 +23,4 @@ kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluste
 wait_for "the scheduler to refuse the trainer" 60 refused \
   || die "The trainer never showed up as Pending. Run cleanup.sh and try again."
 
-show_next \
-  "Your AI trainer is deployed and the nodes are up, but the training never starts. There is no web page: it's all in the terminal." \
-  "kubectl get pods -n $NS"
+scene_set

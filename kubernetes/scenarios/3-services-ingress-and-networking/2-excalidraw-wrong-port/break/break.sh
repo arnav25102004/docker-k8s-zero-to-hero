@@ -32,6 +32,4 @@ has_endpoints || die "Expected the Service to have endpoints, but it has none. R
 wait_for "the visitor to report a failure" 60 visitor_failing \
   || die "The visitor never reported a failure. Run cleanup.sh and try again."
 
-show_next \
-  "Both Excalidraw Pods are Running and the Service has endpoints, yet every request fails. Watch the visitor with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

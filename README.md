@@ -132,6 +132,7 @@ docker-k8s-zero-to-hero/
 ├── cheatsheets/             git.md · docker.md · kubectl.md
 ├── scripts/                 check-prereqs.sh · install-metrics-server.sh · install-monitoring.sh · install-jenkins.sh · load-image.sh · link-check.py
 ├── tests/                   scenario harness (git, docker, kubernetes) + lab manifest check
+├── z2h.py                   🐍 run any scenario: python3 z2h.py break S1.2
 └── labs.sh                  🔥 Git scenario runner + `docker clean` / `k8s clean`
 ```
 

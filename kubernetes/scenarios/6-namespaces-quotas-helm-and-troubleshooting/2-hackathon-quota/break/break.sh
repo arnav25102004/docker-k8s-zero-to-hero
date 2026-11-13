@@ -35,6 +35,4 @@ wait_for "the dashboard to misbehave" 180 refused \
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The dashboard was deployed, and kubectl said so. But look closely: how many dashboard Pods are running? Watch the visitor with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get deployment,pods -n $NS"
+scene_set

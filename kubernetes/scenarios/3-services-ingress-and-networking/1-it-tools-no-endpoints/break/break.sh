@@ -28,6 +28,4 @@ wait_for "the visitor to start" 180 visitor_up \
 
 no_endpoints || die "Expected a Service with no endpoints, but it has some. Run cleanup.sh and try again."
 
-show_next \
-  "Both IT-Tools Pods are Running, but nobody can reach them. The visitor gets no answer. Watch it with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

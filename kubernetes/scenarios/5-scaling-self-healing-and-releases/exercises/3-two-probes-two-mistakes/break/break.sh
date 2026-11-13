@@ -24,6 +24,4 @@ wait_for "the stall's Pods to be created (the first download can take a minute)"
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The thali counter is open, yet nobody is served and the Pods keep restarting. Watch it with: kubectl get pods -n k-36-two-probes -w (Ctrl+C to stop)." \
-  "kubectl logs -f visitor -n k-36-two-probes"
+scene_set

@@ -125,6 +125,4 @@ wait_for "the visitor to start" 180 pod_running "$NS" visitor \
 wait_for "the app to start and fail to look up Redis" 180 app_cannot_resolve \
   || die "Expected the app to be up but not ready, and it isn't. Run cleanup.sh and try again."
 
-show_next \
-  "Redis is running. The app is running too. Security hardened the network, and now the app says it is not ready and nobody can vote. The visitor sees it live: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

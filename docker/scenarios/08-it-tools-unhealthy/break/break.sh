@@ -29,6 +29,4 @@ wait_for "IT-Tools to answer on port 8108" 60 app_up \
 wait_for "Docker to give its verdict (about 10 seconds)" 60 is_unhealthy \
   || die "Unexpected health state. Run cleanup.sh and try again."
 
-show_next \
-  "Open http://localhost:8108 (playground: the port 8108 URL): the app works. But Docker says the container is sick." \
-  "docker ps --filter name=d08-tools"
+scene_set

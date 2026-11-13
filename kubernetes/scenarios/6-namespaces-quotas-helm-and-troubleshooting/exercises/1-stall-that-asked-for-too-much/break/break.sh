@@ -23,6 +23,4 @@ wait_for "the ReplicaSet to be refused (the Deployment shows 0 Pods)" 90 refused
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The chaat stall is set up, and the visitor is hungry. Watch it with: kubectl logs -f visitor -n k-40-limit-max (Ctrl+C to stop)." \
-  "kubectl get deployment,pods -n k-40-limit-max"
+scene_set

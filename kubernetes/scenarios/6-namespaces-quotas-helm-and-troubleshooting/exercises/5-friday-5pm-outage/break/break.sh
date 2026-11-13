@@ -34,6 +34,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "the database Pod to settle" 180 db_settled \
   || die "The database Pod didn't settle into its failing state. Run cleanup.sh and try again."
 
-show_next \
-  "It's Friday, 5 PM, and the release is out. The visitor can't get an answer from the app. Watch it live in a second terminal and keep it open for the whole incident: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

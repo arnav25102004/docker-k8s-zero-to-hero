@@ -33,6 +33,4 @@ wait_for "the image pull to fail" 180 stuck \
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The whiteboard was deployed, but no Pod is running. The visitor can't reach it either. Watch it with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

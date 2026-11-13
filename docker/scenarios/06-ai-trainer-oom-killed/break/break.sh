@@ -21,6 +21,4 @@ run_shown docker compose -f work/compose.yaml up -d --build \
 wait_for "the container to stop" 60 has_exited \
   || die "The container never stopped, which is unexpected. Run cleanup.sh and try again."
 
-show_next \
-  "Your AI model was training. Now the container is gone from 'docker ps': no error, no goodbye." \
-  "docker compose -f work/compose.yaml ps -a"
+scene_set

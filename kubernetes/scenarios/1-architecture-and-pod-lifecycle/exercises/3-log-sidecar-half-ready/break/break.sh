@@ -31,6 +31,4 @@ wait_for "the visitor to start (the first download can take a minute)" 180 visit
 wait_for "the notice board Pod to settle (the first download can take a minute)" 180 half_ready \
   || die "The notice board Pod didn't settle. Run cleanup.sh and try again."
 
-show_next \
-  "The notice board is deployed, but the site is not answering. The visitor sees it live: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

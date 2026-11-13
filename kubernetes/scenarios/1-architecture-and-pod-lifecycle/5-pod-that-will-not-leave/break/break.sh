@@ -24,6 +24,4 @@ kubectl delete pod old-stall -n "$NS" --wait=false >/dev/null || die "kubectl de
 wait_for "the delete to be accepted" 30 being_deleted \
   || die "The Pod was not marked for deletion. Run cleanup.sh and try again."
 
-show_next \
-  "You asked for the old stall to be deleted a moment ago. Kubernetes agreed. And yet… Watch for a minute: kubectl get pods -n k-37-stuck-pod -w (Ctrl+C to stop)." \
-  "kubectl get pods -n k-37-stuck-pod"
+scene_set

@@ -27,6 +27,4 @@ docker run -d --name d13-site --label z2h.scenario=d13 -p 8113:80 \
 wait_for "nginx to start on port 8113" 30 nginx_answers \
   || die "The container didn't start. Check: docker logs d13-site"
 
-show_next \
-  "The container is running, but Priya's portfolio is gone. Open http://localhost:8113 (playground: the port 8113 URL): the page says 403 Forbidden." \
-  "curl -I localhost:8113"
+scene_set

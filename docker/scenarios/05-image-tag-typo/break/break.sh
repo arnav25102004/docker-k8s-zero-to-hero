@@ -21,7 +21,5 @@ run_shown docker build -t d05-tools:1.0 work
 rc=$?
 printf 'docker build finished with exit code %s\n' "$rc"
 
-show_next \
-  "docker build printed an error and returned to the prompt. There is no image and nothing is running." \
-  "Read the error above, line by line. Then follow the README: Investigate."
+scene_set
 exit 0

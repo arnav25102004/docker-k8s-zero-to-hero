@@ -26,6 +26,4 @@ wait_for "the autoscaler to report a problem (it syncs every 15 s)" 120 hpa_comp
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The lassi stall serves happily, but the autoscaler shows <unknown>. Watch it with: kubectl get hpa -n k-41-hpa-target -w (Ctrl+C to stop)." \
-  "kubectl get hpa,deployment -n k-41-hpa-target"
+scene_set
