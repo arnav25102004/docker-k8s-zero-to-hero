@@ -238,3 +238,36 @@ check_visitor() {
   printf '%s\n' "$lines" | sed 's/^/     /'
   return 1
 }
+
+# ---- Monitoring helpers (scenarios K46 to K48 use Prometheus from lab K19) ----
+
+# need_monitoring: stop early, with one friendly line, unless Prometheus is running.
+need_monitoring() {
+  if ! kubectl get pods -n monitoring -l app.kubernetes.io/name=prometheus -o jsonpath='{.items[*].status.phase}' 2>/dev/null | grep -q Running; then
+    die "Prometheus isn't running. This scenario watches the cluster through it. Install it once (about 5 minutes): ./scripts/install-monitoring.sh"
+  fi
+}
+
+# urlencode STRING: percent-encode a PromQL expression for a URL (pure bash).
+urlencode() {
+  local s="$1" i c out=""
+  for ((i = 0; i < ${#s}; i++)); do
+    c="${s:i:1}"
+    case "$c" in
+      [a-zA-Z0-9.~_-]) out+="$c" ;;
+      *) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+
+# prom_query EXPR: raw JSON from Prometheus' query API, reached through the API server
+# (no port-forward needed).
+prom_query() {
+  kubectl get --raw "/api/v1/namespaces/monitoring/services/kube-prometheus-stack-prometheus:9090/proxy/api/v1/query?query=$(urlencode "$1")" 2>/dev/null
+}
+
+# prom_has EXPR: success if the query returns at least one series.
+prom_has() {
+  prom_query "$1" | grep -q '"result":\[{'
+}

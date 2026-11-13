@@ -203,3 +203,39 @@ _run_cycle_k8s() {
   done
   return 0
 }
+
+# ---- Monitoring (scenarios K46 to K48) ----
+# ensure_monitoring: install kube-prometheus-stack (lab K19) if Prometheus is not running. Never
+# removes it: it is shared, slow to install, and cleanup must not tear it down between scenarios.
+ensure_monitoring() {
+  if kubectl get pods -n monitoring -l app.kubernetes.io/name=prometheus -o jsonpath='{.items[*].status.phase}' 2>/dev/null | grep -q Running; then
+    return 0
+  fi
+  command -v helm >/dev/null 2>&1 || { printf 'helm is needed for the monitoring scenarios (K46 to K48).\n' >&2; return 1; }
+  printf '  installing monitoring (kube-prometheus-stack): a few minutes the first time\n'
+  bash "$REPO/scripts/install-monitoring.sh" >/dev/null 2>&1 || { printf 'monitoring install failed: run scripts/install-monitoring.sh to see why\n' >&2; return 1; }
+}
+
+_prom_urlencode() {
+  local s="$1" i c out=""
+  for ((i = 0; i < ${#s}; i++)); do
+    c="${s:i:1}"
+    case "$c" in
+      [a-zA-Z0-9.~_-]) out+="$c" ;;
+      *) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+
+# prom_wait EXPR SECONDS: succeed as soon as Prometheus returns at least one series for EXPR.
+prom_wait() {
+  local expr="$1" max="$2" i=0 url
+  url="/api/v1/namespaces/monitoring/services/kube-prometheus-stack-prometheus:9090/proxy/api/v1/query?query=$(_prom_urlencode "$expr")"
+  while [ "$i" -lt "$max" ]; do
+    kubectl get --raw "$url" 2>/dev/null | grep -q '"result":\[{' && return 0
+    sleep 3
+    i=$((i + 3))
+  done
+  return 1
+}

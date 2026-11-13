@@ -1,0 +1,47 @@
+# Lean settings for kube-prometheus-stack on a laptop cluster (kind, Docker Desktop, minikube).
+# Used by scripts/install-monitoring.sh. Everything not listed here keeps the chart's default.
+
+# We read alerts in the Prometheus UI, so no Alertmanager (saves memory and a Pod).
+alertmanager:
+  enabled: false
+
+# Lab-only login. Never use a fixed password like this anywhere real.
+grafana:
+  adminPassword: z2h-grafana
+  defaultDashboardsTimezone: browser
+
+# Container and Pod numbers come from the kubelet (cAdvisor) and kube-state-metrics.
+# node-exporter needs host mounts that Docker Desktop refuses, so it stays off.
+nodeExporter:
+  enabled: false
+
+# On kind the control-plane parts listen on localhost only, so Prometheus could never scrape them
+# and their alerts would fire forever. Turn the scrapes and their rules off.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+defaultRules:
+  rules:
+    etcd: false
+    kubeControllerManager: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    kubeProxy: false
+
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+    # Pick up ServiceMonitors and rules from every namespace, with no special label needed.
+    # (The chart's default only picks up objects labelled with its own release name.)
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false

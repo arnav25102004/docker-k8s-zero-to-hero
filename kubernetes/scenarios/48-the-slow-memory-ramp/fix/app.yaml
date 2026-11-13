@@ -1,0 +1,73 @@
+# K48 scenario manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: k-48-ramp
+  labels: { app: cache }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: cache }
+  template:
+    metadata:
+      labels: { app: cache }
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: cache
+          image: python:3.12-alpine
+          env:
+            - name: CACHE_MAX_MB      # 0 means: no limit on the cache
+              value: "40"
+          command: ["python", "-u", "-c"]
+          args:
+            - |
+              import os, threading, time, http.server
+              threading.Thread(target=lambda: http.server.HTTPServer(("", 8080), http.server.SimpleHTTPRequestHandler).serve_forever(), daemon=True).start()
+              limit_mb = int(os.environ.get("CACHE_MAX_MB", "0"))
+              cache, size = [], 0
+              print(f"cache starting, limit {limit_mb or 'none'} MB", flush=True)
+              while True:
+                  if limit_mb == 0 or size < limit_mb:
+                      cache.append(bytearray(b"x") * (4 * 1024 * 1024))
+                      size += 4
+                      print(f"cache holds {size} MB", flush=True)
+                  time.sleep(3)
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+            periodSeconds: 2
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 96Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  namespace: k-48-ramp
+spec:
+  selector:
+    app: cache
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cache-alerts
+  namespace: k-48-ramp
+spec:
+  groups:
+    - name: cache-alerts
+      rules:
+        - alert: CacheNearMemoryLimit
+          expr: >-
+            container_memory_working_set_bytes{namespace="k-48-ramp",container="cache"} / on (namespace, pod, container) kube_pod_container_resource_limits{namespace="k-48-ramp",resource="memory"} > 0.8
+          labels:
+            severity: page
+          annotations:
+            summary: The cache is above 80% of its memory limit
