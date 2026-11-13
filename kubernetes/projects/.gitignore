@@ -1,0 +1,2 @@
+# Packaged charts made by `helm package` in Project 2
+*.tgz

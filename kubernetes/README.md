@@ -155,6 +155,7 @@ Remove everything when you are done:
 | K18 | [🏆 Capstone: The Showdown Goes to Production](18-capstone/README.md) | 2h | 🔴 |
 | K19 | [🔔 See Everything: Helm, Prometheus & Grafana](19-observability/README.md) (after K13; many scenarios link to it) | 60m | 🟡 |
 | K20 | [🏁 Build Real Things: two 30-minute projects with Jenkins and monitoring](20-projects/README.md) | 70m | 🟡→🔴 |
+| 🏁 | [**The two projects: Canteen Rush** (lab exercises 5 and 6): build them with us, then build your own](projects/README.md) | 2 × 2.5h | 🟡→🔴 |
 | 🔥 | [Break-and-fix scenarios K01 … K45](scenarios/README.md) (separate from the labs above) | ~8h | 🟢→🔴 |
 
 ## How the labs and the scenarios fit together

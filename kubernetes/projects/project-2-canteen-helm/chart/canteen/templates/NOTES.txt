@@ -1,0 +1,18 @@
+🍵 {{ .Release.Name }} is installed (chart {{ .Chart.Name }}-{{ .Chart.Version }}, app {{ .Chart.AppVersion }}).
+
+Open the canteen:
+  kubectl port-forward svc/{{ include "canteen.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+  then http://localhost:8080
+
+What got created:
+  kubectl get all,configmap,secret,cronjob -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- if .Values.cronjob.enabled }}
+
+The nightly job runs on schedule "{{ .Values.cronjob.schedule }}". Watch it:
+  kubectl get cronjob,jobs -n {{ .Release.Namespace }}
+  kubectl logs -n {{ .Release.Namespace }} job/<one of the jobs>
+{{- end }}
+
+Check it from Helm:   helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+Change something:     helm upgrade {{ .Release.Name }} <chart> -n {{ .Release.Namespace }} --set replicaCount=4
+Undo it:              helm rollback {{ .Release.Name }} 1 -n {{ .Release.Namespace }}

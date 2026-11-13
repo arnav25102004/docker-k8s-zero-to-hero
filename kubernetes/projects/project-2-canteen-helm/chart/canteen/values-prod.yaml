@@ -1,0 +1,12 @@
+# "Production": more replicas, autoscaling on, a real nightly schedule, the Secret kept out of Git.
+replicaCount: 3
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 8
+cronjob:
+  schedule: "0 23 * * *"          # 23:00 every night
+existingSecret: canteen-prod-admin     # create it first: kubectl create secret generic canteen-prod-admin --from-literal=admin-token=... -n <namespace>
+adminToken: ""
+openingBell:
+  enabled: false

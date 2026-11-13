@@ -1,0 +1,35 @@
+# Project 2, phase 4: a CronJob makes a Job on a schedule. "Every 2 minutes" is our class-sized night.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly
+  namespace: canteen2
+spec:
+  schedule: "*/2 * * * *"           # minute hour day month weekday
+  concurrencyPolicy: Forbid          # never let two nights overlap
+  successfulJobsHistoryLimit: 3      # keep the last 3 good Jobs to read their logs
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: close-day
+              image: curlimages/curl:8.11.1
+              env:
+                - name: ADMIN_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: canteen-admin
+                      key: admin-token
+              command: ["sh", "-c"]
+              args:
+                - |
+                  echo "--- the day so far ---"
+                  curl -sf http://canteen/api/report
+                  echo
+                  echo "--- closing the day ---"
+                  curl -sf -X POST -H "X-Admin-Token: $ADMIN_TOKEN" http://canteen/api/admin/close-day
+                  echo

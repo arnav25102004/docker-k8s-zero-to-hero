@@ -1,0 +1,15 @@
+# Run with: helm test <release>. It passes when the app answers its health check.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "canteen.fullname" . }}-test
+  labels:
+    {{- include "canteen.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: probe
+      image: {{ .Values.cronjob.image }}
+      command: ["sh", "-c", "curl -sf http://{{ include "canteen.fullname" . }}/healthz && echo ' healthy'"]

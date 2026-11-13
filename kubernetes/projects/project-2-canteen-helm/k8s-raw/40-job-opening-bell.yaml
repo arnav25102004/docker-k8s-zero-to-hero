@@ -1,0 +1,25 @@
+# Project 2, phase 3: a Job runs once, to completion. This one places a few sample orders.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: opening-bell
+  namespace: canteen2
+spec:
+  backoffLimit: 2              # retry a failing Pod twice, then give up (the "Job gave up" scenario shows what happens next)
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ring
+          image: curlimages/curl:8.11.1
+          command: ["sh", "-c"]
+          args:
+            - |
+              for i in $(seq 1 60); do
+                curl -sf http://canteen/readyz >/dev/null && break
+                echo "waiting for the canteen to open..."; sleep 2
+              done
+              for item in chai chai samosa dosa chai; do
+                curl -sf "http://canteen/api/order?item=$item" >/dev/null && echo "ordered $item"
+              done
+              echo "🔔 the canteen is open for business"

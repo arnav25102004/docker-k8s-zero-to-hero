@@ -1,0 +1,45 @@
+{{- if .Values.cronjob.enabled }}
+# The nightly job: print the day's report, then close the day (a POST that needs the admin token).
+# If the token is wrong the POST is refused (HTTP 401), curl exits non-zero, and the Job fails: look
+# at it with: kubectl get jobs, then kubectl logs job/<name>.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "canteen.fullname" . }}-nightly
+  labels:
+    {{- include "canteen.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  suspend: {{ .Values.cronjob.suspend }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            {{- include "canteen.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: nightly
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: close-day
+              image: {{ .Values.cronjob.image }}
+              env:
+                - name: ADMIN_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "canteen.secretName" . }}
+                      key: admin-token
+              command: ["sh", "-c"]
+              args:
+                - |
+                  echo "--- the day so far ---"
+                  curl -sf http://{{ include "canteen.fullname" . }}/api/report
+                  echo
+                  echo "--- closing the day ---"
+                  curl -sf -X POST -H "X-Admin-Token: $ADMIN_TOKEN" http://{{ include "canteen.fullname" . }}/api/admin/close-day
+                  echo
+{{- end }}

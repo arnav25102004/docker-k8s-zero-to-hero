@@ -1,0 +1,14 @@
+# Project 1, phase 3: one stable address in front of the Pods that come and go.
+apiVersion: v1
+kind: Service
+metadata:
+  name: canteen
+  namespace: canteen
+  labels: { app: canteen, project: canteen-rush }
+spec:
+  type: ClusterIP
+  selector: { app: canteen }      # every Pod wearing this label gets a share of the traffic
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
