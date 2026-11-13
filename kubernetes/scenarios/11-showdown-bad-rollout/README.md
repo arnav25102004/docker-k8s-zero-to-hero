@@ -232,6 +232,13 @@ curl -s localhost:9211/api/info | grep -o '"version": "[^"]*"'
 ```
 Or open http://localhost:9211 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a stuck rollout as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_deployment_status_replicas_unavailable{namespace="k-11-bad-rollout"}
+```
+It stays above zero while the new version never becomes Ready, and the old Pods keep serving. Compare with `kube_deployment_status_replicas_updated`: a stuck rollout is "updated" stuck below "wanted".
+
 ## 🎯 Key takeaways
 - **A rolling update with a readiness probe protects users from a bad release:** a new Pod that never becomes Ready never gets traffic, and `maxUnavailable: 0` keeps the old Pods until it does.
 - **A stuck rollout is not an outage.** Check who is serving (the old Pods, the visitor) before you panic.

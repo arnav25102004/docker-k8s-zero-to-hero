@@ -202,6 +202,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9201
 ```
 Or open http://localhost:9201 in your browser and draw something. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch Pending Pods and what they ask for as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_status_phase{namespace="k-01-pending",phase="Pending"} == 1
+```
+The Pod shows up as Pending. Now compare what it asks for with what a node has: `kube_pod_container_resource_requests{namespace="k-01-pending",resource="memory"}` is 64 Gi (the typo), far above any node. Grafana: **Kubernetes / Compute Resources / Namespace (Pods)** shows the request line with no usage under it.
+
 ## 🎯 Key takeaways
 - **Requests are reservations** the scheduler must fit on a single node; **limits are caps** enforced while the Pod runs.
 - **Pending = the scheduler said no.** No restarts, no logs: the story is in `kubectl describe pod` → Events.

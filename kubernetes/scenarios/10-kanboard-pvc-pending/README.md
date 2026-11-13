@@ -217,6 +217,13 @@ curl -s localhost:9210/healthcheck.php; echo
 ```
 (The port-forward terminal also prints `Handling connection for 9210`.) Or open http://localhost:9210 in your browser. Kanboard's login is `admin` / `admin`: change it on any real board. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a disk that is never granted as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_persistentvolumeclaim_status_phase{namespace="k-10-pvc-pending",phase="Pending"} == 1
+```
+The claim is Pending and the Pod waits for it. `kube_persistentvolumeclaim_info` lists the StorageClass the claim asked for.
+
 ## 🎯 Key takeaways
 - **A PVC is a request, a StorageClass is the menu, a provisioner makes the disk.** If the class doesn't exist, nothing is ever made.
 - **A Pending Pod with no logs: look at what it is waiting for.** `describe pod` names the PVC; `describe pvc` names the missing class.

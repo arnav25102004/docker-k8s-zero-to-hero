@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install Prometheus + Grafana (the kube-prometheus-stack Helm chart) in the namespace "monitoring".
-# Lab K19 teaches it; scenarios K46 to K48 need it. Safe to run again: it upgrades in place.
+# Lab K19 teaches it; several scenarios have an optional "See it in monitoring" tip that uses it. Safe to run again: it upgrades in place.
 #
 #   ./scripts/install-monitoring.sh
 #

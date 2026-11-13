@@ -201,6 +201,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9203
 ```
 Or open http://localhost:9203 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a crash loop as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+increase(kube_pod_container_status_restarts_total{namespace="k-03-crashloop"}[5m])
+```
+The restart counter climbs in steps. `kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} == 1` is the state. The built-in alert **KubePodCrashLooping** goes pending, then firing after about 15 minutes.
+
 ## 🎯 Key takeaways
 - **restartPolicy `Always` restarts a dead container, but waits longer each time** (about 10 s up to 5 min). That waiting is `CrashLoopBackOff`.
 - **`CrashLoopBackOff` is a symptom, not a cause.** The container did start, then died. Read the exit code (`describe`) and the last words (`logs --previous`).

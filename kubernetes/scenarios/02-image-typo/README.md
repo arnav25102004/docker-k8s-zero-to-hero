@@ -183,6 +183,13 @@ curl -s -o /dev/null -w '%{http_code}\n' localhost:9202
 ```
 Or open http://localhost:9202 in your browser and draw something. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a pull that never works as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_container_status_waiting_reason{namespace="k-02-image-typo",reason=~"ErrImagePull|ImagePullBackOff"} == 1
+```
+The reason flips between `ErrImagePull` and `ImagePullBackOff` as Kubernetes backs off. A real team alerts on this reason, because nothing crashes and nothing restarts.
+
 ## 🎯 Key takeaways
 - **The kubelet on each node pulls the image.** A failed pull is retried with a growing wait (about 10 s up to 5 min).
 - **`ErrImagePull` = the pull just failed. `ImagePullBackOff` = waiting before the next try.** Neither one tells you why.

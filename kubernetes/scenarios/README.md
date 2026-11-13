@@ -1,19 +1,19 @@
 # 🔥 Kubernetes break-and-fix scenarios
 
-48 stage demos: 30 main scenarios, five 3-problem practice lanes (K31 to K36, K40 to K48) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
+45 stage demos: 30 main scenarios, four 3-problem practice lanes (K31 to K36, K40 to K45) and three worked examples on topics people meet on the job (K37 to K39). Each one **breaks something in a cluster on purpose**, the class investigates by hand with `kubectl`, then a fix script repairs it. Every scenario has its own folder with a story, the concept, the commands to type, and takeaways.
 
-> **Scenarios vs labs.** Here **K01–K48 means scenario folders** in this directory. They are not the labs K00–K19 in the [Kubernetes track](../README.md).
+> **Scenarios vs labs.** Here **K01–K45 means scenario folders** in this directory. They are not the labs K00–K19 in the [Kubernetes track](../README.md).
 
 > ### 🧰 Install these two things first (once)
 > **1. metrics-server, right after your cluster is up.** Without it there is no `kubectl top`, the autoscaler (K25) has nothing to read, and the K01 tour is half blind.
 > ```bash
 > ./scripts/install-metrics-server.sh
 > ```
-> **2. Prometheus and Grafana, for the "Real world: on call" scenarios K46 to K48** (and lab K19). It needs `helm` and about 2 GB of free memory. The first run takes about five minutes.
+> **2. (Optional) Prometheus and Grafana**, to watch every incident as a graph and an alert. Many scenarios have a short "👀 See it in monitoring" tip that needs it. It needs `helm` and about 2 GB of free memory; the first run takes about five minutes. Lab [K19](../19-observability/README.md) teaches it.
 > ```bash
 > ./scripts/install-monitoring.sh
 > ```
-> Every other scenario works without the second one. To see what is happening in the cluster as you break it, the optional [Kubilitics](https://kubilitics.com/) desktop app gives a live picture ([K01, Step 9](../01-cluster-tour/README.md)).
+> Every scenario works without it. For a live picture of the cluster as you break it, the [Kubilitics](https://kubilitics.com/) desktop app helps too ([K01, Step 9](../01-cluster-tour/README.md)).
 
 ## The lineup
 
@@ -64,9 +64,6 @@
 | K43 | [The maintenance van wants the master key](43-maintenance-van-wants-the-master-key/README.md) | Chai van (practice) | *The van only wanted to serve chai. It asked for a key to the entire market.* | `9243` | 17 MB |
 | K44 | [The checklist](44-the-checklist/README.md) | Kitchen cart (practice) | *The gate does not say "no". It hands you a checklist, and your kitchen cart ticks none of it.* | `9244` | 17 MB |
 | K45 | [The locked-down kitchen](45-the-locked-down-kitchen/README.md) | Kitchen (boss) | *The paperwork is perfect. The cook still cannot start. Welcome to the boss level.* | `9245` | 42 MB |
-| K46 | [The page at 3 AM](46-the-3-am-page/README.md) | Orders service + Prometheus (real world) | *The phone buzzes. Prometheus has an opinion about the orders service.* | - | 4 MB |
-| K47 | [The deploy nobody could place](47-the-deploy-nobody-could-place/README.md) | Checkout service + Prometheus (real world) | *Two letters of difference between a laptop and a data centre.* | - | 17 MB |
-| K48 | [The slow memory ramp](48-the-slow-memory-ramp/README.md) | Cache service + Grafana (real world, boss) | *It runs fine for a minute. Then it dies. Then it does it again. Only the graph shows the pattern.* | - | 19 MB |
 
 ### 🏋️ Practice lanes
 Reading about a fix is not the same as finding one alone. A **practice lane** takes one idea from a scenario you have already done (the *worked example*) and gives you more problems on the same idea, each with less help than the last. K31 to K33 are the first lane: **"Services find Pods"**, after [K04](04-it-tools-no-endpoints/README.md).
@@ -104,15 +101,6 @@ Two more lanes cover resources and security. **"Resources"**, after [K08](08-ai-
 | Guided | [K43](43-maintenance-van-wants-the-master-key/README.md) | questions and a hint ladder |
 | Mostly solo | [K44](44-the-checklist/README.md) | questions only |
 | Boss | [K45](45-the-locked-down-kitchen/README.md) | no hints for the first 5 minutes |
-
-**"Real world: on call"**, after [K19](../19-observability/README.md) (Helm, Prometheus and Grafana), where incidents are found the way a team on call finds them: an alert, a dashboard, then `kubectl`:
-
-| Step | Scenario | You get |
-|---|---|---|
-| Worked example | [K19](../19-observability/README.md) and [K03](03-showdown-crashloop/README.md) | every step explained |
-| Guided | [K46](46-the-3-am-page/README.md) | questions and a hint ladder |
-| Mostly solo | [K47](47-the-deploy-nobody-could-place/README.md) | questions only |
-| Boss | [K48](48-the-slow-memory-ramp/README.md) | no hints for the first 5 minutes |
 
 **Every scenario has a `./check.sh`** in its folder. Run it whenever you like: it only looks, never changes anything, and tells you in one line whether you are done.
 
@@ -157,7 +145,6 @@ Things to know before you start:
 - **K30 is the finale.** Three faults at once, three tracks, about 25 to 30 minutes. Run it after the others, when the class has seen each kind of fault on its own.
 - **K37 leaves a Pod that cannot be deleted** on purpose (a finalizer). Its `cleanup.sh` lifts the finalizer first so the namespace can go; run it, don't just delete the namespace.
 - **K38 changes your kubeconfig's current namespace** (that is its fix). `./cleanup.sh` puts it back, and only if this scenario was the one that set it. If you are unsure, `kubectl config view --minify -o jsonpath='{..namespace}'` shows where you are looking.
-- **K46 to K48 need the monitoring stack from lab K19** (Helm, about 2 GB of free memory). They check for it and say so if it is missing. The scenario test installs it if needed and never removes it.
 - **K43 to K45 label their namespace with a Pod Security level.** Pod Security Admission is built into Kubernetes 1.25 and later, so it needs nothing installed. K45 also pulls two small nginx images.
 - **K42 only reads Pod classes.** It never starves the node, so it is safe on a one-node cluster.
 - **K41 needs no metrics-server.** The autoscaler's complaint is about its target, which every cluster can show.
@@ -284,9 +271,6 @@ Tick each cell after you have run the whole scenario (break, fix, cleanup) on th
 | K43 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K44 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | K45 | ✅ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K46 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K47 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| K48 | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 
 **Known platform-sensitive scenarios.** Look at these first:
 

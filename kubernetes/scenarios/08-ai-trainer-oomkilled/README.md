@@ -199,6 +199,13 @@ kubectl describe pod -n k-08-oomkilled -l app=trainer | grep -E 'State:|Restart 
     Restart Count:  0
 ```
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch an out-of-memory kill as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_container_status_last_terminated_reason{namespace="k-08-oomkilled",reason="OOMKilled"} == 1
+```
+In Grafana, **Kubernetes / Compute Resources / Pod** shows memory climbing to the limit and dropping to zero, a sawtooth. The query `container_memory_working_set_bytes{namespace="k-08-oomkilled"}` is the line you are looking at.
+
 ## 🎯 Key takeaways
 - A memory **limit** is a hard fence (a cgroup). Go over it and the kernel kills the process, with no warning to the program.
 - Exit code **137 = 128 + 9 = SIGKILL**. `Reason: OOMKilled` in `kubectl describe` names the culprit (on some setups it shows as `Error`, still 137).

@@ -258,6 +258,13 @@ curl -s localhost:9220/healthz
 ```
 Or open http://localhost:9220 in your browser and cast a vote. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a limit nobody wrote as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+container_memory_working_set_bytes{namespace="k-20-limitrange",container!=""} / on (namespace, pod, container) kube_pod_container_resource_limits{namespace="k-20-limitrange",resource="memory"}
+```
+Usage divided by limit climbs towards 1 and the Pod dies. The limit in that query is the one the LimitRange filled in, not one you wrote.
+
 ## 🎯 Key takeaways
 - **A Pod can have a limit nobody wrote.** A LimitRange in the namespace fills in missing `resources` when the Pod is created.
 - **An OOM kill is silent:** exit code 137, reason `OOMKilled`, and no error message from the app (a real app may have logged earlier lines).

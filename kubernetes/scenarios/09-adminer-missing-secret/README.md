@@ -224,6 +224,13 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:9209
 ```
 (The port-forward terminal also prints `Handling connection for 9209`. It shows `8080` because the Service's port 80 leads to Adminer's port 8080 inside the Pod.) Or open http://localhost:9209 in your browser: you should see the Adminer login page, with the server field already set to `db`. There is no database behind it in this demo, so just admire the page. Press Ctrl+C in the second terminal to stop the port-forward.
 
+## 👀 See it in monitoring (optional)
+If you installed the monitoring stack ([lab K19](../../19-observability/README.md)), watch a container that was never created as a number. In Prometheus (`kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090`, then http://localhost:9090) run:
+```
+kube_pod_container_status_waiting_reason{namespace="k-09-missing-secret",reason="CreateContainerConfigError"} == 1
+```
+No restarts and no logs, only this waiting reason. It is the monitoring way of saying "look at the Pod events".
+
 ## 🎯 Key takeaways
 - **No logs means it never started.** A container that was never created can't write a log line.
 - **`CreateContainerConfigError` means the kubelet couldn't build the container's settings,** usually a missing Secret or ConfigMap (or a wrong key).

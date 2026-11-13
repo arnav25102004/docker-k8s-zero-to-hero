@@ -78,7 +78,9 @@ Open http://localhost:9090, **Graph**, and run these one at a time:
 Each row is a scenario you already know: restarts are K03 and K07, OOM kills are K08 and K20, Pending is K09 and K16 to K18. Now you can see them **before** a user complains.
 
 ### Step 5: Alerts
-Open **Alerts** in the Prometheus UI. A rule is a query plus a condition. Every red line there is a question someone decided was worth waking a person for. In real teams they go to Slack or a pager (that is Alertmanager's job, which we left out). Scenarios K46 to K48 use these alerts.
+Open **Alerts** in the Prometheus UI. A rule is a query plus a condition. Every red line there is a question someone decided was worth waking a person for. In real teams they go to Slack or a pager (that is Alertmanager's job, which we left out).
+
+A real alert waits before it fires, so one blip does not wake anyone. Try it: run scenario [K03](../scenarios/03-showdown-crashloop/README.md) (a crash loop) and watch **KubePodCrashLooping**. It goes *pending* first and only turns *firing* after several minutes, because the rule says "for 15 minutes". That patience is on purpose.
 
 ### Step 6: Helm, the second half
 ```bash
@@ -104,14 +106,13 @@ Without opening a dashboard, write the one query that lists every Pod whose cont
 container_memory_working_set_bytes{container!=""}
   / on (namespace, pod, container) kube_pod_container_resource_limits{resource="memory"} > 0.8
 ```
-Usage divided by limit, matched on the same Pod and container. Anything above 0.8 is close to being OOM-killed (K08, K20). Scenario K48 uses exactly this alert.
+Usage divided by limit, matched on the same Pod and container. Anything above 0.8 is close to being OOM-killed (K08, K20). Scenario [K20](../scenarios/20-surprise-limitrange-oom/README.md) is exactly this failure.
 </details>
 
 ## 🔥 Now break it
-Real incidents, found the way a team on call finds them: an alert, a dashboard, then `kubectl`.
-- [K46](../scenarios/46-the-3-am-page/README.md): the page at 3 AM (a crash loop found through an alert)
-- [K47](../scenarios/47-the-deploy-nobody-could-place/README.md): a release that cannot be scheduled
-- [K48](../scenarios/48-the-slow-memory-ramp/README.md): memory that climbs for a minute, then dies
+Every scenario can now be watched, not only read with `kubectl`. These carry a short "👀 See it in monitoring" tip with the exact query:
+- [K01](../scenarios/01-excalidraw-pending/README.md) a Pod stuck Pending · [K02](../scenarios/02-image-typo/README.md) a bad image name · [K03](../scenarios/03-showdown-crashloop/README.md) a crash loop
+- [K08](../scenarios/08-ai-trainer-oomkilled/README.md) and [K20](../scenarios/20-surprise-limitrange-oom/README.md) memory kills · [K11](../scenarios/11-showdown-bad-rollout/README.md) a stuck rollout · [K25](../scenarios/25-showdown-hpa-not-scaling/README.md) the autoscaler
 
 ## ✅ Checkpoint
 <details><summary>1. <code>kubectl top</code> and Prometheus both show CPU. What does Prometheus add?</summary>
