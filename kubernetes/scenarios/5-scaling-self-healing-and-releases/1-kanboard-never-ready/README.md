@@ -33,7 +33,7 @@ Kubernetes asks your container two different questions, and the answers do very 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script finishes happily. The Kanboard Pod is `Running`, nothing has crashed, and the Service exists. But a small `visitor` Pod, which asks for the board every 2 seconds, never gets an answer:
 ```bash
@@ -152,7 +152,7 @@ kubectl logs -f visitor -n k-06-never-ready
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

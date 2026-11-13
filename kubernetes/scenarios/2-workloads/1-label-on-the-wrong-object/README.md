@@ -45,7 +45,7 @@ No. The Service looks at the labels on the **Pods**, and a Deployment's own labe
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl logs -f visitor -n k-32-wrong-object
@@ -105,7 +105,7 @@ The label `app: samosa` was put on the Deployment object, but the Pod template o
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 That adds `app: samosa` to the **Pod template** (the selector stays as it is, which is allowed) and the Deployment replaces the Pods one by one. By hand, there are two good options:
 ```bash

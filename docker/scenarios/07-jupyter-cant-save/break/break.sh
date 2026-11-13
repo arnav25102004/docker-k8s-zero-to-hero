@@ -26,6 +26,4 @@ wait_for "Jupyter to start" 90 jupyter_up \
 wait_for "the backup job to finish" 30 backup_done \
   || die "The backup job didn't finish. Check: docker compose -f work/compose.yaml logs backup"
 
-show_next \
-  "Jupyter is up: open http://localhost:8107/lab?token=change-me-123 (playground: the port 8107 URL + /lab?token=change-me-123). In the file browser open work, then assignments, and try to create a notebook there. (The backup job shows Exited (0) in docker compose ps -a. That is normal for a one-shot job.)" \
-  "docker compose -f work/compose.yaml ps -a"
+scene_set

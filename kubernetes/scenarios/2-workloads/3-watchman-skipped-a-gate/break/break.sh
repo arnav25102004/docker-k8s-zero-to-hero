@@ -25,6 +25,4 @@ wait_for "the DaemonSet to count its gates" 120 scene_ready \
   || die "The DaemonSet did not report. Run cleanup.sh and try again."
 sleep 5
 
-show_next \
-  "A watchman was posted at every gate. Count the gates, then count the watchmen." \
-  "kubectl get nodes   ·   kubectl get daemonset,pods -n k-16-daemonset -o wide"
+scene_set

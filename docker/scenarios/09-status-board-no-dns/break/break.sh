@@ -28,6 +28,4 @@ run_shown docker compose -f work/compose.yaml up -d \
 wait_for "the status board to report" 30 board_says_down \
   || die "The board didn't start reporting. Run cleanup.sh and try again."
 
-show_next \
-  "Open http://localhost:8109 (playground: the port 8109 URL): the board shows big red ❌ tiles. The apps are running, though." \
-  "docker compose -f work/compose.yaml ps"
+scene_set

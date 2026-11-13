@@ -34,7 +34,7 @@ Pods come and go, and every new Pod gets a new IP address. So you never talk to 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script finishes happily. Two IT-Tools Pods are `Running`, the Service exists, nothing is red. But a small `visitor` Pod, which asks for the tools every 2 seconds, never gets an answer:
 ```bash
@@ -151,7 +151,7 @@ kubectl logs -f visitor -n k-04-no-endpoints
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about ten seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it). No Pod was restarted: we only changed which labels the Service looks for. What changed:
 ```bash

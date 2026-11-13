@@ -50,7 +50,7 @@ The first says something like `No resources found`, and the second says the Pod 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 Now do what Lakshmi did, with no `-n` at all:
 ```bash
@@ -105,7 +105,7 @@ The manifest says `namespace: k-38-night-canteen`, so the Deployment was created
 ## 🔧 Fix it
 Make plain `kubectl` commands look in the canteen's namespace:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 By hand, that is:
 ```bash

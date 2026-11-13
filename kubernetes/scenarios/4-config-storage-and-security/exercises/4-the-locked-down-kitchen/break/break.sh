@@ -23,6 +23,4 @@ wait_for "the Pods to be admitted and then stuck (the first download can take a 
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The locked-down kitchen is set up, and the visitor is waiting. Watch it with: kubectl logs -f visitor -n k-45-lockdown (Ctrl+C to stop)." \
-  "kubectl get deployment,pods -n k-45-lockdown"
+scene_set

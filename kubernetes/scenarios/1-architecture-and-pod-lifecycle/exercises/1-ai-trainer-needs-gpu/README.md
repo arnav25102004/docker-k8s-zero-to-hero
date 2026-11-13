@@ -40,7 +40,7 @@ Think of booking a cab. "Only an electric car" is a requirement: no electric car
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says it is starting the AI trainer, and then finishes. The training never starts. There is **no web page and no port to open** in this scenario (it isn't a web app), so everything we do, finding the problem and checking the fix, happens in the terminal.
 
@@ -122,7 +122,7 @@ The lab cluster has only ordinary CPU nodes, so no node can ever match. The deep
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The script waits for the new Pod and for the training to finish (about 10 seconds once the Python image is on the node; on a cold cluster, add the image download). What changed: only the placement rule. Compare the two files:
 ```bash

@@ -19,6 +19,4 @@ kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluste
 wait_for "the three workloads to be Running (the first download can take a minute)" 180 all_running \
   || die "The Pods did not start. Run cleanup.sh and try again."
 
-show_next \
-  "Three workloads are running. Which would Kubernetes evict first if the node ran out of memory? Find out what class each one is in: kubectl get pods -n k-42-qos -o custom-columns=NAME:.metadata.name,QOS:.status.qosClass" \
-  "./check.sh"
+scene_set

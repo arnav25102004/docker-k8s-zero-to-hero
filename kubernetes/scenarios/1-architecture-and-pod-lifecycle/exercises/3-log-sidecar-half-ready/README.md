@@ -39,7 +39,7 @@ Analogy: a shop with a cashier and a guard. The shop only opens when both have s
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script deploys the notice board and finishes. Something is not fully up. A small `visitor` Pod, which asks for the board every few seconds, gets no answer:
 ```bash
@@ -184,7 +184,7 @@ kubectl logs -f visitor -n k-29-sidecar
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about half a minute the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

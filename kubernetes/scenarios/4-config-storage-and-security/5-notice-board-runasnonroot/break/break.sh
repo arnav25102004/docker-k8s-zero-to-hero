@@ -25,6 +25,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "the notice board Pods to settle" 180 board_stuck \
   || die "The notice board Pods didn't settle. Run cleanup.sh and try again."
 
-show_next \
-  "The notice board is deployed, but it's not coming up after yesterday's policy rollout. The visitor can't reach it: watch it with kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

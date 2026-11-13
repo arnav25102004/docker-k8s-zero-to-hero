@@ -46,7 +46,7 @@ Requests only: **Burstable**. Nothing at all: **BestEffort**. Only equal request
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get pods -n k-42-qos -o custom-columns=NAME:.metadata.name,QOS:.status.qosClass
@@ -80,7 +80,7 @@ Only requests and limits decide the class, and `kubectl` shows the result. The c
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix sets cache requests = limits, `web` requests below limits, and removes the resources block from `batch`. Each Deployment rolls to a new Pod with the new class.
 

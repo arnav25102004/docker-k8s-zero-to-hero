@@ -41,7 +41,7 @@ Think of a doctor whose patient arrives with three symptoms. A good doctor doesn
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the release is out, and the visitor can't get an answer from the app. The `visitor` Pod is a fan who votes 🐶 every 2 seconds and then reads the vote total twice. It prints one line per round (its clock is UTC, so your times will differ):
 ```bash
@@ -332,7 +332,7 @@ Track B hid Track C: while nobody could reach the app, nobody could see that it 
 ## 🔧 Fix it
 The three by-hand fixes above together replace `./fix.sh`. You don't need both, but `fix.sh` is safe to run any time. It applies the same three fixes **one at a time, in the same order**, and waits wherever a fix needs Pods to roll. Each fix is applied whatever its current state, so it works whether you've fixed zero, one, two or all three tracks by hand. It's the safety net when a demo goes sideways. We ran it right after Track C, with everything already fixed:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 ```
 ▶ Fix 1 of 3 (Track A): Redis image tag redis:7.4.12-alpine…

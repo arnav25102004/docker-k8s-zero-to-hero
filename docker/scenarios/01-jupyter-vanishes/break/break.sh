@@ -26,6 +26,4 @@ run_shown_quiet docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0 \
 wait_for "the container to stop" 30 has_exited \
   || die "The container never stopped, which is unexpected. Run cleanup.sh and try again."
 
-show_next \
-  "You clicked run, Jupyter blinked… and it's gone. Try opening http://localhost:8101: nothing answers." \
-  "docker ps --filter name=d01-jupyter"
+scene_set

@@ -40,7 +40,7 @@ Nothing. The Pod was never created, so there is no Pod to be in an error state. 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get deployment,pods -n k-40-limit-max
@@ -77,7 +77,7 @@ The Deployment asks for `limits.memory: 1Gi`, above the namespace maximum of `12
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix sets the limit to `128Mi`. By hand: `kubectl edit deployment chaat -n k-40-limit-max` and lower `resources.limits.memory`.
 

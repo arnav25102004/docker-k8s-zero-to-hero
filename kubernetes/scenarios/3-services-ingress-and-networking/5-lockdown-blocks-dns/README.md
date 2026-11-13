@@ -34,7 +34,7 @@ Think of a hostel with a strict gate list: "students may go to the library". You
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script first runs a quick enforcement check, then says Redis is running and the app is running too, but the app says it is not ready and nobody can vote. A small `visitor` Pod asks the app `/readyz` ("are you ready?") and gets "not ready" every time:
 ```bash
@@ -165,7 +165,7 @@ kubectl logs -f visitor -n k-13-lockdown
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The log flips from ❌ to ✅ lines within about fifteen seconds (Ctrl+C to stop it). No Pod restarts: a policy change takes effect on running Pods. What changed:
 ```bash

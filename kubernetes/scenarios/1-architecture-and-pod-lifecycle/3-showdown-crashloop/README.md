@@ -36,7 +36,7 @@ A Pod's **restartPolicy** tells the kubelet (the agent on each node) what to do 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the app was deployed, but it keeps starting and dying. The Deployment exists, a Pod exists, and nobody can vote. A small `visitor` Pod keeps asking the app for `/healthz` every 2 seconds and gets no answer:
 ```bash
@@ -137,7 +137,7 @@ kubectl logs -f visitor -n k-03-crashloop
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within a few seconds the log flips from ❌ to ✅ lines (Ctrl+C to stop it). It doesn't wait for the back-off timer: changing the Pod template makes a **new** Pod, and a new Pod starts straight away. What changed: just the value of `PORT`.
 ```bash

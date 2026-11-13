@@ -22,6 +22,4 @@ wait_for "the first stall (stall-0) to start (the first download can take a minu
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "Three stalls were ordered. Look at what exists. The visitor is waiting: kubectl logs -f visitor -n k-15-statefulset (Ctrl+C to stop)." \
-  "kubectl get statefulset,pods -n k-15-statefulset"
+scene_set

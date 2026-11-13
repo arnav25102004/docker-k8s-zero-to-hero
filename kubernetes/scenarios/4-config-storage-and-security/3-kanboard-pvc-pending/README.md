@@ -34,7 +34,7 @@ A container's own filesystem disappears when the container does. To keep data, K
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script finishes happily and says the board is waiting for a disk. Nothing crashed. A small `visitor` Pod, which asks for the board every 2 seconds, never gets an answer:
 ```bash
@@ -142,7 +142,7 @@ kubectl logs -f visitor -n k-10-pvc-pending
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within about twenty seconds once Kanboard is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it):
 ```

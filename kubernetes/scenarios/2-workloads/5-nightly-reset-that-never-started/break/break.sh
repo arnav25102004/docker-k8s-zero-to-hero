@@ -17,6 +17,4 @@ say "Scheduling the nightly reset…"
 kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluster healthy?"
 wait_for "the CronJob to exist" 60 scene_ready || die "The CronJob was not created. Run cleanup.sh and try again."
 
-show_next \
-  "The nightly reset is scheduled to run every minute. Give it two minutes. Did it run?" \
-  "kubectl get cronjob,jobs -n k-24-cronjob"
+scene_set

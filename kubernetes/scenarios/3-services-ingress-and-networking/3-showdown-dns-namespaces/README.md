@@ -36,7 +36,7 @@ Think of two offices in a company. Inside your office you can shout "Priya!" and
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says Redis is running and the app is running too, but the app says it is not ready and nobody can vote. A small `visitor` Pod asks the app `/readyz` every 2 seconds ("are you ready?") and gets "not ready" every time:
 ```bash
@@ -153,7 +153,7 @@ kubectl logs -f visitor -n k-12-dns-app
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The log flips from ❌ to ✅ lines within about ten seconds of the new Pod starting (Ctrl+C to stop it). What changed:
 ```bash

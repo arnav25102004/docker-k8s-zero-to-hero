@@ -43,7 +43,7 @@ The Pods are admitted. They will not be `Running`. Which status do you expect to
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get pods -n k-45-lockdown
@@ -79,7 +79,7 @@ Two stacked mistakes. The image runs as root, which `runAsNonRoot: true` forbids
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix swaps the image for `nginxinc/nginx-unprivileged`, and moves the container port, the probe and the Service `targetPort` to 8080.
 

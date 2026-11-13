@@ -38,7 +38,7 @@ docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
 ```
 Or use the one-line shortcut, which prints each command before it runs it, exactly as above:
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 ```
 ✅ Scenario d01 cleaned up
@@ -151,9 +151,9 @@ docker build -t d01-jupyter:1.0 work
 docker rm -f d01-jupyter
 docker run -d --name d01-jupyter -p 8101:8888 d01-jupyter:1.0
 ```
-Or run `./fix/fix.sh`, which does the same: it drops the fixed Dockerfile into a fresh `work/`, then prints and runs those exact commands (the build, `docker rm -f`, the run).
+Or run `python3 fix/run.py`, which does the same: it drops the fixed Dockerfile into a fresh `work/`, then prints and runs those exact commands (the build, `docker rm -f`, the run).
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 Either way you end in the same place: image `d01-jupyter:1.0`, container `d01-jupyter`.
 

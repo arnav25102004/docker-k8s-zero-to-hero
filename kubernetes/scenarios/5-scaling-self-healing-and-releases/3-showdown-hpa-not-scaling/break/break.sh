@@ -39,6 +39,4 @@ wait_for "the load to start" 180 load_up \
 wait_for "the autoscaler to report its first reading" 180 hpa_cannot_read \
   || die "The autoscaler never reported. Run cleanup.sh and try again."
 
-show_next \
-  "The app is up and the load Pod keeps it busy, but the autoscaler is not scaling it. Watch it with: kubectl get hpa -n $NS -w (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

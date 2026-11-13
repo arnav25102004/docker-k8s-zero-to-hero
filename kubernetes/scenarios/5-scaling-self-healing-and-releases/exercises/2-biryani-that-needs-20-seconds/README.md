@@ -45,7 +45,7 @@ The liveness probe starts checking after `initialDelaySeconds: 5`, checks every 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 In a second terminal, watch the Pods live:
 ```bash
@@ -101,7 +101,7 @@ The app needs about 20 seconds to start. The liveness probe starts at 5 s and gi
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix adds a **startup probe** (up to 60 s to come up, checked every 2 s); liveness only begins after it passes. The raise-the-delay fix from the trap above also passes `./check.sh`: you now know which one you would rather defend in a review.
 

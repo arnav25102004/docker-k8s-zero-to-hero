@@ -36,7 +36,7 @@ HTTP **401** means "I don't know who you are". HTTP **403** means "I know exactl
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the bot is running, but the leaderboard stays empty. There is **no web page and no port to open** in this scenario (the bot is not a web app), so everything we do happens in the terminal with `logs` and `kubectl auth can-i`.
 
@@ -117,7 +117,7 @@ kubectl logs -f bot -n k-14-forbidden
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The script adds the missing permission and waits for the bot's next successful try (up to about 15 seconds). What changed: nothing in the bot. The `break` folder had no Role at all; the `fix` folder adds one (a file named `rbac.yaml`):
 ```bash

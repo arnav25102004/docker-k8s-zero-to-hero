@@ -33,6 +33,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "the app Pod to settle" 180 settled \
   || die "The app Pod didn't settle into its failing state. Run cleanup.sh and try again."
 
-show_next \
-  "Redis is running, but the app is not coming up and nobody can vote. The visitor sees it live: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

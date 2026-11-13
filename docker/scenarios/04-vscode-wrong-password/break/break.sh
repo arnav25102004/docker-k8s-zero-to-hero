@@ -25,6 +25,4 @@ run_shown_quiet docker run -d --name d04-vscode -p 8104:8080 --env-file work/app
 wait_for "VS Code to answer on port 8104" 90 vscode_up \
   || die "VS Code didn't come up in time. Run ./cleanup.sh and try again."
 
-show_next \
-  "VS Code is running at http://localhost:8104 and asks for a password. Type: change-me-123" \
-  "Then see what happens, and run: docker logs d04-vscode"
+scene_set

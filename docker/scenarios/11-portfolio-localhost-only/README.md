@@ -31,7 +31,7 @@ You met the same idea from the outside in [Lab D01, §4 "The student survival ki
 
 ## 💥 Break it
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 The room should see the script finish happily ("container is running"). Now open http://localhost:8111 (playground: the port 8111 URL): the browser says the site **can't be reached** (or the connection was reset). Nothing in the script printed an error.
 
@@ -103,7 +103,7 @@ The `Dockerfile` starts the server with `--bind 127.0.0.1`. Inside a container, 
 
 ## 🔧 Fix it
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 What changed: `break/` and `fix/` hold the same page. Only the `Dockerfile` differs:
 ```bash
@@ -113,7 +113,7 @@ grep -n '^CMD' break/Dockerfile fix/Dockerfile
 break/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "127.0.0.1"]
 fix/Dockerfile:7:CMD ["python", "-m", "http.server", "8000", "--bind", "0.0.0.0"]
 ```
-`0.0.0.0` means "listen on every network interface". By hand, this replaces `./fix/fix.sh`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
+`0.0.0.0` means "listen on every network interface". By hand, this replaces `python3 fix/run.py`: remove the old container, rebuild from the fixed `Dockerfile`, run again:
 ```bash
 docker rm -f d11-portfolio
 docker build -t d11-portfolio:1.0 fix

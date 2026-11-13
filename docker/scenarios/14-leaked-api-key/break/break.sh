@@ -23,6 +23,4 @@ docker run --rm --label z2h.scenario=d14 d14-weather:broken
 say "Sharing it with the team: docker tag d14-weather:broken d14-weather:shared"
 docker tag d14-weather:broken d14-weather:shared
 
-show_next \
-  "The widget works and the image is 'shared' as d14-weather:shared. Nothing looks wrong." \
-  "docker history d14-weather:broken"
+scene_set

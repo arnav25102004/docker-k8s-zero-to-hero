@@ -23,6 +23,4 @@ kubectl apply -f "$HERE/" >/dev/null || die "kubectl apply failed. Is the cluste
 wait_for "the trainer to be killed" 180 killed \
   || die "Expected the trainer to be killed, but it wasn't. Run cleanup.sh and try again."
 
-show_next \
-  "Your AI model was training. Now the Pod keeps restarting and the training never finishes. There is no web page: it's all in the terminal. Watch it with: kubectl get pods -n $NS -w (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

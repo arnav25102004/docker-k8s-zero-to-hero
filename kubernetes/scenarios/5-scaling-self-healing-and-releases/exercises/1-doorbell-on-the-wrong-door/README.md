@@ -46,7 +46,7 @@ The Pods are `Running`. Before you look:
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl logs -f visitor -n k-34-doorbell
@@ -107,7 +107,7 @@ The readiness probe knocks on port `8080`, but the container listens on port `56
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 That points the probe at port `5678`. By hand, it is a one-line change to the Deployment:
 ```bash

@@ -28,6 +28,4 @@ wait_for "the visitor to start" 180 visitor_up \
 no_endpoints() { [ -z "$(kubectl get endpointslices -n "$NS" -l kubernetes.io/service-name=samosa -o jsonpath='{..addresses}' 2>/dev/null)" ]; }
 no_endpoints || die "Expected a Service with no endpoints, but it has some. Run cleanup.sh and try again."
 
-show_next \
-  "The samosa stall is open and both fryers are Running, yet nobody gets a samosa. Watch it with: kubectl logs -f visitor -n k-32-wrong-object (Ctrl+C to stop)." \
-  "kubectl get deployment,pods -n k-32-wrong-object --show-labels"
+scene_set

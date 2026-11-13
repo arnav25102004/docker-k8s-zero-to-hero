@@ -28,7 +28,7 @@ your folder ──▶ .dockerignore filter ──▶ build context (the box) ─
 
 ## 💥 Break it
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 The room should see a wall of red text: `docker build` stops with an error, and then `docker run` complains that the image `d10-qr:1.0` can't be found. Nothing is running at http://localhost:8110 (playground: the port 8110 URL) because the app was never built.
 
@@ -108,7 +108,7 @@ Just the header: no image was built.
 
 ## 🔧 Fix it
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 What changed: `break/` and `fix/` hold the same app. Only `.dockerignore` differs:
 ```bash

@@ -34,7 +34,7 @@ docker compose -f work/compose.yaml up -d
 ```
 Or use the one-line shortcut, which prints every Docker command before it runs it, exactly as above:
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 ```
 ✅ Scenario d09 cleaned up
@@ -228,9 +228,9 @@ docker compose -f work/compose.yaml up -d
  Container d09-board-1 Starting
  Container d09-board-1 Started
 ```
-(shortened: Compose may print some lines twice, and the build output is left out.) Or run `./fix/fix.sh`, which does the same: it drops the fixed files into a fresh `work/`, then prints and runs that exact `docker compose -f work/compose.yaml up -d`.
+(shortened: Compose may print some lines twice, and the build output is left out.) Or run `python3 fix/run.py`, which does the same: it drops the fixed files into a fresh `work/`, then prints and runs that exact `docker compose -f work/compose.yaml up -d`.
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 Either way you end in the same place: containers `d09-draw-1`, `d09-tools-1`, `d09-board-1` on the network `d09_default`.
 

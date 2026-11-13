@@ -47,7 +47,7 @@ The restarts stop, but the Pods stay `0/1`: the readiness probe is still wrong, 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get pods -n k-36-two-probes -w
@@ -95,7 +95,7 @@ Two independent mistakes:
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix corrects both: readiness asks for `/`, liveness uses port `8080`. By hand, that is two edits to the same Deployment.
 

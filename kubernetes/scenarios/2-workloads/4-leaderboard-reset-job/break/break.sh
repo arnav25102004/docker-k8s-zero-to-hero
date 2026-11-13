@@ -31,6 +31,4 @@ kubectl apply -f "$HERE/script.yaml" -f "$HERE/job.yaml" >/dev/null || die "kube
 wait_for "the Job to finish its attempts (about half a minute; the first download can take longer)" 180 job_gave_up \
   || die "The Job never finished. Run cleanup.sh and try again."
 
-show_next \
-  "The scores were meant to be reset overnight. They weren't, and the Job has stopped trying." \
-  "kubectl get job,pods -n $NS"
+scene_set

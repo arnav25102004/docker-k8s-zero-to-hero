@@ -24,6 +24,4 @@ wait_for "the players to start" 180 players_up \
 wait_for "the bot to be refused by the API (403)" 180 forbidden \
   || die "Expected the bot to be refused, but didn't see it. Run cleanup.sh and try again."
 
-show_next \
-  "The bot is running, but the leaderboard stays empty. Watch it with: kubectl logs -f bot -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

@@ -37,6 +37,4 @@ kubectl apply -f "$HERE/v2/" >/dev/null || die "kubectl apply of v2 failed. Is t
 wait_for "the new Pod to start crashing while the 3 old Pods stay Ready" 180 stuck \
   || die "Expected a stuck rollout, but didn't see it. Run cleanup.sh and try again."
 
-show_next \
-  "v2 was released on a Friday evening. Then it went quiet. Is the poll down? Watch what a visitor gets: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

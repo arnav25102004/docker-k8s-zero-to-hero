@@ -26,6 +26,4 @@ run_shown docker run -d --name d03-api --network d03-net -p 8103:8080 d03-api:1.
 wait_for "the API to answer on port 8103" 30 not_ready \
   || die "The API didn't come up in time. Run cleanup.sh and try again."
 
-show_next \
-  "Both containers are Up. The voting booth is open at http://localhost:8103 (playground: the port 8103 URL), so try a vote." \
-  "curl -s localhost:8103/readyz"
+scene_set

@@ -49,6 +49,4 @@ wait_for "the visitor to start" 180 visitor_up \
 wait_for "whoami to finish scaling" 180 one_waiting \
   || die "The Pods never settled as expected. Run cleanup.sh and try again."
 
-show_next \
-  "whoami is scaled out to $REPLICAS Pods for the open house, and the site still answers. But is every Pod pulling its weight? Watch the visitor: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

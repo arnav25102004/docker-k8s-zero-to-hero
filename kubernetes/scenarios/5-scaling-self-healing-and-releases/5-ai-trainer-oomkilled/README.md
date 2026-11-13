@@ -39,7 +39,7 @@ Think of a hostel mess with one plate per student. Take more than one plate and 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the trainer was deployed, but the training never finishes. The Pod keeps restarting and its `RESTARTS` count keeps climbing. There is **no web page and no port to open** in this scenario (it isn't a web app), so everything we do, finding the problem and checking the fix, happens in the terminal with `logs` and `describe`.
 
@@ -133,7 +133,7 @@ Calibration (roughly, from about 10 MB for a bare Python 3.12 process plus 25 MB
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The script waits for the new Pod and for the training to finish (about 10 seconds). What changed: only the memory settings. Compare the two files:
 ```bash

@@ -45,7 +45,7 @@ Two, if nothing is wrong. Zero if the CronJob is suspended, if its time has not 
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get cronjob,jobs -n k-24-cronjob
@@ -80,7 +80,7 @@ The CronJob's `spec.suspend` is `true`: someone paused it during an incident and
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix sets `suspend: false`. By hand: `kubectl patch cronjob nightly-reset -n k-24-cronjob -p '{"spec":{"suspend":false}}'`. Then wait for the next minute and watch a Job appear.
 

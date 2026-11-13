@@ -37,7 +37,7 @@ docker run -d --name d08-tools -p 8108:80 d08-tools:1.0
 ```
 Or the one-line shortcut, which prints every Docker command it runs:
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 
 Laptop: http://localhost:8108 shows IT-Tools. Playground: open the port 8108 URL. Docker needs a few failed checks before it gives its verdict, so wait about 10 seconds. (The script waits for you.)
@@ -139,7 +139,7 @@ docker run -d --name d08-tools -p 8108:80 d08-tools:1.0
 
 Or run the shortcut, which does the same: it makes a fresh `work/` from `fix/`, then runs those commands, printing each one.
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 
 ## ✅ Verify it yourself

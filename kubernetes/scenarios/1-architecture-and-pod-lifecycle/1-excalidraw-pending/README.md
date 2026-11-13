@@ -35,7 +35,7 @@ Before Kubernetes starts a Pod, a component called the **scheduler** must pick a
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 What the room should see: the script says the whiteboard was deployed, but there is no running Pod. The Deployment exists, nothing crashed, and nobody can open the whiteboard. A small `visitor` Pod keeps asking for it every 2 seconds and gets no answer:
 ```bash
@@ -141,7 +141,7 @@ kubectl logs -f visitor -n k-01-pending
 ```
 Then, in the first terminal:
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 Within a few seconds once Excalidraw is downloaded (the first time, up to a minute or two) the log flips from ❌ to ✅ lines (Ctrl+C to stop it). What changed: the request shrinks to what a whiteboard needs, and we add a limit as a safety cap.
 ```bash

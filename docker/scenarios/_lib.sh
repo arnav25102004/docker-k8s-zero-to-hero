@@ -217,6 +217,12 @@ scenario_cleanup() {
   return 0
 }
 
+# scene_set: the one line every break.sh ends with. It says the scene is ready and
+# deliberately gives no clue: finding the cause is the exercise (the README guides you).
+scene_set() {
+  printf '\n\033[1;32m✅ The scene is set.\033[0m Open the scenario README and start investigating.\n'
+}
+
 # show_next MSG...: the closing block every break.sh / fix.sh prints.
 # First arg = what the learner should see; remaining args = what to type next.
 show_next() {

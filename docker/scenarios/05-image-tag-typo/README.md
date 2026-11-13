@@ -36,12 +36,12 @@ docker build -t d05-tools:1.0 work
 ```
 Or the one-line shortcut, which makes `work/` for you and prints every Docker command it runs (you stay in the scenario folder):
 ```bash
-./break/break.sh
+python3 break/run.py
 ```
 `docker build` prints an error and returns to the prompt. Nothing is running, so there is nothing to open on http://localhost:8105 (playground: the port 8105 URL).
 
 ## 🔍 Investigate
-Guess first, then run these **in order**. Run them from the scenario folder, the same place you ran `./break/break.sh`.
+Guess first, then run these **in order**. Run them from the scenario folder, the same place you ran `python3 break/run.py`.
 
 **1. Read the error. All of it.**
 It is already on your screen from the build. This is the part that matters (shortened; the exact wording varies by Docker version and engine, and the last `View build details` line only appears on Docker Desktop):
@@ -139,9 +139,9 @@ docker run -d --name d05-tools -p 8105:80 d05-tools:1.0
 ```
 (The build output is a few dozen lines ending in `naming to docker.io/library/d05-tools:1.0 done`. `docker rm -f` prints nothing when there is no container yet; it just makes the run safe to repeat.)
 
-Or run `./fix/fix.sh`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
+Or run `python3 fix/run.py`, which does the same: it makes a fresh `work/` from `fix/`, then runs those build and run commands, printing each one.
 ```bash
-./fix/fix.sh
+python3 fix/run.py
 ```
 
 ## ✅ Verify it yourself

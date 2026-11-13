@@ -37,7 +37,7 @@ Fewer. `DESIRED` only counts nodes the Pod may run on. A tainted node is silentl
 
 ## 💥 Break it
 ```bash
-cd break && ./break.sh
+cd break && python3 run.py
 ```
 ```bash
 kubectl get nodes
@@ -73,7 +73,7 @@ The nodes carry taints (a reserved node, and the control plane's own). A Pod run
 
 ## 🔧 Fix it
 ```bash
-cd ../fix && ./fix.sh
+cd ../fix && python3 run.py
 ```
 The reference fix adds two tolerations to the Pod template: one for the control-plane taint and one for `z2h-vip`. By hand: `kubectl edit daemonset watchman -n k-16-daemonset`. The DaemonSet adds the missing watchmen on its own.
 

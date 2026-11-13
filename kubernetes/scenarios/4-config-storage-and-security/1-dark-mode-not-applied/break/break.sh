@@ -28,6 +28,4 @@ say "The design team switches dark mode on in the config…"
 kubectl patch configmap ui-settings -n "$NS" --type merge -p '{"data":{"THEME":"dark"}}' >/dev/null \
   || die "Could not update the ConfigMap."
 
-show_next \
-  "Dark mode is ON in the config. The site is still blinding white. Watch what a visitor sees with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

@@ -37,6 +37,4 @@ not_ready || die "Expected the Pod to be Running but not Ready. Run cleanup.sh a
 wait_for "the visitor to report a failure" 60 visitor_failing \
   || die "The visitor never reported a failure. Run cleanup.sh and try again."
 
-show_next \
-  "The Kanboard Pod is Running, yet nobody gets served. Watch the visitor with: kubectl logs -f visitor -n $NS (Ctrl+C to stop)." \
-  "kubectl get pods -n $NS"
+scene_set

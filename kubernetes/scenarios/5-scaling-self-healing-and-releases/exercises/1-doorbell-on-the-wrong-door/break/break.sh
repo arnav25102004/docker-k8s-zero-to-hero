@@ -24,6 +24,4 @@ wait_for "the stall's Pods to be created (the first download can take a minute)"
 wait_for "the visitor to start" 180 visitor_up \
   || die "The visitor Pod didn't start. Run cleanup.sh and try again."
 
-show_next \
-  "The dosa counter is open and the cook is working, but nobody gets a dosa. Watch it with: kubectl logs -f visitor -n k-34-doorbell (Ctrl+C to stop)." \
-  "kubectl get pods -n k-34-doorbell"
+scene_set
